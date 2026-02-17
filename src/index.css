@@ -1,0 +1,417 @@
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Noto+Sans+Devanagari:wght@400;500;600;700&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Direct Access for Farmers - Design System
+   Agricultural marketplace with rural-friendly, accessible design
+   Colors: Fresh greens, warm earth tones, cream backgrounds
+*/
+
+@layer base {
+  :root {
+    /* Core brand colors - Agricultural theme */
+    --background: 48 33% 97%;
+    --foreground: 156 30% 12%;
+
+    --card: 0 0% 100%;
+    --card-foreground: 156 30% 12%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 156 30% 12%;
+
+    /* Primary - Fresh Green (Growth, Agriculture) */
+    --primary: 142 71% 35%;
+    --primary-foreground: 0 0% 100%;
+    --primary-light: 142 60% 45%;
+    --primary-dark: 142 80% 25%;
+
+    /* Secondary - Warm Amber (Earth, Harvest) */
+    --secondary: 38 92% 50%;
+    --secondary-foreground: 0 0% 100%;
+    --secondary-light: 38 90% 60%;
+
+    /* Accent - Orange (CTAs, Energy) */
+    --accent: 24 95% 53%;
+    --accent-foreground: 0 0% 100%;
+
+    /* Muted - Warm Gray */
+    --muted: 40 20% 92%;
+    --muted-foreground: 156 10% 40%;
+
+    /* Destructive */
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 100%;
+
+    /* Borders & Inputs */
+    --border: 40 20% 85%;
+    --input: 40 20% 88%;
+    --ring: 142 71% 35%;
+
+    --radius: 0.75rem;
+
+    /* Custom tokens */
+    --cream: 48 50% 96%;
+    --earth: 30 30% 30%;
+    --success: 142 70% 40%;
+    --warning: 45 93% 47%;
+    --info: 199 89% 48%;
+
+    /* Sidebar */
+    --sidebar-background: 142 30% 15%;
+    --sidebar-foreground: 0 0% 98%;
+    --sidebar-primary: 142 71% 45%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 142 40% 22%;
+    --sidebar-accent-foreground: 0 0% 98%;
+    --sidebar-border: 142 30% 25%;
+    --sidebar-ring: 142 71% 45%;
+
+    /* Gradients */
+    --gradient-hero: linear-gradient(135deg, hsl(142, 71%, 35%) 0%, hsl(142, 60%, 28%) 100%);
+    --gradient-card: linear-gradient(180deg, hsl(0, 0%, 100%) 0%, hsl(48, 33%, 98%) 100%);
+    --gradient-accent: linear-gradient(135deg, hsl(24, 95%, 53%) 0%, hsl(38, 92%, 50%) 100%);
+    --gradient-success: linear-gradient(135deg, hsl(142, 70%, 40%) 0%, hsl(142, 80%, 30%) 100%);
+
+    /* Shadows */
+    --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+    --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+    --shadow-card: 0 4px 20px rgba(0, 0, 0, 0.08);
+    --shadow-glow: 0 0 20px rgba(34, 197, 94, 0.3);
+  }
+
+  .dark {
+    --background: 156 30% 8%;
+    --foreground: 48 33% 95%;
+
+    --card: 156 25% 12%;
+    --card-foreground: 48 33% 95%;
+
+    --popover: 156 25% 12%;
+    --popover-foreground: 48 33% 95%;
+
+    --primary: 142 60% 45%;
+    --primary-foreground: 156 30% 8%;
+    --primary-light: 142 50% 55%;
+    --primary-dark: 142 70% 35%;
+
+    --secondary: 38 80% 55%;
+    --secondary-foreground: 156 30% 8%;
+
+    --accent: 24 90% 55%;
+    --accent-foreground: 0 0% 100%;
+
+    --muted: 156 20% 18%;
+    --muted-foreground: 48 20% 65%;
+
+    --destructive: 0 62% 50%;
+    --destructive-foreground: 0 0% 100%;
+
+    --border: 156 20% 22%;
+    --input: 156 20% 22%;
+    --ring: 142 60% 45%;
+
+    --cream: 156 25% 10%;
+    --earth: 30 20% 70%;
+
+    --sidebar-background: 156 30% 6%;
+    --sidebar-foreground: 0 0% 98%;
+    --sidebar-primary: 142 60% 45%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 156 25% 15%;
+    --sidebar-accent-foreground: 0 0% 98%;
+    --sidebar-border: 156 20% 18%;
+    --sidebar-ring: 142 60% 45%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  html {
+    scroll-behavior: smooth;
+  }
+
+  body {
+    @apply bg-background text-foreground font-sans antialiased;
+    font-feature-settings: "rlig" 1, "calt" 1;
+  }
+
+  /* Typography */
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-heading font-bold tracking-tight;
+  }
+}
+
+@layer components {
+  /* Card Variants */
+  .card-elevated {
+    @apply bg-card rounded-xl shadow-card border border-border/50 transition-all duration-300;
+  }
+
+  .card-elevated:hover {
+    @apply shadow-lg -translate-y-1;
+  }
+
+  .card-product {
+    @apply bg-card rounded-2xl overflow-hidden shadow-card border border-border/30 transition-all duration-300;
+  }
+
+  .card-product:hover {
+    @apply shadow-lg scale-[1.02];
+  }
+
+  /* Button Variants */
+  .btn-hero {
+    @apply bg-gradient-to-r from-accent to-secondary text-white font-semibold px-8 py-4 rounded-xl shadow-lg transition-all duration-300;
+  }
+
+  .btn-hero:hover {
+    @apply shadow-xl scale-105;
+  }
+
+  .btn-primary-gradient {
+    @apply bg-gradient-to-r from-primary to-primary-light text-primary-foreground font-semibold rounded-xl shadow-md transition-all duration-300;
+  }
+
+  .btn-primary-gradient:hover {
+    @apply shadow-lg scale-[1.02];
+  }
+
+  /* Navigation */
+  .nav-item {
+    @apply flex flex-col items-center gap-1 p-3 rounded-xl transition-all duration-200 text-muted-foreground;
+  }
+
+  .nav-item:hover {
+    @apply bg-muted text-foreground;
+  }
+
+  .nav-item.active {
+    @apply bg-primary/10 text-primary;
+  }
+
+  /* Form Elements */
+  .input-field {
+    @apply w-full px-4 py-3 bg-background border border-input rounded-xl focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition-all duration-200;
+  }
+
+  /* Status Badges */
+  .badge-success {
+    @apply bg-success/10 text-success px-3 py-1 rounded-full text-sm font-medium;
+  }
+
+  .badge-warning {
+    @apply bg-warning/10 text-warning px-3 py-1 rounded-full text-sm font-medium;
+  }
+
+  .badge-pending {
+    @apply bg-secondary/10 text-secondary px-3 py-1 rounded-full text-sm font-medium;
+  }
+
+  /* Chat Bubbles */
+  .chat-bubble-sent {
+    @apply bg-primary text-primary-foreground rounded-2xl rounded-br-sm px-4 py-2 max-w-[80%] ml-auto;
+  }
+
+  .chat-bubble-received {
+    @apply bg-muted text-foreground rounded-2xl rounded-bl-sm px-4 py-2 max-w-[80%];
+  }
+
+  /* Glassmorphism */
+  .glass {
+    @apply bg-white/80 backdrop-blur-lg border border-white/20;
+  }
+
+  /* Mobile Bottom Nav */
+  .mobile-nav {
+    @apply fixed bottom-0 left-0 right-0 bg-card border-t border-border shadow-lg z-50;
+  }
+
+  /* Dashboard Stats Card */
+  .stat-card {
+    @apply bg-card rounded-2xl p-6 shadow-card border border-border/30;
+  }
+
+  /* Price Tag */
+  .price-tag {
+    @apply text-2xl font-bold text-primary;
+  }
+
+  /* Farmer Verified Badge */
+  .verified-badge {
+    @apply inline-flex items-center gap-1 bg-primary/10 text-primary px-2 py-0.5 rounded-full text-xs font-medium;
+  }
+}
+
+@layer utilities {
+  /* Custom Scrollbar */
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
+
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+
+  /* Text Gradient */
+  .text-gradient {
+    @apply bg-clip-text text-transparent bg-gradient-to-r from-primary to-primary-light;
+  }
+
+  .text-gradient-accent {
+    @apply bg-clip-text text-transparent bg-gradient-to-r from-accent to-secondary;
+  }
+
+  /* Animate */
+  .animate-fade-in {
+    animation: fadeIn 0.5s ease-out;
+  }
+
+  .animate-slide-up {
+    animation: slideUp 0.5s ease-out;
+  }
+
+  .animate-slide-in-right {
+    animation: slideInRight 0.3s ease-out;
+  }
+
+  .animate-bounce-gentle {
+    animation: bounceGentle 2s ease-in-out infinite;
+  }
+
+  .animate-pulse-slow {
+    animation: pulseSlow 3s ease-in-out infinite;
+  }
+
+  .animate-float-slow {
+    animation: floatSlow 3s ease-in-out infinite;
+  }
+
+  .animate-scale-in {
+    animation: scaleIn 0.5s ease-out;
+  }
+
+  .animate-zoom-in {
+    animation: zoomIn 0.5s ease-out;
+  }
+
+  .animate-slide-in-left {
+    animation: slideInLeft 0.5s ease-out;
+  }
+}
+
+/* Keyframe Animations */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slideInRight {
+  from {
+    opacity: 0;
+    transform: translateX(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes bounceGentle {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-5px);
+  }
+}
+
+@keyframes pulseSlow {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.7;
+  }
+}
+
+@keyframes floatSlow {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
+}
+
+@keyframes scaleIn {
+  from {
+    opacity: 0;
+    transform: scale(0.9);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes zoomIn {
+  from {
+    opacity: 0;
+    transform: scale(0.8);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes slideInLeft {
+  from {
+    opacity: 0;
+    transform: translateX(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+/* Hindi Font Support */
+.font-hindi {
+  font-family: 'Noto Sans Devanagari', sans-serif;
+}
+
+/* Responsive Typography */
+@media (max-width: 640px) {
+  .hero-title {
+    @apply text-3xl;
+  }
+}
+
+@media (min-width: 641px) {
+  .hero-title {
+    @apply text-5xl;
+  }
+}
