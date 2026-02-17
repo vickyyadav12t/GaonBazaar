@@ -1,4 +1,10 @@
 # Logs
+node_modules/
+Farm-back/node_modules/
+Farm-front/node_modules/
+
+
+
 logs
 *.log
 npm-debug.log*
