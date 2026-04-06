@@ -1067,8 +1067,15 @@ const ListingManagement = () => {
                     {(imageFiles.length > 0 || (newProduct.imageUrls && newProduct.imageUrls.length > 0)) && (
                       <div className="grid grid-cols-3 gap-3">
                         {imageFiles.map((it) => (
-                          <div key={it.id} className="relative rounded-lg overflow-hidden border">
-                            <img src={it.previewUrl} alt="preview" className="h-24 w-full object-cover" />
+                          <div
+                            key={it.id}
+                            className="relative flex h-24 items-center justify-center overflow-hidden rounded-lg border bg-muted"
+                          >
+                            <img
+                              src={it.previewUrl}
+                              alt="preview"
+                              className="max-h-full max-w-full object-contain p-1"
+                            />
                             <button
                               type="button"
                               onClick={() => removeImageFile(it.id)}
@@ -1079,8 +1086,15 @@ const ListingManagement = () => {
                           </div>
                         ))}
                         {(newProduct.imageUrls || []).map((url) => (
-                          <div key={url} className="relative rounded-lg overflow-hidden border">
-                            <img src={url} alt="preview" className="h-24 w-full object-cover" />
+                          <div
+                            key={url}
+                            className="relative flex h-24 items-center justify-center overflow-hidden rounded-lg border bg-muted"
+                          >
+                            <img
+                              src={url}
+                              alt="preview"
+                              className="max-h-full max-w-full object-contain p-1"
+                            />
                             <button
                               type="button"
                               onClick={() => removeImageUrl(url)}
@@ -1325,12 +1339,14 @@ const ListingManagement = () => {
           ) : (
           displayedListings.map((listing) => (
             <div key={listing.id} className="card-elevated overflow-hidden">
-              <div className="relative">
-                <img
-                  src={listing.images[0]}
-                  alt={listing.name}
-                  className="w-full h-40 object-cover"
-                />
+              <div className="relative bg-muted">
+                <div className="flex h-44 w-full items-center justify-center p-3 sm:h-52">
+                  <img
+                    src={listing.images[0]}
+                    alt={listing.name}
+                    className="max-h-full max-w-full object-contain"
+                  />
+                </div>
                 <div className="absolute top-2 right-2">
                   {getStatusBadge(listing.status)}
                 </div>
