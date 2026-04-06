@@ -115,7 +115,7 @@ mongoose
     console.log("MongoDB connected");
     if (!isMailConfigured()) {
       console.warn(
-        "[mail] SMTP not configured — transactional email is disabled. Set SMTP_HOST, SMTP_USER, SMTP_PASS (see .env.example). Password reset, order emails, and support mail will not send."
+        "[mail] Email not configured — transactional email is disabled. Set SMTP_HOST, SMTP_USER, SMTP_PASS (see .env.example)."
       );
     } else {
       await verifyMailConnection().catch(() => {});

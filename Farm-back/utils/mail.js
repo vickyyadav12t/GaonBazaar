@@ -10,12 +10,13 @@ try {
   /* ignore */
 }
 
+function trimEnv(name) {
+  const v = process.env[name];
+  return v != null && String(v).trim() ? String(v).trim() : "";
+}
+
 function isMailConfigured() {
-  return !!(
-    process.env.SMTP_HOST &&
-    process.env.SMTP_USER &&
-    process.env.SMTP_PASS
-  );
+  return !!(trimEnv("SMTP_HOST") && trimEnv("SMTP_USER") && process.env.SMTP_PASS);
 }
 
 /** @type {import('nodemailer').Transporter | null} */
@@ -30,7 +31,6 @@ function buildTransportOptions() {
   const port = Number(process.env.SMTP_PORT) || 587;
   const secure = process.env.SMTP_SECURE === "true";
 
-  // Nodemailer default TCP connect wait is 120s; we had 30s and saw ETIMEDOUT on CONN from Render→Gmail.
   const connMs = Math.min(
     180000,
     Math.max(15000, Number(process.env.SMTP_CONNECTION_TIMEOUT_MS) || 120000)
@@ -40,11 +40,11 @@ function buildTransportOptions() {
   const dnsMs = Math.min(90000, Math.max(5000, Number(process.env.SMTP_DNS_TIMEOUT_MS) || 45000));
 
   const opts = {
-    host: String(process.env.SMTP_HOST).trim(),
+    host: trimEnv("SMTP_HOST"),
     port,
     secure,
     auth: {
-      user: String(process.env.SMTP_USER).trim(),
+      user: trimEnv("SMTP_USER"),
       pass: String(process.env.SMTP_PASS),
     },
     connectionTimeout: connMs,
@@ -53,8 +53,6 @@ function buildTransportOptions() {
     dnsTimeout: dnsMs,
   };
 
-  // Optional: force TLS upgrade (some hosts need it; others reject it — default off).
-  // Nodemailer still negotiates STARTTLS on 587 without this for most providers.
   if (
     String(process.env.SMTP_REQUIRE_TLS || "").trim() === "1" &&
     !secure &&
@@ -63,7 +61,6 @@ function buildTransportOptions() {
     opts.requireTLS = true;
   }
 
-  // Dev only: self-signed SMTP (set SMTP_TLS_REJECT_UNAUTHORIZED=0)
   if (String(process.env.SMTP_TLS_REJECT_UNAUTHORIZED || "").trim() === "0") {
     opts.tls = { ...(opts.tls || {}), rejectUnauthorized: false };
   }
@@ -87,6 +84,7 @@ async function verifyMailConnection() {
   if (!isMailConfigured()) {
     return false;
   }
+
   const t = getTransporter();
   if (!t) return false;
   try {
@@ -98,6 +96,11 @@ async function verifyMailConnection() {
       "[mail] SMTP verify failed — check SMTP_HOST, port, and credentials:",
       err?.message || err
     );
+    if (String(process.env.RENDER || "").toLowerCase() === "true") {
+      console.error(
+        "[mail] hint: Render free web services may block outbound SMTP (ports 25/465/587). Use a paid instance or a provider HTTP API if SMTP stays blocked."
+      );
+    }
     return false;
   }
 }
@@ -119,7 +122,7 @@ async function sendMail(opts) {
     throw err;
   }
 
-  const from = process.env.SMTP_FROM || process.env.SMTP_USER;
+  const from = trimEnv("SMTP_FROM") || trimEnv("SMTP_USER");
 
   try {
     await transporter.sendMail({
@@ -139,7 +142,7 @@ async function sendMail(opts) {
     );
     if (code === "ETIMEDOUT" || String(err.command || "") === "CONN") {
       console.error(
-        "[mail] hint: TCP to SMTP host timed out. On Render, confirm outbound 587/465 is allowed; try SMTP_PORT=465 + SMTP_SECURE=true (Gmail); or use SendGrid port 2525. See .env.example."
+        "[mail] hint: TCP to SMTP timed out or was blocked. Try SMTP_PORT=465 + SMTP_SECURE=true, or port 2525 with some providers. See .env.example."
       );
     }
     throw err;
