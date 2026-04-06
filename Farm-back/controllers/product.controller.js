@@ -18,6 +18,28 @@ function truthyQuery(val) {
   return val === true || val === "true" || val === "1";
 }
 
+/** Whole number ≥ 1; rejects fractional values so DB matches what farmers typed. */
+function toPositiveIntQuantity(value, fieldLabel) {
+  const n = Number(value);
+  if (!Number.isFinite(n)) {
+    const e = new Error(`Invalid ${fieldLabel}`);
+    e.code = "INVALID_QUANTITY";
+    throw e;
+  }
+  const t = Math.trunc(n);
+  if (Math.abs(n - t) > 1e-9) {
+    const e = new Error(`Invalid ${fieldLabel}`);
+    e.code = "INVALID_QUANTITY";
+    throw e;
+  }
+  if (t < 1 || !Number.isSafeInteger(t)) {
+    const e = new Error(`Invalid ${fieldLabel}`);
+    e.code = "INVALID_QUANTITY";
+    throw e;
+  }
+  return t;
+}
+
 // GET /api/products
 // Query:
 //   mine=true — farmer-only own listings (all statuses for that farmer).
@@ -274,9 +296,33 @@ exports.createProduct = async (req, res) => {
       isNegotiable,
     } = req.body;
 
-    if (!name || !category || !price || !unit || !availableQuantity) {
+    if (!name || !category || !price || !unit || availableQuantity === undefined || availableQuantity === "") {
       return res.status(400).json({
         message: "Name, category, price, unit and availableQuantity are required",
+      });
+    }
+
+    let availInt;
+    let minInt;
+    try {
+      availInt = toPositiveIntQuantity(availableQuantity, "available quantity");
+      minInt =
+        minOrderQuantity !== undefined && minOrderQuantity !== null && minOrderQuantity !== ""
+          ? toPositiveIntQuantity(minOrderQuantity, "minimum order quantity")
+          : 1;
+    } catch (e) {
+      if (e.code === "INVALID_QUANTITY") {
+        return res.status(400).json({
+          message:
+            "Available quantity and minimum order must be whole numbers (no decimals) and at least 1.",
+        });
+      }
+      throw e;
+    }
+
+    if (minInt > availInt) {
+      return res.status(400).json({
+        message: "Minimum order cannot be greater than available quantity.",
       });
     }
 
@@ -287,8 +333,8 @@ exports.createProduct = async (req, res) => {
       category,
       price,
       unit,
-      availableQuantity,
-      minOrderQuantity,
+      availableQuantity: availInt,
+      minOrderQuantity: minInt,
       harvestDate,
       images,
       isOrganic,
@@ -342,11 +388,54 @@ exports.updateProduct = async (req, res) => {
       "status",
     ];
 
-    updatableFields.forEach((field) => {
-      if (req.body[field] !== undefined) {
-        product[field] = req.body[field];
+    for (const field of updatableFields) {
+      if (req.body[field] === undefined) continue;
+
+      if (field === "availableQuantity") {
+        try {
+          product.availableQuantity = toPositiveIntQuantity(
+            req.body.availableQuantity,
+            "available quantity"
+          );
+        } catch (e) {
+          if (e.code === "INVALID_QUANTITY") {
+            return res.status(400).json({
+              message:
+                "Available quantity must be a whole number (no decimals) and at least 1.",
+            });
+          }
+          throw e;
+        }
+        continue;
       }
-    });
+      if (field === "minOrderQuantity") {
+        try {
+          product.minOrderQuantity = toPositiveIntQuantity(
+            req.body.minOrderQuantity,
+            "minimum order quantity"
+          );
+        } catch (e) {
+          if (e.code === "INVALID_QUANTITY") {
+            return res.status(400).json({
+              message:
+                "Minimum order must be a whole number (no decimals) and at least 1.",
+            });
+          }
+          throw e;
+        }
+        continue;
+      }
+
+      product[field] = req.body[field];
+    }
+
+    const avail = product.availableQuantity;
+    const minQ = product.minOrderQuantity != null ? product.minOrderQuantity : 1;
+    if (minQ > avail) {
+      return res.status(400).json({
+        message: "Minimum order cannot be greater than available quantity.",
+      });
+    }
 
     await product.save();
 

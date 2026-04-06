@@ -41,10 +41,30 @@ export const validatePrice = (price: string | number): boolean => {
   return !isNaN(numPrice) && numPrice > 0;
 };
 
+/**
+ * Parse a whole-number listing quantity (kg, quintal, etc.).
+ * Rejects decimals, scientific notation, and trailing junk (parseInt("100abc") would wrongly pass).
+ */
+export const parseListingQuantity = (
+  raw: string | number | undefined | null,
+): number | null => {
+  if (raw === undefined || raw === null) return null;
+  if (typeof raw === 'number') {
+    if (!Number.isFinite(raw) || raw < 1) return null;
+    const t = Math.trunc(raw);
+    return t === raw && Number.isSafeInteger(t) ? t : null;
+  }
+  const s = String(raw).trim().replace(/,/g, '');
+  if (s === '') return null;
+  if (!/^\d+$/.test(s)) return null;
+  const n = Number(s);
+  return Number.isSafeInteger(n) && n >= 1 ? n : null;
+};
+
 // Quantity validation
 export const validateQuantity = (quantity: string | number, min: number = 1): boolean => {
-  const numQty = typeof quantity === 'string' ? parseInt(quantity) : quantity;
-  return !isNaN(numQty) && numQty >= min && Number.isInteger(numQty);
+  const numQty = parseListingQuantity(quantity);
+  return numQty !== null && numQty >= min;
 };
 
 // PIN code validation (Indian)

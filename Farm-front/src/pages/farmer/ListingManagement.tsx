@@ -27,7 +27,12 @@ import { useAppSelector } from '@/hooks/useRedux';
 import { Product, CropCategory } from '@/types';
 import { useToast } from '@/hooks/use-toast';
 import { apiService } from '@/services/api';
-import { validatePrice, validateQuantity, validateRequired } from '@/lib/validators';
+import {
+  parseListingQuantity,
+  validatePrice,
+  validateQuantity,
+  validateRequired,
+} from '@/lib/validators';
 import { resolveFarmerAvatarUrl } from '@/lib/farmerAvatarUrl';
 import { useCopilot } from '@/context/CopilotContext';
 
@@ -91,6 +96,12 @@ const ListingManagement = () => {
   const [imageFiles, setImageFiles] = useState<Array<{ id: string; file: File; previewUrl: string }>>(
     []
   );
+
+  /** Always read after `await` so quantities match what the farmer sees (fixes stale closure during image upload). */
+  const newProductRef = useRef(newProduct);
+  const imageFilesRef = useRef(imageFiles);
+  newProductRef.current = newProduct;
+  imageFilesRef.current = imageFiles;
 
   const addImageUrl = () => {
     const url = (newProduct.imageUrlInput || '').trim();
@@ -271,17 +282,17 @@ const ListingManagement = () => {
     setIsListingFormOpen(true);
   };
 
-  const validateNewProduct = () => {
+  function getListingFormErrors(p: typeof newProduct): Record<string, string> {
     const errors: Record<string, string> = {};
 
-    if (!validateRequired(newProduct.name)) {
+    if (!validateRequired(p.name)) {
       errors.name =
         currentLanguage === 'en'
           ? 'Product name is required'
           : 'उत्पाद नाम आवश्यक है';
     }
 
-    if (!validateRequired(newProduct.price) || !validatePrice(newProduct.price)) {
+    if (!validateRequired(p.price) || !validatePrice(p.price)) {
       errors.price =
         currentLanguage === 'en'
           ? 'Enter a valid price greater than 0'
@@ -289,25 +300,43 @@ const ListingManagement = () => {
     }
 
     if (
-      !validateRequired(newProduct.availableQuantity) ||
-      !validateQuantity(newProduct.availableQuantity, 1)
+      !validateRequired(p.availableQuantity) ||
+      !validateQuantity(p.availableQuantity, 1)
     ) {
       errors.availableQuantity =
         currentLanguage === 'en'
-          ? 'Enter a valid available quantity'
-          : 'मान्य उपलब्ध मात्रा दर्ज करें';
+          ? 'Enter a valid whole number for available quantity (no decimals).'
+          : 'उपलब्ध मात्रा के लिए पूर्ण संख्या दर्ज करें (दशमलव नहीं)।';
     }
 
+    if (p.minOrderQuantity && !validateQuantity(p.minOrderQuantity, 1)) {
+      errors.minOrderQuantity =
+        currentLanguage === 'en'
+          ? 'Enter a valid whole number for minimum order (no decimals).'
+          : 'न्यूनतम ऑर्डर के लिए पूर्ण संख्या दर्ज करें (दशमलव नहीं)।';
+    }
+
+    const availParsed = parseListingQuantity(p.availableQuantity);
+    const minParsed =
+      p.minOrderQuantity != null && String(p.minOrderQuantity).trim() !== ''
+        ? parseListingQuantity(p.minOrderQuantity)
+        : 1;
     if (
-      newProduct.minOrderQuantity &&
-      !validateQuantity(newProduct.minOrderQuantity, 1)
+      availParsed !== null &&
+      minParsed !== null &&
+      minParsed > availParsed
     ) {
       errors.minOrderQuantity =
         currentLanguage === 'en'
-          ? 'Enter a valid minimum order quantity'
-          : 'मान्य न्यूनतम ऑर्डर मात्रा दर्ज करें';
+          ? 'Minimum order cannot be greater than available quantity.'
+          : 'न्यूनतम ऑर्डर उपलब्ध मात्रा से अधिक नहीं हो सकता।';
     }
 
+    return errors;
+  }
+
+  const validateNewProduct = () => {
+    const errors = getListingFormErrors(newProduct);
     setFormErrors(errors);
     return Object.keys(errors).length === 0;
   };
@@ -648,28 +677,59 @@ const ListingManagement = () => {
     try {
       setIsUploadingImages(true);
 
+      const filesSnapshot = imageFilesRef.current.map((x) => x);
       let uploadedUrls: string[] = [];
-      if (imageFiles.length > 0) {
-        const uploadRes = await apiService.uploads.uploadImages(imageFiles.map((x) => x.file));
+      if (filesSnapshot.length > 0) {
+        const uploadRes = await apiService.uploads.uploadImages(
+          filesSnapshot.map((x) => x.file)
+        );
         uploadedUrls = (uploadRes.data?.urls || []).filter(Boolean);
       }
 
+      const latest = newProductRef.current;
+      const postUploadErrors = getListingFormErrors(latest);
+      if (Object.keys(postUploadErrors).length > 0) {
+        setFormErrors(postUploadErrors);
+        toast({
+          title: currentLanguage === 'en' ? 'Please fix the errors' : 'कृपया त्रुटियाँ सुधारें',
+          description:
+            currentLanguage === 'en'
+              ? 'Values may have changed while images were uploading. Check min order and available quantity, then save again.'
+              : 'छवि अपलोड के दौरान मान बदल सकते हैं। न्यूनतम ऑर्डर और उपलब्ध मात्रा जाँचकर फिर सहेजें।',
+          variant: 'destructive',
+        });
+        return;
+      }
+
+      const availQ = parseListingQuantity(latest.availableQuantity);
+      const minQ =
+        latest.minOrderQuantity != null && String(latest.minOrderQuantity).trim() !== ''
+          ? parseListingQuantity(latest.minOrderQuantity)
+          : 1;
+      if (availQ === null || minQ === null) {
+        toast({
+          title: currentLanguage === 'en' ? 'Invalid quantities' : 'अमान्य मात्रा',
+          variant: 'destructive',
+        });
+        return;
+      }
+
       const finalImages = Array.from(
-        new Set([...(newProduct.imageUrls || []), ...uploadedUrls])
+        new Set([...(latest.imageUrls || []), ...uploadedUrls])
       ).slice(0, 5);
 
       const payload = {
-        name: newProduct.name,
-        nameHindi: newProduct.nameHindi,
-        category: newProduct.category,
-        description: newProduct.description,
-        price: parseFloat(newProduct.price),
-        unit: newProduct.unit,
-        minOrderQuantity: parseInt(newProduct.minOrderQuantity || '1', 10),
-        availableQuantity: parseInt(newProduct.availableQuantity, 10),
-        harvestDate: newProduct.harvestDate || undefined,
-        isOrganic: newProduct.isOrganic,
-        isNegotiable: newProduct.isNegotiable,
+        name: latest.name,
+        nameHindi: latest.nameHindi,
+        category: latest.category,
+        description: latest.description,
+        price: parseFloat(latest.price),
+        unit: latest.unit,
+        minOrderQuantity: minQ,
+        availableQuantity: availQ,
+        harvestDate: latest.harvestDate || undefined,
+        isOrganic: latest.isOrganic,
+        isNegotiable: latest.isNegotiable,
         images:
           finalImages && finalImages.length > 0
             ? finalImages
@@ -1062,6 +1122,9 @@ const ListingManagement = () => {
                     <Label>{currentLanguage === 'en' ? 'Min Order' : 'न्यूनतम ऑर्डर'}</Label>
                     <Input
                       type="number"
+                      inputMode="numeric"
+                      min={1}
+                      step={1}
                       value={newProduct.minOrderQuantity}
                       onChange={(e) => setNewProduct({ ...newProduct, minOrderQuantity: e.target.value })}
                       placeholder="10"
@@ -1077,6 +1140,9 @@ const ListingManagement = () => {
                     <Label>{currentLanguage === 'en' ? 'Available Quantity' : 'उपलब्ध मात्रा'}</Label>
                     <Input
                       type="number"
+                      inputMode="numeric"
+                      min={1}
+                      step={1}
                       value={newProduct.availableQuantity}
                       onChange={(e) => setNewProduct({ ...newProduct, availableQuantity: e.target.value })}
                       placeholder="500"
@@ -1254,11 +1320,18 @@ const ListingManagement = () => {
                 <p className="text-lg font-bold text-primary">
                   ₹{listing.price.toLocaleString()}/{listing.unit}
                 </p>
-                <div className="flex items-center gap-4 text-sm text-muted-foreground mt-2">
+                <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-muted-foreground mt-2">
                   <span className="flex items-center gap-1">
                     <Eye className="w-4 h-4" /> {listing.views}
                   </span>
-                  <span>{listing.availableQuantity} {listing.unit} available</span>
+                  <span>
+                    {currentLanguage === 'en' ? 'Min' : 'न्यूनतम'} {listing.minOrderQuantity}{' '}
+                    {listing.unit}
+                  </span>
+                  <span>
+                    {listing.availableQuantity} {listing.unit}{' '}
+                    {currentLanguage === 'en' ? 'available' : 'उपलब्ध'}
+                  </span>
                 </div>
                 <div className="flex items-center gap-2 mt-4">
                   <Button
