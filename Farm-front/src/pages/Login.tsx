@@ -216,11 +216,22 @@ const Login = () => {
       completeAuth(user, token);
     } catch (err: any) {
       console.error(err);
+      const status = err?.response?.status;
+      const serverMsg = err?.response?.data?.message;
       const message =
-        err?.response?.data?.message || err?.message || 'Login failed';
+        status === 429
+          ? currentLanguage === 'en'
+            ? 'Too many requests. Please wait a few minutes and try again.'
+            : 'बहुत अधिक अनुरोध। कुछ मिनट प्रतीक्षा करें और फिर कोशिश करें।'
+          : serverMsg || err?.message || 'Login failed';
       setError(message);
       toast({
-        title: 'Login failed',
+        title:
+          status === 429
+            ? currentLanguage === 'en'
+              ? 'Please wait'
+              : 'कृपया प्रतीक्षा करें'
+            : 'Login failed',
         description: message,
         variant: 'destructive',
       });

@@ -33,7 +33,29 @@ const { isMailConfigured, verifyMailConnection } = require("./utils/mail");
 const app = express();
 const server = http.createServer(app);
 
-app.set("trust proxy", process.env.TRUST_PROXY === "1" ? 1 : false);
+/**
+ * Required behind Render/nginx so req.ip is the real client — otherwise rate limiting
+ * treats all users as one IP and returns 429 for /api/auth/login almost immediately.
+ * Set TRUST_PROXY=0 to force off (rare).
+ */
+function shouldTrustProxy() {
+  const t = String(process.env.TRUST_PROXY || "").trim().toLowerCase();
+  if (t === "0" || t === "false" || t === "no") return false;
+  if (t === "1" || t === "true" || t === "yes") return true;
+  // Render.com Web Services set RENDER=true automatically
+  if (String(process.env.RENDER || "").toLowerCase() === "true") return true;
+  return false;
+}
+
+const trustProxyEnabled = shouldTrustProxy();
+app.set("trust proxy", trustProxyEnabled ? 1 : false);
+if (trustProxyEnabled) {
+  console.log("[http] trust proxy enabled (per-client IP for rate limiting)");
+} else {
+  console.warn(
+    "[http] trust proxy disabled — use TRUST_PROXY=1 or deploy on Render (RENDER=true) to avoid shared 429s behind a reverse proxy"
+  );
+}
 
 app.use(getHelmetMiddleware());
 
@@ -54,6 +76,9 @@ const apiLimiter = rateLimit({
   standardHeaders: true,
   legacyHeaders: false,
   skip: () => process.env.RATE_LIMIT_DISABLED === "1",
+  message: {
+    message: "Too many requests from this network. Please wait a few minutes and try again.",
+  },
 });
 app.use("/api", apiLimiter);
 
