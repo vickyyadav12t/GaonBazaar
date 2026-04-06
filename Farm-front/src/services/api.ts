@@ -43,11 +43,20 @@ export const clearAuthToken = () => {
   localStorage.removeItem('authToken');
 };
 
+/** Default client timeout — Render cold starts + DB can exceed 20s. */
+const DEFAULT_API_TIMEOUT_MS = 60000;
+
+/** Auth routes that send email over SMTP (server may use ~30s socket + cold start). */
+const LONG_TIMEOUT_AUTH_PATHS = [
+  '/auth/register/send-email-code',
+  '/auth/forgot-password',
+];
+
 // Create axios instance with base configuration
 // This connects to your backend API (backend not included in this project)
 const api = axios.create({
   baseURL: getApiBaseUrl(),
-  timeout: 20000,
+  timeout: DEFAULT_API_TIMEOUT_MS,
   headers: {
     'Content-Type': 'application/json',
   },
@@ -62,6 +71,15 @@ api.interceptors.request.use(
       h.delete?.('Content-Type');
       if (config.timeout === undefined || config.timeout < 60000) {
         config.timeout = 120000;
+      }
+    }
+    const urlPath = String(config.url || '').split('?')[0];
+    if (
+      LONG_TIMEOUT_AUTH_PATHS.some((p) => urlPath === p || urlPath.endsWith(p))
+    ) {
+      const want = 120000;
+      if (config.timeout === undefined || config.timeout < want) {
+        config.timeout = want;
       }
     }
     const token = getAuthToken();

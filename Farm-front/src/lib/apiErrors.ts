@@ -2,6 +2,13 @@
  * User-facing message from axios/fetch errors (prefers server JSON `message`).
  */
 export function getApiErrorMessage(err: unknown, fallback: string): string {
+  const ax = err as { code?: string; message?: string };
+  if (
+    ax?.code === 'ECONNABORTED' ||
+    (typeof ax?.message === 'string' && /timeout/i.test(ax.message))
+  ) {
+    return 'Request timed out. The server may be starting up — wait 30 seconds and try again. If it keeps happening, check your connection.';
+  }
   if (err && typeof err === 'object' && 'response' in err) {
     const r = err as { response?: { data?: { message?: string }; status?: number } };
     const m = r.response?.data?.message;

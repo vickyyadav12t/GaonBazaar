@@ -1,4 +1,14 @@
 const nodemailer = require("nodemailer");
+const dns = require("dns");
+
+// Cloud hosts: avoid hanging on broken IPv6 routes to smtp.* (Render, etc.)
+try {
+  if (typeof dns.setDefaultResultOrder === "function") {
+    dns.setDefaultResultOrder("ipv4first");
+  }
+} catch (_) {
+  /* ignore */
+}
 
 function isMailConfigured() {
   return !!(
@@ -20,6 +30,15 @@ function buildTransportOptions() {
   const port = Number(process.env.SMTP_PORT) || 587;
   const secure = process.env.SMTP_SECURE === "true";
 
+  // Nodemailer default TCP connect wait is 120s; we had 30s and saw ETIMEDOUT on CONN from Render→Gmail.
+  const connMs = Math.min(
+    180000,
+    Math.max(15000, Number(process.env.SMTP_CONNECTION_TIMEOUT_MS) || 120000)
+  );
+  const greetMs = Math.min(120000, Math.max(10000, Number(process.env.SMTP_GREETING_TIMEOUT_MS) || 60000));
+  const sockMs = Math.min(300000, Math.max(30000, Number(process.env.SMTP_SOCKET_TIMEOUT_MS) || 120000));
+  const dnsMs = Math.min(90000, Math.max(5000, Number(process.env.SMTP_DNS_TIMEOUT_MS) || 45000));
+
   const opts = {
     host: String(process.env.SMTP_HOST).trim(),
     port,
@@ -28,9 +47,10 @@ function buildTransportOptions() {
       user: String(process.env.SMTP_USER).trim(),
       pass: String(process.env.SMTP_PASS),
     },
-    connectionTimeout: 30000,
-    greetingTimeout: 30000,
-    socketTimeout: 30000,
+    connectionTimeout: connMs,
+    greetingTimeout: greetMs,
+    socketTimeout: sockMs,
+    dnsTimeout: dnsMs,
   };
 
   // Optional: force TLS upgrade (some hosts need it; others reject it — default off).
@@ -117,6 +137,11 @@ async function sendMail(opts) {
         code != null ? ` [${code}]` : ""
       }`
     );
+    if (code === "ETIMEDOUT" || String(err.command || "") === "CONN") {
+      console.error(
+        "[mail] hint: TCP to SMTP host timed out. On Render, confirm outbound 587/465 is allowed; try SMTP_PORT=465 + SMTP_SECURE=true (Gmail); or use SendGrid port 2525. See .env.example."
+      );
+    }
     throw err;
   }
 }
