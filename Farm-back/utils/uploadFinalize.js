@@ -1,4 +1,11 @@
-const { assertFileContentAllowed, unlinkQuiet } = require("./validateUploadedFile");
+const fs = require("fs");
+const os = require("os");
+const path = require("path");
+const {
+  assertFileContentAllowed,
+  assertBufferContentAllowed,
+  unlinkQuiet,
+} = require("./validateUploadedFile");
 const { scanUploadedFileIfEnabled } = require("./uploadVirusScan");
 
 /**
@@ -18,6 +25,28 @@ async function finalizeUploadedFile(file, { allowPdf }) {
     await unlinkQuiet(file.path);
     throw e;
   }
+}
+
+/**
+ * Magic-byte check + optional ClamAV for in-memory uploads (Cloudinary or buffer→disk).
+ * @returns {Promise<{ mime: string }>}
+ */
+async function finalizeUploadBuffer(buffer, { allowPdf }) {
+  const { mime } = assertBufferContentAllowed(buffer, { allowPdf });
+  if (String(process.env.UPLOAD_VIRUS_SCAN || "").trim() !== "1") {
+    return { mime };
+  }
+  const tmp = path.join(
+    os.tmpdir(),
+    `gb-upload-${Date.now()}-${Math.random().toString(36).slice(2, 10)}`
+  );
+  try {
+    await fs.promises.writeFile(tmp, buffer);
+    await scanUploadedFileIfEnabled(tmp);
+  } finally {
+    await unlinkQuiet(tmp);
+  }
+  return { mime };
 }
 
 function mapUploadErrorToHttp(err) {
@@ -53,4 +82,8 @@ function mapUploadErrorToHttp(err) {
   return { status: 500, message: "Upload processing failed" };
 }
 
-module.exports = { finalizeUploadedFile, mapUploadErrorToHttp };
+module.exports = {
+  finalizeUploadedFile,
+  finalizeUploadBuffer,
+  mapUploadErrorToHttp,
+};

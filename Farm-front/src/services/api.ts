@@ -57,7 +57,12 @@ const api = axios.create({
 api.interceptors.request.use(
   (config) => {
     if (typeof FormData !== 'undefined' && config.data instanceof FormData) {
-      delete (config.headers as Record<string, unknown>)['Content-Type'];
+      const h = config.headers as Record<string, unknown> & { delete?: (k: string) => void };
+      delete h['Content-Type'];
+      h.delete?.('Content-Type');
+      if (config.timeout === undefined || config.timeout < 60000) {
+        config.timeout = 120000;
+      }
     }
     const token = getAuthToken();
     if (token) {
@@ -288,23 +293,18 @@ export const apiService = {
     uploadImages: (files: File[]) => {
       const formData = new FormData();
       files.slice(0, 5).forEach((f) => formData.append('images', f));
-      return api.post('/uploads/images', formData, {
-        headers: { 'Content-Type': 'multipart/form-data' },
-      });
+      // Do not set Content-Type — browser/axios must add multipart boundary (interceptor strips defaults).
+      return api.post('/uploads/images', formData);
     },
     uploadAvatar: (file: File) => {
       const formData = new FormData();
       formData.append('image', file);
-      return api.post<{ url: string }>('/uploads/avatar', formData, {
-        headers: { 'Content-Type': 'multipart/form-data' },
-      });
+      return api.post<{ url: string }>('/uploads/avatar', formData);
     },
     uploadKycFile: (file: File) => {
       const formData = new FormData();
       formData.append('file', file);
-      return api.post<{ url: string; originalName: string }>('/uploads/kyc', formData, {
-        headers: { 'Content-Type': 'multipart/form-data' },
-      });
+      return api.post<{ url: string; originalName: string }>('/uploads/kyc', formData);
     },
   },
 

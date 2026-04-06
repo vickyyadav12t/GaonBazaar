@@ -36,20 +36,39 @@ async function assertFileContentAllowed(absPath, opts = {}) {
   try {
     const { bytesRead } = await fd.read(buf, 0, 512, 0);
     const slice = buf.subarray(0, bytesRead);
-    const mime = detectMimeFromBuffer(slice);
-    if (!mime) {
-      throw new Error("FILE_SIGNATURE_INVALID");
-    }
-    if (mime === MIME_PDF && !allowPdf) {
-      throw new Error("FILE_PDF_NOT_ALLOWED");
-    }
-    if (mime !== MIME_PDF && !String(mime).startsWith("image/")) {
-      throw new Error("FILE_TYPE_NOT_ALLOWED");
-    }
-    return { mime };
+    return assertSliceMimeAllowed(slice, { allowPdf });
   } finally {
     await fd.close();
   }
+}
+
+/**
+ * Validate an in-memory file (e.g. multer memoryStorage) before Cloudinary or disk save.
+ * @param {Buffer} buffer
+ * @param {{ allowPdf?: boolean }} opts
+ * @returns {{ mime: string }}
+ */
+function assertBufferContentAllowed(buffer, opts = {}) {
+  const allowPdf = opts.allowPdf === true;
+  if (!Buffer.isBuffer(buffer) || buffer.length === 0) {
+    throw new Error("FILE_SIGNATURE_INVALID");
+  }
+  const slice = buffer.subarray(0, Math.min(buffer.length, 512));
+  return assertSliceMimeAllowed(slice, { allowPdf });
+}
+
+function assertSliceMimeAllowed(slice, { allowPdf }) {
+  const mime = detectMimeFromBuffer(slice);
+  if (!mime) {
+    throw new Error("FILE_SIGNATURE_INVALID");
+  }
+  if (mime === MIME_PDF && !allowPdf) {
+    throw new Error("FILE_PDF_NOT_ALLOWED");
+  }
+  if (mime !== MIME_PDF && !String(mime).startsWith("image/")) {
+    throw new Error("FILE_TYPE_NOT_ALLOWED");
+  }
+  return { mime };
 }
 
 async function unlinkQuiet(p) {
@@ -62,6 +81,7 @@ async function unlinkQuiet(p) {
 
 module.exports = {
   assertFileContentAllowed,
+  assertBufferContentAllowed,
   unlinkQuiet,
   MIME_JPEG,
   MIME_PNG,
