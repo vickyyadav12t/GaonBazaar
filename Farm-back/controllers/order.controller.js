@@ -13,6 +13,9 @@ const USER_ORDER_MAX_LIMIT = 100;
 const USER_ORDER_DEFAULT_LIMIT = 50;
 const USER_ORDER_STATUSES = new Set(["pending", "processing", "shipped", "delivered", "cancelled"]);
 
+/** Log once per process if orders cannot send email due to missing SMTP. */
+let warnedOrderEmailNoSmtp = false;
+
 function formatInr(n) {
   const v = Number(n) || 0;
   return `₹${v.toLocaleString("en-IN")}`;
@@ -46,7 +49,15 @@ function orderLinesSummary(orderDoc) {
 
 async function safeSendOrderEmails({ orderDoc, kind, extra }) {
   try {
-    if (!isMailConfigured()) return;
+    if (!isMailConfigured()) {
+      if (!warnedOrderEmailNoSmtp) {
+        warnedOrderEmailNoSmtp = true;
+        console.warn(
+          "[mail] Order emails skipped: SMTP not configured (set SMTP_HOST, SMTP_USER, SMTP_PASS on the server)."
+        );
+      }
+      return;
+    }
     const buyerId = orderDoc?.buyer;
     const farmerId = orderDoc?.farmer;
     if (!buyerId || !farmerId) return;
@@ -155,7 +166,16 @@ async function safeSendOrderEmails({ orderDoc, kind, extra }) {
     }
 
     if (mailJobs.length) {
-      await Promise.allSettled(mailJobs);
+      const results = await Promise.allSettled(mailJobs);
+      results.forEach((r) => {
+        if (r.status === "rejected") {
+          const reason = r.reason;
+          console.error(
+            "[mail] Order email job failed:",
+            reason?.message || reason?.code || String(reason)
+          );
+        }
+      });
     }
   } catch (e) {
     console.error("Order email error:", e);

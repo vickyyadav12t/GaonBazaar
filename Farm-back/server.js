@@ -28,6 +28,7 @@ const publicRoutes = require("./routes/public.routes");
 const path = require("path");
 
 dotenv.config();
+const { isMailConfigured, verifyMailConnection } = require("./utils/mail");
 
 const app = express();
 const server = http.createServer(app);
@@ -66,7 +67,16 @@ app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 
 mongoose
   .connect(process.env.MONGO_URI)
-  .then(() => console.log("MongoDB connected"))
+  .then(async () => {
+    console.log("MongoDB connected");
+    if (!isMailConfigured()) {
+      console.warn(
+        "[mail] SMTP not configured — transactional email is disabled. Set SMTP_HOST, SMTP_USER, SMTP_PASS (see .env.example). Password reset, order emails, and support mail will not send."
+      );
+    } else {
+      await verifyMailConnection().catch(() => {});
+    }
+  })
   .catch((err) => console.log(err));
 
 // Health check

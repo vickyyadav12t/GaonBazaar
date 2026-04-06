@@ -671,9 +671,9 @@ const Settings = () => {
                   <div className="space-y-0.5">
                     <Label>{t.emailNotif}</Label>
                     <p className="text-sm text-muted-foreground">
-                      {currentLanguage === 'en' 
-                        ? 'Receive notifications via email' 
-                        : 'ईमेल के माध्यम से सूचनाएं प्राप्त करें'}
+                      {currentLanguage === 'en'
+                        ? 'Order and account emails go to the address in Profile. The server must have SMTP configured (not only this toggle).'
+                        : 'ऑर्डर और खाता ईमेल प्रोफ़ाइल में दिए ईमेल पर जाते हैं। सर्वर पर SMTP सेट होना चाहिए (केवल यह स्विच पर्याप्त नहीं)।'}
                     </p>
                   </div>
                   <Switch

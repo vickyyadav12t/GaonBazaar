@@ -8,6 +8,70 @@ function isMailConfigured() {
   );
 }
 
+/** @type {import('nodemailer').Transporter | null} */
+let cachedTransporter = null;
+
+function buildTransportOptions() {
+  const port = Number(process.env.SMTP_PORT) || 587;
+  const secure = process.env.SMTP_SECURE === "true";
+
+  const opts = {
+    host: String(process.env.SMTP_HOST).trim(),
+    port,
+    secure,
+    auth: {
+      user: String(process.env.SMTP_USER).trim(),
+      pass: String(process.env.SMTP_PASS),
+    },
+    connectionTimeout: 20000,
+    greetingTimeout: 20000,
+    socketTimeout: 20000,
+  };
+
+  // STARTTLS on submission ports (e.g. Gmail/Outlook/SendGrid on 587 or 2525).
+  if (!secure && (port === 587 || port === 2525)) {
+    opts.requireTLS = true;
+  }
+
+  // Dev only: self-signed SMTP (set SMTP_TLS_REJECT_UNAUTHORIZED=0)
+  if (String(process.env.SMTP_TLS_REJECT_UNAUTHORIZED || "").trim() === "0") {
+    opts.tls = { ...(opts.tls || {}), rejectUnauthorized: false };
+  }
+
+  return opts;
+}
+
+function getTransporter() {
+  if (!isMailConfigured()) return null;
+  if (!cachedTransporter) {
+    cachedTransporter = nodemailer.createTransport(buildTransportOptions());
+  }
+  return cachedTransporter;
+}
+
+/**
+ * Call once on startup to surface bad credentials / firewall issues in logs.
+ * @returns {Promise<boolean>}
+ */
+async function verifyMailConnection() {
+  if (!isMailConfigured()) {
+    return false;
+  }
+  const t = getTransporter();
+  if (!t) return false;
+  try {
+    await t.verify();
+    console.log("[mail] SMTP connection verified OK");
+    return true;
+  } catch (err) {
+    console.error(
+      "[mail] SMTP verify failed — check SMTP_HOST, port, and credentials:",
+      err?.message || err
+    );
+    return false;
+  }
+}
+
 /**
  * @param {{ to: string; subject: string; text: string; html?: string }} opts
  */
@@ -18,24 +82,32 @@ async function sendMail(opts) {
     throw err;
   }
 
-  const transporter = nodemailer.createTransport({
-    host: process.env.SMTP_HOST,
-    port: Number(process.env.SMTP_PORT) || 587,
-    secure: process.env.SMTP_SECURE === "true",
-    auth: {
-      user: process.env.SMTP_USER,
-      pass: process.env.SMTP_PASS,
-    },
-  });
+  const transporter = getTransporter();
+  if (!transporter) {
+    const err = new Error("Email transporter unavailable");
+    err.code = "MAIL_NOT_CONFIGURED";
+    throw err;
+  }
 
   const from = process.env.SMTP_FROM || process.env.SMTP_USER;
-  await transporter.sendMail({
-    from,
-    to: opts.to,
-    subject: opts.subject,
-    text: opts.text,
-    html: opts.html || opts.text.replace(/\n/g, "<br/>"),
-  });
+
+  try {
+    await transporter.sendMail({
+      from,
+      to: opts.to,
+      subject: opts.subject,
+      text: opts.text,
+      html: opts.html || opts.text.replace(/\n/g, "<br/>"),
+    });
+  } catch (err) {
+    const code = err.code || err.responseCode;
+    console.error(
+      `[mail] send failed (to=${String(opts.to).slice(0, 64)}…): ${err.message}${
+        code != null ? ` [${code}]` : ""
+      }`
+    );
+    throw err;
+  }
 }
 
-module.exports = { sendMail, isMailConfigured };
+module.exports = { sendMail, isMailConfigured, verifyMailConnection };
