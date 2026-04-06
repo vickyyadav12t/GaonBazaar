@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Noto+Sans+Devanagari:wght@400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Noto+Sans+Devanagari:wght@400;500;600;700&display=swap');
 
 @tailwind base;
 @tailwind components;
@@ -413,5 +413,27 @@
 @media (min-width: 641px) {
   .hero-title {
     @apply text-5xl;
+  }
+}
+
+/* Crop calendar: print-friendly schedule (paired with Tailwind print:hidden / hidden print:block) */
+@media print {
+  .calendar-print-sheet {
+    padding: 1.25rem;
+    font-size: 12pt;
+    color: #111;
+    background: #fff;
+  }
+
+  .calendar-print-sheet table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+
+  .calendar-print-sheet th,
+  .calendar-print-sheet td {
+    border: 1px solid #333;
+    padding: 0.35rem 0.5rem;
+    text-align: left;
   }
 }

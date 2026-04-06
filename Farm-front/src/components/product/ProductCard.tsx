@@ -3,13 +3,26 @@ import { Star, MapPin, CheckCircle, Eye } from 'lucide-react';
 import { Product } from '@/types';
 import { Badge } from '@/components/ui/badge';
 import { useAppSelector } from '@/hooks/useRedux';
+import { optimizeListingImageUrl } from '@/lib/productImageUrl';
 
 interface ProductCardProps {
   product: Product;
+  /** First screenful: eager + high priority reduces LCP wait for hero grids */
+  imagePriority?: 'high' | 'low';
 }
 
-const ProductCard = ({ product }: ProductCardProps) => {
+const CARD_IMG_W = 480;
+const CARD_IMG_H = 360;
+
+const ProductCard = ({ product, imagePriority = 'low' }: ProductCardProps) => {
   const { currentLanguage } = useAppSelector((state) => state.language);
+  const rawHero = product.images?.[0];
+  const heroSrc = rawHero
+    ? optimizeListingImageUrl(rawHero, CARD_IMG_W)
+    : optimizeListingImageUrl(
+        'https://images.unsplash.com/photo-1574323347407-f5e1ad6d020b?w=600',
+        CARD_IMG_W
+      );
 
   const formatPrice = (price: number) => {
     return new Intl.NumberFormat('en-IN', {
@@ -23,10 +36,15 @@ const ProductCard = ({ product }: ProductCardProps) => {
     <Link to={`/product/${product.id}`}>
       <div className="card-product group animate-fade-in hover:scale-[1.02] transition-all duration-300 hover:shadow-lg">
         {/* Image */}
-        <div className="relative aspect-[4/3] overflow-hidden rounded-t-lg">
-          <img 
-            src={product.images[0]} 
+        <div className="relative aspect-[4/3] overflow-hidden rounded-t-lg bg-muted">
+          <img
+            src={heroSrc}
             alt={product.name}
+            width={CARD_IMG_W}
+            height={CARD_IMG_H}
+            loading={imagePriority === 'high' ? 'eager' : 'lazy'}
+            decoding="async"
+            fetchpriority={imagePriority === 'high' ? 'high' : 'low'}
             className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700 ease-out"
           />
           {/* Badges */}
@@ -70,9 +88,22 @@ const ProductCard = ({ product }: ProductCardProps) => {
           {/* Farmer Info */}
           <div className="flex items-center justify-between pt-3 border-t border-border">
             <div className="flex items-center gap-2">
-              <div className="w-8 h-8 rounded-full overflow-hidden bg-muted">
+              <div className="w-8 h-8 rounded-full overflow-hidden bg-muted shrink-0">
                 {product.farmerAvatar ? (
-                  <img src={product.farmerAvatar} alt={product.farmerName} className="w-full h-full object-cover" />
+                  <img
+                    src={optimizeListingImageUrl(product.farmerAvatar, 128)}
+                    alt={product.farmerName}
+                    width={32}
+                    height={32}
+                    loading="lazy"
+                    decoding="async"
+                    className="w-full h-full object-cover"
+                    onError={(e) => {
+                      const el = e.currentTarget;
+                      el.onerror = null;
+                      el.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(product.farmerName)}&size=64`;
+                    }}
+                  />
                 ) : (
                   <div className="w-full h-full flex items-center justify-center text-xs font-medium">
                     {product.farmerName.charAt(0)}
@@ -92,7 +123,9 @@ const ProductCard = ({ product }: ProductCardProps) => {
             </div>
             <div className="flex items-center gap-1 text-secondary">
               <Star className="w-4 h-4 fill-current" />
-              <span className="text-sm font-medium">{product.farmerRating}</span>
+              <span className="text-sm font-medium">
+                {product.farmerRating > 0 ? product.farmerRating : '—'}
+              </span>
             </div>
           </div>
         </div>

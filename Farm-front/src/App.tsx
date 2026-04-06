@@ -1,10 +1,16 @@
 import { Provider } from 'react-redux';
+import { lazy, Suspense, useEffect, type ReactNode } from 'react';
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { GoogleOAuthProvider } from "@react-oauth/google";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { useDispatch } from 'react-redux';
 import { store } from '@/store';
+import { finishAuthCheck, loginSuccess, logout } from '@/store/slices/authSlice';
+import { apiService, clearAuthToken, getAuthToken } from '@/services/api';
+import { mapApiUserToAuth } from '@/lib/mapAuthUser';
 
 // Auth Components
 import ProtectedRoute from "@/components/auth/ProtectedRoute";
@@ -15,64 +21,168 @@ import ErrorBoundary from "@/components/ErrorBoundary";
 
 // Scroll to Top
 import ScrollToTop from "@/components/ScrollToTop";
+import { RoutePageFallback } from '@/components/routing/RoutePageFallback';
+import { CopilotProvider } from '@/context/CopilotContext';
 
-// Pages
-import Landing from "./pages/Landing";
-import Login from "./pages/Login";
-import Register from "./pages/Register";
-import Marketplace from "./pages/Marketplace";
-import ProductDetail from "./pages/ProductDetail";
-import Support from "./pages/Support";
-import NotFound from "./pages/NotFound";
-import CropCalendar from "./pages/CropCalendar";
+const Landing = lazy(() => import('./pages/Landing'));
+const Login = lazy(() => import('./pages/Login'));
+const Register = lazy(() => import('./pages/Register'));
+const ResetPassword = lazy(() => import('./pages/ResetPassword'));
+const ForgotPassword = lazy(() => import('./pages/ForgotPassword'));
+const Marketplace = lazy(() => import('./pages/Marketplace'));
+const ProductDetail = lazy(() => import('./pages/ProductDetail'));
+const Support = lazy(() => import('./pages/Support'));
+const NotFound = lazy(() => import('./pages/NotFound'));
+const CropCalendar = lazy(() => import('./pages/CropCalendar'));
+const PricingGuidePage = lazy(() =>
+  import('./pages/ResourcePages').then((m) => ({ default: m.PricingGuidePage }))
+);
+const QualityStandardsPage = lazy(() =>
+  import('./pages/ResourcePages').then((m) => ({ default: m.QualityStandardsPage }))
+);
+const TermsPage = lazy(() => import('./pages/ResourcePages').then((m) => ({ default: m.TermsPage })));
+const PrivacyPolicyPage = lazy(() =>
+  import('./pages/ResourcePages').then((m) => ({ default: m.PrivacyPolicyPage }))
+);
+const FarmerDashboard = lazy(() => import('./pages/farmer/FarmerDashboard'));
+const BuyerDashboard = lazy(() => import('./pages/buyer/BuyerDashboard'));
+const AdminDashboard = lazy(() => import('./pages/admin/AdminDashboard'));
+const Cart = lazy(() => import('./pages/buyer/Cart'));
+const Checkout = lazy(() => import('./pages/buyer/Checkout'));
+const OrderTracking = lazy(() => import('./pages/buyer/OrderTracking'));
+const OrderDetailPage = lazy(() => import('./pages/orders/OrderDetailPage'));
+const BuyerProfile = lazy(() => import('./pages/buyer/BuyerProfile'));
+const BuyerChats = lazy(() => import('./pages/buyer/BuyerChats'));
+const Wishlist = lazy(() => import('./pages/buyer/Wishlist'));
+const ListingManagement = lazy(() => import('./pages/farmer/ListingManagement'));
+const FarmerOrders = lazy(() => import('./pages/farmer/FarmerOrders'));
+const FarmerProfile = lazy(() => import('./pages/farmer/FarmerProfile'));
+const FarmerChats = lazy(() => import('./pages/farmer/FarmerChats'));
+const Earnings = lazy(() => import('./pages/farmer/Earnings'));
+const Analytics = lazy(() => import('./pages/farmer/Analytics'));
+const FarmerNews = lazy(() => import('./pages/farmer/FarmerNews'));
+const Notifications = lazy(() => import('./pages/Notifications'));
+const Settings = lazy(() => import('./pages/Settings'));
+const NegotiationChat = lazy(() => import('./pages/chat/NegotiationChat'));
+const Reviews = lazy(() => import('./pages/reviews/Reviews'));
 
-// Dashboard Pages
-import FarmerDashboard from "./pages/farmer/FarmerDashboard";
-import BuyerDashboard from "./pages/buyer/BuyerDashboard";
-import AdminDashboard from "./pages/admin/AdminDashboard";
-
-// New Pages
-import Cart from "./pages/buyer/Cart";
-import Checkout from "./pages/buyer/Checkout";
-import OrderTracking from "./pages/buyer/OrderTracking";
-import BuyerProfile from "./pages/buyer/BuyerProfile";
-import ListingManagement from "./pages/farmer/ListingManagement";
-import FarmerOrders from "./pages/farmer/FarmerOrders";
-import FarmerProfile from "./pages/farmer/FarmerProfile";
-import Earnings from "./pages/farmer/Earnings";
-import Analytics from "./pages/farmer/Analytics";
-import Notifications from "./pages/Notifications";
-import Settings from "./pages/Settings";
-import NegotiationChat from "./pages/chat/NegotiationChat";
-import Reviews from "./pages/reviews/Reviews";
+function PageSuspense({ children }: { children: ReactNode }) {
+  return <Suspense fallback={<RoutePageFallback />}>{children}</Suspense>;
+}
 
 const queryClient = new QueryClient();
+const googleClientId = (import.meta.env.VITE_GOOGLE_CLIENT_ID || "").trim();
 
-const App = () => (
-  <Provider store={store}>
+const AuthBootstrap = () => {
+  const dispatch = useDispatch();
+
+  useEffect(() => {
+    const initAuth = async () => {
+      const token = getAuthToken();
+      if (!token) {
+        dispatch(logout());
+        dispatch(finishAuthCheck());
+        return;
+      }
+
+      try {
+        const response = await apiService.users.getProfile();
+        const user = response.data?.user;
+        if (!user) {
+          dispatch(logout());
+          return;
+        }
+
+        dispatch(loginSuccess(mapApiUserToAuth(user)));
+      } catch {
+        clearAuthToken();
+        dispatch(logout());
+      } finally {
+        dispatch(finishAuthCheck());
+      }
+    };
+
+    initAuth();
+  }, [dispatch]);
+
+  return null;
+};
+
+const AppInner = () => (
     <QueryClientProvider client={queryClient}>
       <TooltipProvider>
+          <BrowserRouter
+            future={{
+              v7_startTransition: true,
+              v7_relativeSplatPath: true,
+            }}
+          >
+        <CopilotProvider>
         <ErrorBoundary>
+          <AuthBootstrap />
           <Toaster />
           <Sonner />
-          <BrowserRouter>
             <ScrollToTop />
             <Routes>
               {/* Public Routes */}
-              <Route path="/" element={<Landing />} />
-              <Route path="/login" element={<Login />} />
-              <Route path="/register" element={<Register />} />
-            <Route path="/marketplace" element={<Marketplace />} />
-            <Route path="/product/:id" element={<ProductDetail />} />
-            <Route path="/support" element={<Support />} />
-            <Route path="/calendar" element={<CropCalendar />} />
-              
+              <Route path="/" element={<PageSuspense><Landing /></PageSuspense>} />
+              <Route path="/login" element={<PageSuspense><Login /></PageSuspense>} />
+              <Route path="/register" element={<PageSuspense><Register /></PageSuspense>} />
+              <Route path="/reset-password" element={<PageSuspense><ResetPassword /></PageSuspense>} />
+              <Route path="/forgot-password" element={<PageSuspense><ForgotPassword /></PageSuspense>} />
+              <Route path="/guides/pricing" element={<PageSuspense><PricingGuidePage /></PageSuspense>} />
+              <Route path="/guides/quality" element={<PageSuspense><QualityStandardsPage /></PageSuspense>} />
+              <Route path="/legal/terms" element={<PageSuspense><TermsPage /></PageSuspense>} />
+              <Route path="/legal/privacy" element={<PageSuspense><PrivacyPolicyPage /></PageSuspense>} />
+            <Route
+              path="/marketplace"
+              element={
+                <ProtectedRoute allowedRoles={['farmer', 'buyer', 'admin']}>
+                  <PageSuspense>
+                    <Marketplace />
+                  </PageSuspense>
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/product/:id"
+              element={
+                <ProtectedRoute allowedRoles={['farmer', 'buyer', 'admin']}>
+                  <PageSuspense>
+                    <ProductDetail />
+                  </PageSuspense>
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/support"
+              element={
+                <ProtectedRoute allowedRoles={['farmer', 'buyer', 'admin']}>
+                  <PageSuspense>
+                    <Support />
+                  </PageSuspense>
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/calendar"
+              element={
+                <ProtectedRoute allowedRoles={['farmer', 'buyer', 'admin']}>
+                  <PageSuspense>
+                    <CropCalendar />
+                  </PageSuspense>
+                </ProtectedRoute>
+              }
+            />
+
               {/* Protected Routes - All Users */}
               <Route 
                 path="/notifications" 
                 element={
                   <ProtectedRoute allowedRoles={['farmer', 'buyer', 'admin']}>
-                    <Notifications />
+                    <PageSuspense>
+                      <Notifications />
+                    </PageSuspense>
                   </ProtectedRoute>
                 } 
               />
@@ -80,7 +190,9 @@ const App = () => (
                 path="/settings" 
                 element={
                   <ProtectedRoute allowedRoles={['farmer', 'buyer', 'admin']}>
-                    <Settings />
+                    <PageSuspense>
+                      <Settings />
+                    </PageSuspense>
                   </ProtectedRoute>
                 } 
               />
@@ -90,7 +202,9 @@ const App = () => (
                 path="/farmer/dashboard" 
                 element={
                   <ProtectedRoute allowedRoles={['farmer']}>
-                    <FarmerDashboard />
+                    <PageSuspense>
+                      <FarmerDashboard />
+                    </PageSuspense>
                   </ProtectedRoute>
                 } 
               />
@@ -98,7 +212,19 @@ const App = () => (
                 path="/farmer/listings" 
                 element={
                   <ProtectedRoute allowedRoles={['farmer']}>
-                    <ListingManagement />
+                    <PageSuspense>
+                      <ListingManagement />
+                    </PageSuspense>
+                  </ProtectedRoute>
+                } 
+              />
+              <Route 
+                path="/farmer/orders/:orderId" 
+                element={
+                  <ProtectedRoute allowedRoles={['farmer']}>
+                    <PageSuspense>
+                      <OrderDetailPage />
+                    </PageSuspense>
                   </ProtectedRoute>
                 } 
               />
@@ -106,7 +232,9 @@ const App = () => (
                 path="/farmer/orders" 
                 element={
                   <ProtectedRoute allowedRoles={['farmer']}>
-                    <FarmerOrders />
+                    <PageSuspense>
+                      <FarmerOrders />
+                    </PageSuspense>
                   </ProtectedRoute>
                 } 
               />
@@ -114,7 +242,9 @@ const App = () => (
                 path="/farmer/chats" 
                 element={
                   <ProtectedRoute allowedRoles={['farmer']}>
-                    <FarmerDashboard />
+                    <PageSuspense>
+                      <FarmerChats />
+                    </PageSuspense>
                   </ProtectedRoute>
                 } 
               />
@@ -122,7 +252,9 @@ const App = () => (
                 path="/farmer/reviews" 
                 element={
                   <ProtectedRoute allowedRoles={['farmer']}>
-                    <Reviews />
+                    <PageSuspense>
+                      <Reviews />
+                    </PageSuspense>
                   </ProtectedRoute>
                 } 
               />
@@ -130,7 +262,9 @@ const App = () => (
                 path="/farmer/profile" 
                 element={
                   <ProtectedRoute allowedRoles={['farmer']}>
-                    <FarmerProfile />
+                    <PageSuspense>
+                      <FarmerProfile />
+                    </PageSuspense>
                   </ProtectedRoute>
                 } 
               />
@@ -138,7 +272,9 @@ const App = () => (
                 path="/farmer/earnings" 
                 element={
                   <ProtectedRoute allowedRoles={['farmer']}>
-                    <Earnings />
+                    <PageSuspense>
+                      <Earnings />
+                    </PageSuspense>
                   </ProtectedRoute>
                 } 
               />
@@ -146,9 +282,21 @@ const App = () => (
                 path="/farmer/analytics" 
                 element={
                   <ProtectedRoute allowedRoles={['farmer']}>
-                    <Analytics />
+                    <PageSuspense>
+                      <Analytics />
+                    </PageSuspense>
                   </ProtectedRoute>
                 } 
+              />
+              <Route
+                path="/farmer/news"
+                element={
+                  <ProtectedRoute allowedRoles={['farmer']}>
+                    <PageSuspense>
+                      <FarmerNews />
+                    </PageSuspense>
+                  </ProtectedRoute>
+                }
               />
 
               {/* Protected Buyer Routes */}
@@ -156,7 +304,19 @@ const App = () => (
                 path="/buyer/dashboard" 
                 element={
                   <ProtectedRoute allowedRoles={['buyer']}>
-                    <BuyerDashboard />
+                    <PageSuspense>
+                      <BuyerDashboard />
+                    </PageSuspense>
+                  </ProtectedRoute>
+                } 
+              />
+              <Route 
+                path="/buyer/orders/:orderId" 
+                element={
+                  <ProtectedRoute allowedRoles={['buyer']}>
+                    <PageSuspense>
+                      <OrderDetailPage />
+                    </PageSuspense>
                   </ProtectedRoute>
                 } 
               />
@@ -164,7 +324,9 @@ const App = () => (
                 path="/buyer/orders" 
                 element={
                   <ProtectedRoute allowedRoles={['buyer']}>
-                    <OrderTracking />
+                    <PageSuspense>
+                      <OrderTracking />
+                    </PageSuspense>
                   </ProtectedRoute>
                 } 
               />
@@ -172,7 +334,9 @@ const App = () => (
                 path="/buyer/chats" 
                 element={
                   <ProtectedRoute allowedRoles={['buyer']}>
-                    <BuyerDashboard />
+                    <PageSuspense>
+                      <BuyerChats />
+                    </PageSuspense>
                   </ProtectedRoute>
                 } 
               />
@@ -180,15 +344,29 @@ const App = () => (
                 path="/buyer/cart" 
                 element={
                   <ProtectedRoute allowedRoles={['buyer']}>
-                    <Cart />
+                    <PageSuspense>
+                      <Cart />
+                    </PageSuspense>
                   </ProtectedRoute>
                 } 
+              />
+              <Route
+                path="/buyer/wishlist"
+                element={
+                  <ProtectedRoute allowedRoles={['buyer']}>
+                    <PageSuspense>
+                      <Wishlist />
+                    </PageSuspense>
+                  </ProtectedRoute>
+                }
               />
               <Route 
                 path="/buyer/checkout" 
                 element={
                   <ProtectedRoute allowedRoles={['buyer']}>
-                    <Checkout />
+                    <PageSuspense>
+                      <Checkout />
+                    </PageSuspense>
                   </ProtectedRoute>
                 } 
               />
@@ -196,7 +374,9 @@ const App = () => (
                 path="/buyer/reviews" 
                 element={
                   <ProtectedRoute allowedRoles={['buyer']}>
-                    <Reviews />
+                    <PageSuspense>
+                      <Reviews />
+                    </PageSuspense>
                   </ProtectedRoute>
                 } 
               />
@@ -204,43 +384,115 @@ const App = () => (
                 path="/buyer/profile" 
                 element={
                   <ProtectedRoute allowedRoles={['buyer']}>
-                    <BuyerProfile />
+                    <PageSuspense>
+                      <BuyerProfile />
+                    </PageSuspense>
                   </ProtectedRoute>
                 } 
               />
 
-              {/* Protected Admin Routes */}
-              <Route 
-                path="/admin/dashboard" 
+              {/* Protected Admin Routes — shell at /admin?tab=…; legacy paths redirect */}
+              <Route
+                path="/admin/orders/:orderId"
                 element={
                   <AdminRoute>
-                    <AdminDashboard />
+                    <PageSuspense>
+                      <OrderDetailPage />
+                    </PageSuspense>
                   </AdminRoute>
-                } 
+                }
               />
-              <Route 
-                path="/admin/users" 
+              <Route
+                path="/admin/dashboard"
                 element={
                   <AdminRoute>
-                    <AdminDashboard />
+                    <Navigate to="/admin?tab=overview" replace />
                   </AdminRoute>
-                } 
+                }
               />
-              <Route 
-                path="/admin/listings" 
+              <Route
+                path="/admin/orders"
                 element={
                   <AdminRoute>
-                    <AdminDashboard />
+                    <Navigate to="/admin?tab=orders" replace />
                   </AdminRoute>
-                } 
+                }
               />
-              <Route 
-                path="/admin/reviews" 
+              <Route
+                path="/admin/users"
                 element={
                   <AdminRoute>
-                    <AdminDashboard />
+                    <Navigate to="/admin?tab=users" replace />
                   </AdminRoute>
-                } 
+                }
+              />
+              <Route
+                path="/admin/kyc"
+                element={
+                  <AdminRoute>
+                    <Navigate to="/admin?tab=kyc" replace />
+                  </AdminRoute>
+                }
+              />
+              <Route
+                path="/admin/payouts"
+                element={
+                  <AdminRoute>
+                    <Navigate to="/admin?tab=payouts" replace />
+                  </AdminRoute>
+                }
+              />
+              <Route
+                path="/admin/listings"
+                element={
+                  <AdminRoute>
+                    <Navigate to="/admin?tab=listings" replace />
+                  </AdminRoute>
+                }
+              />
+              <Route
+                path="/admin/reviews"
+                element={
+                  <AdminRoute>
+                    <Navigate to="/admin?tab=reviews" replace />
+                  </AdminRoute>
+                }
+              />
+              <Route
+                path="/admin/support"
+                element={
+                  <AdminRoute>
+                    <Navigate to="/admin?tab=support" replace />
+                  </AdminRoute>
+                }
+              />
+              <Route
+                path="/admin/audit"
+                element={
+                  <AdminRoute>
+                    <Navigate to="/admin?tab=audit" replace />
+                  </AdminRoute>
+                }
+              />
+              <Route
+                path="/admin/profile"
+                element={
+                  <AdminRoute>
+                    <PageSuspense>
+                      <Settings />
+                    </PageSuspense>
+                  </AdminRoute>
+                }
+              />
+              <Route
+                path="/admin"
+                element={
+                  <AdminRoute>
+                    <PageSuspense>
+                      <AdminDashboard />
+                    </PageSuspense>
+                  </AdminRoute>
+                }
               />
 
               {/* Protected Chat Route */}
@@ -248,18 +500,32 @@ const App = () => (
                 path="/chat/:id" 
                 element={
                   <ProtectedRoute allowedRoles={['farmer', 'buyer']}>
-                    <NegotiationChat />
+                    <PageSuspense>
+                      <NegotiationChat />
+                    </PageSuspense>
                   </ProtectedRoute>
                 } 
               />
 
               {/* Catch-all */}
-              <Route path="*" element={<NotFound />} />
+              <Route path="*" element={<PageSuspense><NotFound /></PageSuspense>} />
             </Routes>
-          </BrowserRouter>
         </ErrorBoundary>
+        </CopilotProvider>
+          </BrowserRouter>
       </TooltipProvider>
     </QueryClientProvider>
+);
+
+const App = () => (
+  <Provider store={store}>
+    {googleClientId ? (
+      <GoogleOAuthProvider clientId={googleClientId}>
+        <AppInner />
+      </GoogleOAuthProvider>
+    ) : (
+      <AppInner />
+    )}
   </Provider>
 );
 

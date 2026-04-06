@@ -59,10 +59,7 @@ export const validateAadhaar = (aadhaar: string): boolean => {
   return /^\d{12}$/.test(cleaned);
 };
 
-// OTP validation
-export const validateOTP = (otp: string): boolean => {
-  return /^\d{6}$/.test(otp);
-};
+// (OTP validation removed - no longer used)
 
 // URL validation
 export const validateURL = (url: string): boolean => {
@@ -105,10 +102,6 @@ export const getValidationError = (field: string, rule: string): string => {
     aadhaar: {
       required: 'Aadhaar number is required',
       invalid: 'Please enter a valid 12-digit Aadhaar number',
-    },
-    otp: {
-      required: 'OTP is required',
-      invalid: 'Please enter a valid 6-digit OTP',
     },
   };
 

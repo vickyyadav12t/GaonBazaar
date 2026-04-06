@@ -1,53 +1,104 @@
-import { useEffect, useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
-import { ArrowLeft, Package, Truck, CheckCircle, Clock, MapPin, Phone, MessageCircle, Star } from 'lucide-react';
+import { useEffect, useMemo, useRef, useState } from 'react';
+import { Link, useNavigate, useSearchParams } from 'react-router-dom';
+import { ArrowLeft, Package, Download, Loader2, Filter } from 'lucide-react';
 import Layout from '@/components/layout/Layout';
 import { Button } from '@/components/ui/button';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useAppSelector } from '@/hooks/useRedux';
 import { apiService } from '@/services/api';
+import { saveCsvFromApi } from '@/lib/downloadCsv';
 import { Order } from '@/types';
 import { useToast } from '@/hooks/use-toast';
+import { mapApiOrderToOrder } from '@/lib/mapOrderFromApi';
+
+const ORDER_STATUS_FILTER_VALUES = new Set([
+  'pending',
+  'processing',
+  'shipped',
+  'delivered',
+  'cancelled',
+]);
+
+const ORDER_PAGE = 50;
 
 const OrderTracking = () => {
   const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
   const { toast } = useToast();
   const { currentLanguage } = useAppSelector((state) => state.language);
   const { user } = useAppSelector((state) => state.auth);
   const [orders, setOrders] = useState<Order[]>([]);
-  const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [loadingMore, setLoadingMore] = useState(false);
+  const [hasMore, setHasMore] = useState(true);
+  const [orderTotal, setOrderTotal] = useState<number | null>(null);
+  const ordersRef = useRef<Order[]>([]);
+  ordersRef.current = orders;
+  const [exportingCsv, setExportingCsv] = useState(false);
+
+  const statusParam = searchParams.get('status');
+  const filterStatus =
+    statusParam && ORDER_STATUS_FILTER_VALUES.has(statusParam) ? statusParam : 'all';
+
+  const filterPaymentPending = searchParams.get('payment') === 'pending';
+
+  const setFilterStatus = (value: string) => {
+    setSearchParams(
+      (prev) => {
+        const next = new URLSearchParams(prev);
+        if (value === 'all') next.delete('status');
+        else next.set('status', value);
+        next.delete('payment');
+        return next;
+      },
+      { replace: true }
+    );
+  };
+
+  const setPaymentFilter = (value: 'all' | 'pending') => {
+    setSearchParams(
+      (prev) => {
+        const next = new URLSearchParams(prev);
+        if (value === 'pending') {
+          next.set('payment', 'pending');
+          next.delete('status');
+        } else {
+          next.delete('payment');
+        }
+        return next;
+      },
+      { replace: true }
+    );
+  };
 
   useEffect(() => {
     const fetchOrders = async () => {
+      if (!user) return;
       try {
         setIsLoading(true);
-        const response = await apiService.orders.getAll();
+        const params: {
+          limit: number;
+          skip: number;
+          includeTotal: boolean;
+          status?: string;
+          paymentStatus?: string;
+        } = {
+          limit: ORDER_PAGE,
+          skip: 0,
+          includeTotal: true,
+        };
+        if (filterStatus !== 'all') params.status = filterStatus;
+        if (filterPaymentPending) params.paymentStatus = 'pending';
+        const response = await apiService.orders.getAll(params);
         const backendOrders = response.data?.orders || [];
-        const mapped: Order[] = backendOrders.map((o: any) => ({
-          id: o._id || o.id,
-          buyerId: o.buyer?._id || o.buyer,
-          buyerName: o.buyer?.name || 'Buyer',
-          farmerId: o.farmer?._id || o.farmer,
-          farmerName: o.farmer?.name || 'Farmer',
-          productId: o.items?.[0]?.product || '',
-          productName: o.items?.[0]?.name || 'Product',
-          productImage:
-            o.items?.[0]?.image ||
-            'https://images.unsplash.com/photo-1574323347407-f5e1ad6d020b?w=600',
-          quantity: o.items?.[0]?.quantity || 1,
-          unit: o.items?.[0]?.unit || 'kg',
-          pricePerUnit: o.items?.[0]?.price || 0,
-          totalAmount: o.totalAmount || 0,
-          status: o.status,
-          paymentStatus: o.paymentStatus || 'pending',
-          deliveryAddress: o.shippingAddress || '',
-          createdAt: o.createdAt || new Date().toISOString(),
-          expectedDelivery: undefined,
-        }));
+        const mapped: Order[] = backendOrders.map((o: any) => mapApiOrderToOrder(o));
         setOrders(mapped);
-        if (mapped.length > 0) {
-          setSelectedOrder(mapped[0]);
-        }
+        const tot = response.data?.total;
+        const t = typeof tot === 'number' ? tot : null;
+        setOrderTotal(t);
+        setHasMore(
+          mapped.length === ORDER_PAGE && (t == null || mapped.length < t)
+        );
       } catch (error: any) {
         console.error('Failed to load orders', error);
         toast({
@@ -65,218 +116,221 @@ const OrderTracking = () => {
       }
     };
 
-    if (user) {
-      fetchOrders();
+    void fetchOrders();
+  }, [user, currentLanguage, toast, filterStatus, filterPaymentPending]);
+
+  const loadMoreOrders = async () => {
+    if (!user || loadingMore || !hasMore) return;
+    setLoadingMore(true);
+    const skip = ordersRef.current.length;
+    try {
+      const params: {
+        limit: number;
+        skip: number;
+        status?: string;
+        paymentStatus?: string;
+      } = { limit: ORDER_PAGE, skip };
+      if (filterStatus !== 'all') params.status = filterStatus;
+      if (filterPaymentPending) params.paymentStatus = 'pending';
+      const response = await apiService.orders.getAll(params);
+      const backendOrders = response.data?.orders || [];
+      const mapped: Order[] = backendOrders.map((o: any) => mapApiOrderToOrder(o));
+      const mergedLen = skip + mapped.length;
+      setOrders((prev) => [...prev, ...mapped]);
+      const t = orderTotal;
+      setHasMore(
+        mapped.length === ORDER_PAGE && (t == null || mergedLen < t)
+      );
+    } catch (e) {
+      console.error(e);
+    } finally {
+      setLoadingMore(false);
     }
-  }, [user, currentLanguage, toast]);
+  };
 
-  const getStatusSteps = (status: string) => {
-    const steps = [
-      { key: 'pending', label: currentLanguage === 'en' ? 'Order Placed' : 'ऑर्डर दिया गया', icon: Package },
-      { key: 'confirmed', label: currentLanguage === 'en' ? 'Confirmed' : 'पुष्टि', icon: CheckCircle },
-      { key: 'processing', label: currentLanguage === 'en' ? 'Processing' : 'प्रोसेसिंग', icon: Clock },
-      { key: 'shipped', label: currentLanguage === 'en' ? 'Shipped' : 'भेज दिया', icon: Truck },
-      { key: 'delivered', label: currentLanguage === 'en' ? 'Delivered' : 'पहुंचा दिया', icon: CheckCircle },
-    ];
+  const en = currentLanguage === 'en';
 
-    const statusOrder = ['pending', 'confirmed', 'processing', 'shipped', 'delivered'];
-    const currentIndex = statusOrder.indexOf(status);
-
-    return steps.map((step, index) => ({
-      ...step,
-      completed: index <= currentIndex,
-      current: index === currentIndex,
-    }));
+  const handleExportOrdersCsv = async () => {
+    try {
+      setExportingCsv(true);
+      await saveCsvFromApi(() => apiService.orders.exportCsv(), 'orders.csv');
+      toast({
+        title: en ? 'Export started' : 'निर्यात शुरू',
+        description: en ? 'Your orders CSV is downloading.' : 'आपका ऑर्डर CSV डाउनलोड हो रहा है।',
+      });
+    } catch (e: unknown) {
+      const msg = e instanceof Error ? e.message : '';
+      toast({
+        title: en ? 'Export failed' : 'निर्यात विफल',
+        description: msg || (en ? 'Could not download CSV.' : 'CSV डाउनलोड नहीं हो सका।'),
+        variant: 'destructive',
+      });
+    } finally {
+      setExportingCsv(false);
+    }
   };
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case 'delivered': return 'text-success bg-success/10';
-      case 'shipped': return 'text-primary bg-primary/10';
-      case 'cancelled': return 'text-destructive bg-destructive/10';
-      default: return 'text-warning bg-warning/10';
+      case 'delivered':
+        return 'text-success bg-success/10';
+      case 'shipped':
+        return 'text-primary bg-primary/10';
+      case 'cancelled':
+        return 'text-destructive bg-destructive/10';
+      default:
+        return 'text-warning bg-warning/10';
     }
   };
 
+  const filteredOrders = useMemo(() => {
+    return orders.filter((o) => {
+      const statusOk = filterStatus === 'all' || o.status === filterStatus;
+      const paymentOk =
+        !filterPaymentPending ||
+        (o.paymentStatus === 'pending' && o.status !== 'cancelled');
+      return statusOk && paymentOk;
+    });
+  }, [orders, filterStatus, filterPaymentPending]);
+
+  const paymentFilterValue = filterPaymentPending ? 'pending' : 'all';
+
   return (
     <Layout>
-      <div className="container mx-auto px-4 py-6">
-        {/* Header */}
-        <div className="flex items-center gap-4 mb-6">
-          <button onClick={() => navigate(-1)} className="p-2 hover:bg-muted rounded-lg">
+      <div className="container mx-auto px-4 py-6 max-w-2xl">
+        <div className="flex flex-wrap items-center gap-4 mb-6">
+          <button type="button" onClick={() => navigate(-1)} className="p-2 hover:bg-muted rounded-lg">
             <ArrowLeft className="w-5 h-5" />
           </button>
-          <h1 className="text-2xl font-bold">
-            {currentLanguage === 'en' ? 'My Orders' : 'मेरे ऑर्डर'}
-          </h1>
+          <h1 className="text-2xl font-bold flex-1 min-w-0">{en ? 'My orders' : 'मेरे ऑर्डर'}</h1>
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            className="shrink-0"
+            disabled={exportingCsv}
+            onClick={() => void handleExportOrdersCsv()}
+          >
+            {exportingCsv ? (
+              <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+            ) : (
+              <Download className="w-4 h-4 mr-2" />
+            )}
+            {en ? 'Export CSV' : 'CSV निर्यात'}
+          </Button>
         </div>
 
-        <div className="grid lg:grid-cols-3 gap-6">
-          {/* Orders List */}
-          <div className="lg:col-span-1 space-y-3">
-            {isLoading ? (
-              <div className="text-center py-8 text-muted-foreground">
-                {currentLanguage === 'en'
-                  ? 'Loading orders...'
-                  : 'ऑर्डर लोड हो रहे हैं...'}
-              </div>
-            ) : orders.length === 0 ? (
-              <div className="text-center py-8 text-muted-foreground">
-                {currentLanguage === 'en'
-                  ? 'No orders yet.'
-                  : 'अभी तक कोई ऑर्डर नहीं।'}
+        {isLoading ? (
+          <div className="text-center py-12 text-muted-foreground">
+            {en ? 'Loading orders…' : 'ऑर्डर लोड हो रहे हैं…'}
+          </div>
+        ) : orders.length === 0 ? (
+          <div className="text-center py-12 text-muted-foreground">
+            <Package className="w-14 h-14 mx-auto mb-4 opacity-50" />
+            <p className="mb-4">{en ? 'No orders yet.' : 'अभी तक कोई ऑर्डर नहीं।'}</p>
+            <Button asChild>
+              <Link to="/marketplace">{en ? 'Browse marketplace' : 'बाज़ार देखें'}</Link>
+            </Button>
+          </div>
+        ) : (
+          <>
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-center mb-6">
+              <Select value={filterStatus} onValueChange={setFilterStatus}>
+                <SelectTrigger className="w-full sm:w-[200px]">
+                  <Filter className="w-4 h-4 mr-2 shrink-0" />
+                  <SelectValue placeholder={en ? 'Order status' : 'ऑर्डर स्थिति'} />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">{en ? 'All statuses' : 'सभी स्थिति'}</SelectItem>
+                  <SelectItem value="pending">{en ? 'Pending' : 'लंबित'}</SelectItem>
+                  <SelectItem value="processing">{en ? 'Processing' : 'प्रोसेसिंग'}</SelectItem>
+                  <SelectItem value="shipped">{en ? 'Shipped' : 'भेज दिया'}</SelectItem>
+                  <SelectItem value="delivered">{en ? 'Delivered' : 'डिलीवर'}</SelectItem>
+                  <SelectItem value="cancelled">{en ? 'Cancelled' : 'रद्द'}</SelectItem>
+                </SelectContent>
+              </Select>
+              <Select
+                value={paymentFilterValue}
+                onValueChange={(v) => setPaymentFilter(v as 'all' | 'pending')}
+              >
+                <SelectTrigger className="w-full sm:w-[200px]">
+                  <SelectValue placeholder={en ? 'Payment' : 'भुगतान'} />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">{en ? 'All payments' : 'सभी भुगतान'}</SelectItem>
+                  <SelectItem value="pending">
+                    {en ? 'Payment pending' : 'भुगतान लंबित'}
+                  </SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            {filteredOrders.length === 0 ? (
+              <div className="text-center py-10 text-muted-foreground rounded-xl border border-dashed">
+                <p className="mb-4">
+                  {en ? 'No orders match this filter.' : 'इस फ़िल्टर से कोई ऑर्डर नहीं मिला।'}
+                </p>
+                <Button type="button" variant="outline" size="sm" asChild>
+                  <Link to="/buyer/orders">{en ? 'Clear filters' : 'फ़िल्टर हटाएं'}</Link>
+                </Button>
               </div>
             ) : (
-              <>
-                {orders.map((order) => (
-                  <button
-                    key={order.id}
-                    onClick={() => setSelectedOrder(order)}
-                    className={`w-full text-left card-elevated p-4 transition-all ${selectedOrder && selectedOrder.id === order.id ? 'ring-2 ring-primary' : 'hover:shadow-md'}`}
-                  >
-                    <div className="flex gap-3">
-                      <img
-                        src={order.productImage}
-                        alt={order.productName}
-                        className="w-16 h-16 rounded-lg object-cover"
-                      />
-                      <div className="flex-1 min-w-0">
-                        <p className="font-medium truncate">{order.productName}</p>
-                        <p className="text-sm text-muted-foreground">
-                          {order.quantity} {order.unit}
-                        </p>
-                        <div className="flex items-center gap-2 mt-1">
-                          <span className={`text-xs px-2 py-0.5 rounded-full ${getStatusColor(order.status)}`}>
-                            {order.status}
-                          </span>
-                        </div>
-                      </div>
-                    </div>
-                  </button>
-                ))}
-              </>
-            )
-            }
-          </div>
-
-          {/* Order Details */}
-          <div className="lg:col-span-2">
-            {selectedOrder && (
-              <div className="space-y-6">
-                {/* Order Info */}
-                <div className="card-elevated p-6">
-                  <div className="flex items-start justify-between mb-4">
-                    <div>
-                      <p className="text-sm text-muted-foreground">
-                        {currentLanguage === 'en' ? 'Order ID' : 'ऑर्डर आईडी'}
-                      </p>
-                      <p className="font-mono font-bold">#{selectedOrder.id.toUpperCase()}</p>
-                    </div>
-                    <span className={`px-3 py-1 rounded-full text-sm font-medium ${getStatusColor(selectedOrder.status)}`}>
-                      {selectedOrder.status}
-                    </span>
-                  </div>
-
-                  <div className="flex gap-4 p-4 bg-muted/50 rounded-xl">
-                    <img
-                      src={selectedOrder.productImage}
-                      alt={selectedOrder.productName}
-                      className="w-20 h-20 rounded-lg object-cover"
-                    />
-                    <div>
-                      <h3 className="font-semibold">{selectedOrder.productName}</h3>
-                      <p className="text-sm text-muted-foreground">
-                        {currentLanguage === 'en' ? 'by' : 'द्वारा'} {selectedOrder.farmerName}
-                      </p>
-                      <p className="text-sm">
-                        {selectedOrder.quantity} {selectedOrder.unit} × ₹{selectedOrder.pricePerUnit.toLocaleString()}
-                      </p>
-                      <p className="font-bold text-primary mt-1">
-                        ₹{selectedOrder.totalAmount.toLocaleString()}
-                      </p>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Tracking Timeline */}
-                <div className="card-elevated p-6">
-                  <h2 className="text-lg font-semibold mb-6">
-                    {currentLanguage === 'en' ? 'Order Tracking' : 'ऑर्डर ट्रैकिंग'}
-                  </h2>
-                  <div className="relative">
-                    {getStatusSteps(selectedOrder.status).map((step, index, arr) => (
-                      <div key={step.key} className="flex gap-4 pb-8 last:pb-0">
-                        <div className="relative flex flex-col items-center">
-                          <div className={`w-10 h-10 rounded-full flex items-center justify-center ${step.completed ? 'bg-success text-white' : 'bg-muted text-muted-foreground'}`}>
-                            <step.icon className="w-5 h-5" />
-                          </div>
-                          {index < arr.length - 1 && (
-                            <div className={`w-0.5 flex-1 mt-2 ${step.completed && arr[index + 1]?.completed ? 'bg-success' : 'bg-muted'}`} />
-                          )}
-                        </div>
-                        <div className="flex-1 pt-2">
-                          <p className={`font-medium ${step.completed ? 'text-foreground' : 'text-muted-foreground'}`}>
-                            {step.label}
-                          </p>
-                          {step.current && (
-                            <p className="text-sm text-muted-foreground mt-1">
-                              {currentLanguage === 'en' ? 'Current Status' : 'वर्तमान स्थिति'}
-                            </p>
-                          )}
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-
-                {/* Delivery Info */}
-                <div className="card-elevated p-6">
-                  <h2 className="text-lg font-semibold mb-4">
-                    {currentLanguage === 'en' ? 'Delivery Details' : 'डिलीवरी विवरण'}
-                  </h2>
-                  <div className="space-y-4">
-                    <div className="flex items-start gap-3">
-                      <MapPin className="w-5 h-5 text-muted-foreground mt-0.5" />
-                      <div>
-                        <p className="text-sm text-muted-foreground">
-                          {currentLanguage === 'en' ? 'Delivery Address' : 'डिलीवरी पता'}
-                        </p>
-                        <p className="font-medium">{selectedOrder.deliveryAddress}</p>
-                      </div>
-                    </div>
-                    {selectedOrder.expectedDelivery && (
-                      <div className="flex items-start gap-3">
-                        <Clock className="w-5 h-5 text-muted-foreground mt-0.5" />
-                        <div>
+              <ul className="space-y-3">
+                {filteredOrders.map((order) => (
+                  <li key={order.id}>
+                    <Link
+                      to={`/buyer/orders/${order.id}`}
+                      className="block card-elevated p-4 transition-all hover:ring-2 hover:ring-primary/30"
+                    >
+                      <div className="flex gap-4">
+                        <img
+                          src={order.productImage}
+                          alt=""
+                          className="w-16 h-16 rounded-lg object-cover shrink-0"
+                        />
+                        <div className="flex-1 min-w-0">
+                          <p className="font-medium truncate">{order.productName}</p>
                           <p className="text-sm text-muted-foreground">
-                            {currentLanguage === 'en' ? 'Expected Delivery' : 'अपेक्षित डिलीवरी'}
+                            {order.quantity} {order.unit} · {en ? 'Seller' : 'विक्रेता'}:{' '}
+                            {order.farmerName}
                           </p>
-                          <p className="font-medium">{selectedOrder.expectedDelivery}</p>
+                          <div className="flex flex-wrap items-center gap-2 mt-2">
+                            <span
+                              className={`text-xs px-2 py-0.5 rounded-full capitalize ${getStatusColor(order.status)}`}
+                            >
+                              {order.status}
+                            </span>
+                            <span className="text-sm font-semibold text-primary">
+                              ₹{order.totalAmount.toLocaleString('en-IN')}
+                            </span>
+                          </div>
                         </div>
                       </div>
-                    )}
-                  </div>
-                </div>
-
-                {/* Actions */}
-                <div className="flex flex-wrap gap-3">
-                  <Link to={`/chat/chat-1`} className="flex-1">
-                    <Button variant="outline" className="w-full">
-                      <MessageCircle className="w-4 h-4 mr-2" />
-                      {currentLanguage === 'en' ? 'Contact Farmer' : 'किसान से संपर्क करें'}
-                    </Button>
-                  </Link>
-                  {selectedOrder.status === 'delivered' && (
-                    <Button className="flex-1 btn-primary-gradient">
-                      <Star className="w-4 h-4 mr-2" />
-                      {currentLanguage === 'en' ? 'Rate Order' : 'ऑर्डर रेट करें'}
-                    </Button>
-                  )}
-                </div>
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            )}
+            {hasMore && filteredOrders.length > 0 && (
+              <div className="flex justify-center mt-6">
+                <Button
+                  type="button"
+                  variant="outline"
+                  disabled={loadingMore}
+                  onClick={() => void loadMoreOrders()}
+                >
+                  {loadingMore
+                    ? en
+                      ? 'Loading…'
+                      : 'लोड हो रहा है…'
+                    : en
+                      ? 'Load more'
+                      : 'और लोड करें'}
+                </Button>
               </div>
             )}
-          </div>
-        </div>
+          </>
+        )}
       </div>
     </Layout>
   );

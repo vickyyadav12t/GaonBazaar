@@ -1,0 +1,9 @@
+node_modules/
+.env
+.env.local
+*.log
+.DS_Store
+
+# User uploads (keep folder with .gitkeep)
+uploads/*
+!uploads/.gitkeep

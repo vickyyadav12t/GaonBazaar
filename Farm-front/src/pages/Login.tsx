@@ -1,6 +1,7 @@
-import { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { useEffect, useState } from 'react';
+import { Link, useNavigate, useSearchParams, useLocation } from 'react-router-dom';
 import { Eye, EyeOff, Phone, ArrowRight, Mail, Shield, Sparkles, TrendingUp, Users, CheckCircle } from 'lucide-react';
+import { GoogleLogin } from '@react-oauth/google';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -10,12 +11,29 @@ import { useAppDispatch, useAppSelector } from '@/hooks/useRedux';
 import { loginSuccess } from '@/store/slices/authSlice';
 import { toast } from '@/hooks/use-toast';
 import { AnimateOnScroll } from '@/components/animations';
-import { apiService } from '@/services/api';
+import { apiService, setAuthToken } from '@/services/api';
+import { mapApiUserToAuth } from '@/lib/mapAuthUser';
+import { ROUTES } from '@/constants';
 
 const Login = () => {
   const navigate = useNavigate();
+  const location = useLocation();
+  const [searchParams, setSearchParams] = useSearchParams();
   const dispatch = useAppDispatch();
   const { currentLanguage } = useAppSelector((state) => state.language);
+
+  useEffect(() => {
+    if (searchParams.get('suspended') !== '1') return;
+    toast({
+      title: 'Account suspended',
+      description:
+        'Your account is suspended or your session was ended. Contact support if this is unexpected.',
+      variant: 'destructive',
+    });
+    const next = new URLSearchParams(searchParams);
+    next.delete('suspended');
+    setSearchParams(next, { replace: true });
+  }, [searchParams, setSearchParams]);
   
   const [loginMethod, setLoginMethod] = useState<'phone' | 'email'>('phone');
   const [phone, setPhone] = useState('');
@@ -23,7 +41,11 @@ const Login = () => {
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [googleLoading, setGoogleLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  const googleClientId = (import.meta.env.VITE_GOOGLE_CLIENT_ID || '').trim();
+  const googleEnabled = Boolean(googleClientId);
 
   const content = {
     en: {
@@ -37,6 +59,12 @@ const Login = () => {
       register: 'Register Now',
       orContinue: 'Or continue with',
       demoAccounts: 'Demo Accounts',
+      googleFailed: 'Google sign-in failed',
+      googleContinue: 'Continue with Google',
+      googleNotConfiguredTitle: 'Google sign-in not set up',
+      googleNotConfiguredDesc:
+        'Add VITE_GOOGLE_CLIENT_ID to Farm-front/.env (same Web Client ID as GOOGLE_CLIENT_ID on the server), authorize http://localhost:5173 in Google Cloud Console, then restart the dev server.',
+      forgotPassword: 'Forgot password?',
     },
     hi: {
       title: 'वापस स्वागत है!',
@@ -49,10 +77,100 @@ const Login = () => {
       register: 'अभी रजिस्टर करें',
       orContinue: 'या जारी रखें',
       demoAccounts: 'डेमो खाते',
+      googleFailed: 'Google साइन-इन विफल',
+      googleContinue: 'Google से जारी रखें',
+      googleNotConfiguredTitle: 'Google साइन-इन कॉन्फ़िगर नहीं है',
+      googleNotConfiguredDesc:
+        'Farm-front/.env में VITE_GOOGLE_CLIENT_ID जोड़ें (सर्वर पर GOOGLE_CLIENT_ID जैसा ही), Google Cloud Console में http://localhost:5173 अधिकृत करें, फिर dev सर्वर रीस्टार्ट करें।',
+      forgotPassword: 'पासवर्ड भूल गए?',
     },
   };
 
   const t = content[currentLanguage];
+
+  const GoogleGlyph = () => (
+    <svg className="w-5 h-5 mr-3 shrink-0" viewBox="0 0 24 24" aria-hidden>
+      <path
+        fill="#4285F4"
+        d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
+      />
+      <path
+        fill="#34A853"
+        d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"
+      />
+      <path
+        fill="#FBBC05"
+        d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"
+      />
+      <path
+        fill="#EA4335"
+        d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"
+      />
+    </svg>
+  );
+
+  const completeAuth = (user: unknown, token?: string) => {
+    if (token) {
+      setAuthToken(token);
+    }
+    if (!user || typeof user !== 'object') {
+      throw new Error('User data not returned from server');
+    }
+    const mappedUser = mapApiUserToAuth(user as Record<string, unknown>);
+    dispatch(loginSuccess(mappedUser));
+    const from = (location.state as { from?: { pathname?: string; search?: string } } | null)?.from;
+    if (
+      from?.pathname &&
+      typeof from.pathname === 'string' &&
+      from.pathname.startsWith('/') &&
+      from.pathname !== '/login'
+    ) {
+      navigate(`${from.pathname}${from.search || ''}`, { replace: true });
+      return;
+    }
+    if (mappedUser.role === 'farmer') {
+      navigate('/farmer/dashboard');
+    } else if (mappedUser.role === 'buyer') {
+      navigate('/buyer/dashboard');
+    } else {
+      navigate(ROUTES.ADMIN_DASHBOARD);
+    }
+  };
+
+  const handleGoogleSuccess = async (credential?: string | null) => {
+    if (!credential) {
+      toast({
+        title: t.googleFailed,
+        description:
+          currentLanguage === 'en'
+            ? 'No credential returned from Google.'
+            : 'Google से कोई क्रेडेंशियल नहीं मिला।',
+        variant: 'destructive',
+      });
+      return;
+    }
+    try {
+      setGoogleLoading(true);
+      setError(null);
+      const response = await apiService.auth.googleLogin({ credential });
+      const { user, token } = response.data || {};
+      completeAuth(user, token);
+    } catch (err: unknown) {
+      console.error(err);
+      const message =
+        (err as { response?: { data?: { message?: string } } })?.response?.data?.message ||
+        (err as Error)?.message ||
+        (currentLanguage === 'en' ? 'Google sign-in failed' : 'Google साइन-इन विफल');
+      setError(message);
+      toast({
+        title: t.googleFailed,
+        description: message,
+        variant: 'destructive',
+      });
+    } finally {
+      setGoogleLoading(false);
+    }
+  };
 
   const handleLogin = async () => {
     if (loginMethod === 'phone' && !phone) {
@@ -97,42 +215,7 @@ const Login = () => {
       setError(null);
       const response = await apiService.auth.login(credentials);
       const { user, token } = response.data || {};
-
-      if (token) {
-        localStorage.setItem('authToken', token);
-      }
-
-      if (!user) {
-        throw new Error('User data not returned from server');
-      }
-
-      // Map backend user to frontend User shape (minimal for now)
-      const mappedUser = {
-        id: user._id || user.id,
-        name: user.name,
-        email: user.email || '',
-        phone: user.phone,
-        role: user.role,
-        avatar: undefined,
-        isVerified: user.kycStatus === 'approved',
-        kycStatus: user.kycStatus || 'pending',
-        location: {
-          state: user.location?.state || '',
-          district: user.location?.district || '',
-          village: user.location?.village || '',
-        },
-        createdAt: user.createdAt || new Date().toISOString(),
-      };
-
-      dispatch(loginSuccess(mappedUser));
-
-      if (mappedUser.role === 'farmer') {
-        navigate('/farmer/dashboard');
-      } else if (mappedUser.role === 'buyer') {
-        navigate('/buyer/dashboard');
-      } else {
-        navigate('/admin/dashboard');
-      }
+      completeAuth(user, token);
     } catch (err: any) {
       console.error(err);
       const message =
@@ -159,15 +242,14 @@ const Login = () => {
         <div className="absolute top-20 right-20 w-32 h-32 bg-secondary/20 rounded-full blur-2xl" />
         <div className="absolute bottom-40 left-20 w-40 h-40 bg-accent/20 rounded-full blur-3xl" />
         
-        <div className="relative z-10">
-          <Link to="/" className="flex items-center gap-3 mb-12 group">
-            <div className="w-14 h-14 bg-white/20 backdrop-blur-md rounded-2xl flex items-center justify-center group-hover:scale-110 transition-transform border border-white/30">
-              <span className="text-3xl">🌾</span>
-            </div>
-            <div>
-              <h1 className="font-bold text-2xl">Direct Access</h1>
-              <p className="text-sm opacity-90">for Farmers</p>
-            </div>
+        <div className="relative z-10 isolate">
+          <Link to="/" className="mb-12 block group" aria-label="GaonBazaar home">
+            <img
+              src={`${import.meta.env.BASE_URL}assets/logo.png`}
+              alt="GaonBazaar"
+              className="h-[40px] w-auto max-w-[min(400px,92vw)] shrink-0 object-contain block m-0 p-0 align-middle border-0 bg-transparent group-hover:opacity-95 transition-opacity"
+              style={{ filter: 'brightness(0) invert(1)' }}
+            />
           </Link>
         </div>
 
@@ -219,11 +301,12 @@ const Login = () => {
           {/* Mobile Logo */}
           <AnimateOnScroll animation="fade-in">
             <div className="lg:hidden mb-8 text-center">
-              <Link to="/" className="inline-flex items-center gap-2 group">
-                <div className="w-12 h-12 bg-gradient-to-br from-primary to-primary-dark rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform shadow-lg">
-                  <span className="text-2xl">🌾</span>
-                </div>
-                <span className="font-bold text-xl">Direct Access</span>
+              <Link to="/" className="mx-auto flex max-w-[min(320px,90vw)] justify-center group" aria-label="GaonBazaar home">
+                <img
+                  src={`${import.meta.env.BASE_URL}assets/logo.png`}
+                  alt="GaonBazaar"
+                  className="h-[40px] w-auto max-w-[min(320px,90vw)] shrink-0 object-contain block m-0 p-0 align-middle border-0 bg-transparent group-hover:scale-[1.02] transition-transform"
+                />
               </Link>
             </div>
           </AnimateOnScroll>
@@ -318,9 +401,20 @@ const Login = () => {
                   )}
 
                   <div>
-                    <Label htmlFor="password" className={`text-sm font-semibold mb-2 block ${currentLanguage === 'hi' ? 'font-hindi' : ''}`}>
-                      {t.password}
-                    </Label>
+                    <div className="flex items-center justify-between gap-2 mb-2">
+                      <Label
+                        htmlFor="password"
+                        className={`text-sm font-semibold block ${currentLanguage === 'hi' ? 'font-hindi' : ''}`}
+                      >
+                        {t.password}
+                      </Label>
+                      <Link
+                        to="/forgot-password"
+                        className={`text-sm font-medium text-primary hover:underline shrink-0 ${currentLanguage === 'hi' ? 'font-hindi' : ''}`}
+                      >
+                        {t.forgotPassword}
+                      </Link>
+                    </div>
                     <div className="relative">
                       <Input
                         id="password"
@@ -353,6 +447,7 @@ const Login = () => {
                     onClick={handleLogin}
                     disabled={
                       isLoading ||
+                      googleLoading ||
                       (loginMethod === 'phone' ? !phone : !email) ||
                       !password
                     }
@@ -371,6 +466,68 @@ const Login = () => {
                     )}
                   </Button>
                 </div>
+              </CardContent>
+            </Card>
+          </AnimateOnScroll>
+
+          {/* Google sign-in — below password login; needs VITE_GOOGLE_CLIENT_ID + App provider for live OAuth */}
+          <AnimateOnScroll animation="slide-up" delay={0.35}>
+            <Card className="mt-6 border-2 shadow-md">
+              <CardContent className="p-4 sm:p-5 space-y-3">
+                <p
+                  className={`text-center text-sm font-medium text-muted-foreground ${currentLanguage === 'hi' ? 'font-hindi' : ''}`}
+                >
+                  {t.orContinue}
+                </p>
+                <div className="flex flex-col items-stretch min-h-[44px]">
+                  {googleLoading ? (
+                    <div className="flex items-center justify-center gap-2 py-3 text-muted-foreground text-sm">
+                      <div className="w-5 h-5 border-2 border-primary/30 border-t-primary rounded-full animate-spin" />
+                      {currentLanguage === 'en' ? 'Signing in…' : 'साइन इन…'}
+                    </div>
+                  ) : googleEnabled ? (
+                    <GoogleLogin
+                      onSuccess={(res) => void handleGoogleSuccess(res.credential)}
+                      onError={() =>
+                        toast({
+                          title: t.googleFailed,
+                          description:
+                            currentLanguage === 'en'
+                              ? 'Try again or use email or phone.'
+                              : 'पुनः प्रयास करें या ईमेल/फोन से लॉगिन करें।',
+                          variant: 'destructive',
+                        })
+                      }
+                      text="continue_with"
+                      shape="rectangular"
+                      size="large"
+                      width="100%"
+                      locale={currentLanguage === 'hi' ? 'hi' : 'en'}
+                    />
+                  ) : (
+                    <Button
+                      type="button"
+                      variant="outline"
+                      className="w-full h-12 text-base font-medium border-2 bg-card hover:bg-muted/60"
+                      onClick={() =>
+                        toast({
+                          title: t.googleNotConfiguredTitle,
+                          description: t.googleNotConfiguredDesc,
+                        })
+                      }
+                    >
+                      <GoogleGlyph />
+                      {t.googleContinue}
+                    </Button>
+                  )}
+                </div>
+                {!googleEnabled && (
+                  <p className="text-xs text-center text-muted-foreground leading-relaxed">
+                    {currentLanguage === 'en'
+                      ? 'Set VITE_GOOGLE_CLIENT_ID in Farm-front/.env to enable the Google button.'
+                      : 'Google बटन चालू करने के लिए Farm-front/.env में VITE_GOOGLE_CLIENT_ID सेट करें।'}
+                  </p>
+                )}
               </CardContent>
             </Card>
           </AnimateOnScroll>

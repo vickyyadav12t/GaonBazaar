@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { ArrowRight, Upload, CheckCircle, Shield, Sparkles, MapPin, User, FileText, ArrowLeft } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -11,7 +11,23 @@ import { loginSuccess } from '@/store/slices/authSlice';
 import { toast } from '@/hooks/use-toast';
 import { UserRole } from '@/types';
 import { AnimateOnScroll } from '@/components/animations';
-import { apiService } from '@/services/api';
+import { apiService, setAuthToken } from '@/services/api';
+import { mapApiUserToAuth } from '@/lib/mapAuthUser';
+import { validateEmail, validatePhone } from '@/lib/validators';
+import { ROUTES } from '@/constants';
+
+const MAX_KYC_BYTES = 5 * 1024 * 1024;
+
+function isAllowedKycFile(file: File): boolean {
+  const okType =
+    file.type === 'application/pdf' ||
+    file.type === 'image/png' ||
+    file.type === 'image/jpeg' ||
+    file.type === 'image/jpg';
+  if (okType) return true;
+  const lower = file.name.toLowerCase();
+  return lower.endsWith('.pdf') || lower.endsWith('.png') || lower.endsWith('.jpg') || lower.endsWith('.jpeg');
+}
 
 const Register = () => {
   const navigate = useNavigate();
@@ -42,7 +58,10 @@ const Register = () => {
     businessType: 'retailer',
   });
   const [isLoading, setIsLoading] = useState(false);
-  const [kycUploaded, setKycUploaded] = useState(false);
+  const [kycFile, setKycFile] = useState<File | null>(null);
+  const [kycDocType, setKycDocType] = useState<'aadhaar' | 'kisan'>('aadhaar');
+  const [emailVerificationCode, setEmailVerificationCode] = useState('');
+  const kycInputRef = useRef<HTMLInputElement>(null);
 
   const content = {
     en: {
@@ -60,6 +79,24 @@ const Register = () => {
       register: 'Complete Registration',
       hasAccount: 'Already have an account?',
       login: 'Login',
+      emailRequired: 'Email is required',
+      emailInvalid: 'Please enter a valid email address',
+      phoneInvalid: 'Enter a valid 10-digit Indian mobile number',
+      codeSent: 'Verification code sent',
+      codeSentDesc: 'Check your inbox for a 6-digit code (expires in 10 minutes).',
+      emailCodeLabel: 'Email verification code',
+      emailCodeHint: 'Enter the 6-digit code we sent to your email.',
+      resendCode: 'Resend code',
+      codeRequired: 'Enter the 6-digit code from your email',
+      locationRequired: 'Please select state and district',
+      kycRequired: 'Upload your KYC document (Aadhaar or Kisan ID) to create a farmer account.',
+      kycInvalid: 'Use a PNG, JPG, or PDF file only.',
+      kycTooLarge: 'File must be 5MB or smaller.',
+      kycDocTypeLabel: 'Document type',
+      kycAadhaar: 'Aadhaar card',
+      kycKisan: 'Kisan ID',
+      kycSelected: 'Selected file',
+      buyerWelcome: 'Your account has been created.',
     },
     hi: {
       title: 'खाता बनाएं',
@@ -76,6 +113,24 @@ const Register = () => {
       register: 'पंजीकरण पूरा करें',
       hasAccount: 'पहले से खाता है?',
       login: 'लॉगिन',
+      emailRequired: 'ईमेल आवश्यक है',
+      emailInvalid: 'कृपया वैध ईमेल दर्ज करें',
+      phoneInvalid: 'वैध 10 अंकों का मोबाइल नंबर दर्ज करें',
+      codeSent: 'सत्यापन कोड भेजा गया',
+      codeSentDesc: 'अपना इनबॉक्स देखें — 6 अंकों का कोड (10 मिनट में समाप्त)।',
+      emailCodeLabel: 'ईमेल सत्यापन कोड',
+      emailCodeHint: 'ईमेल पर भेजा गया 6 अंकों का कोड दर्ज करें।',
+      resendCode: 'कोड फिर भेजें',
+      codeRequired: 'ईमेल से 6 अंकों का कोड दर्ज करें',
+      locationRequired: 'कृपया राज्य और जिला चुनें',
+      kycRequired: 'किसान खाता बनाने के लिए KYC दस्तावेज़ (आधार या किसान ID) अपलोड करें।',
+      kycInvalid: 'केवल PNG, JPG या PDF उपयोग करें।',
+      kycTooLarge: 'फ़ाइल 5MB से छोटी होनी चाहिए।',
+      kycDocTypeLabel: 'दस्तावेज़ प्रकार',
+      kycAadhaar: 'आधार कार्ड',
+      kycKisan: 'किसान ID',
+      kycSelected: 'चयनित फ़ाइल',
+      buyerWelcome: 'आपका खाता बन गया है।',
     },
   };
 
@@ -85,10 +140,92 @@ const Register = () => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
-  const handleNext = () => {
-    if (step < 4) {
-      setStep(step + 1);
-    } else {
+  const handleNext = async () => {
+    if (step === 1) {
+      setStep(2);
+      return;
+    }
+
+    if (step === 2) {
+      if (
+        !formData.name?.trim() ||
+        !formData.phone?.trim() ||
+        !formData.email?.trim() ||
+        !formData.password ||
+        !formData.confirmPassword
+      ) {
+        toast({
+          title: currentLanguage === 'en' ? 'Missing details' : 'जानकारी अधूरी है',
+          description:
+            currentLanguage === 'en'
+              ? 'Please fill in name, phone, email, and password.'
+              : 'कृपया नाम, फ़ोन, ईमेल और पासवर्ड भरें।',
+          variant: 'destructive',
+        });
+        return;
+      }
+      if (!validateEmail(formData.email.trim())) {
+        toast({
+          title: currentLanguage === 'en' ? 'Invalid email' : 'अमान्य ईमेल',
+          description: t.emailInvalid,
+          variant: 'destructive',
+        });
+        return;
+      }
+      const phoneDigits = formData.phone.replace(/\D/g, '');
+      if (!validatePhone(phoneDigits)) {
+        toast({
+          title: currentLanguage === 'en' ? 'Invalid phone' : 'अमान्य फ़ोन',
+          description: t.phoneInvalid,
+          variant: 'destructive',
+        });
+        return;
+      }
+      if (formData.password !== formData.confirmPassword) {
+        toast({
+          title: currentLanguage === 'en' ? 'Passwords do not match' : 'पासवर्ड मेल नहीं खा रहे हैं',
+          variant: 'destructive',
+        });
+        return;
+      }
+      try {
+        setIsLoading(true);
+        await apiService.auth.sendRegistrationEmailCode({ email: formData.email.trim() });
+        toast({
+          title: t.codeSent,
+          description: t.codeSentDesc,
+        });
+        setEmailVerificationCode('');
+        setStep(3);
+      } catch (error: unknown) {
+        const message =
+          (error as { response?: { data?: { message?: string } } })?.response?.data?.message ||
+          (currentLanguage === 'en' ? 'Could not send verification email.' : 'सत्यापन ईमेल नहीं भेजा जा सका।');
+        toast({
+          title: currentLanguage === 'en' ? 'Email not sent' : 'ईमेल नहीं भेजा गया',
+          description: message,
+          variant: 'destructive',
+        });
+      } finally {
+        setIsLoading(false);
+      }
+      return;
+    }
+
+    if (step === 3) {
+      if (!formData.state?.trim() || !formData.district?.trim()) {
+        toast({
+          title: currentLanguage === 'en' ? 'Location required' : 'स्थान आवश्यक',
+          description: t.locationRequired,
+          variant: 'destructive',
+        });
+        return;
+      }
+      setStep(4);
+      return;
+    }
+
+    if (step === 4) {
       handleRegister();
     }
   };
@@ -100,14 +237,19 @@ const Register = () => {
   };
 
   const handleRegister = async () => {
-    // Basic client-side validation
-    if (!formData.name || !formData.phone || !formData.password || !formData.confirmPassword) {
+    const digits = emailVerificationCode.replace(/\D/g, '');
+    if (digits.length !== 6) {
+      toast({
+        title: currentLanguage === 'en' ? 'Verification code' : 'सत्यापन कोड',
+        description: t.codeRequired,
+        variant: 'destructive',
+      });
+      return;
+    }
+
+    if (!formData.name || !formData.phone || !formData.email?.trim() || !formData.password) {
       toast({
         title: currentLanguage === 'en' ? 'Missing details' : 'जानकारी अधूरी है',
-        description:
-          currentLanguage === 'en'
-            ? 'Please fill in name, phone and password.'
-            : 'कृपया नाम, फ़ोन और पासवर्ड भरें।',
         variant: 'destructive',
       });
       return;
@@ -116,70 +258,84 @@ const Register = () => {
     if (formData.password !== formData.confirmPassword) {
       toast({
         title: currentLanguage === 'en' ? 'Passwords do not match' : 'पासवर्ड मेल नहीं खा रहे हैं',
-        description:
-          currentLanguage === 'en'
-            ? 'Please make sure both passwords are the same.'
-            : 'कृपया दोनों पासवर्ड एक जैसे रखें।',
         variant: 'destructive',
       });
       return;
     }
 
+    if (role === 'farmer') {
+      if (!kycFile) {
+        toast({
+          title: currentLanguage === 'en' ? 'KYC required' : 'KYC आवश्यक',
+          description: t.kycRequired,
+          variant: 'destructive',
+        });
+        return;
+      }
+    }
+
     try {
       setIsLoading(true);
 
-      const payload = {
-        name: formData.name,
-        phone: formData.phone,
-        email: formData.email,
-        password: formData.password,
-        role,
-        state: formData.state,
-        district: formData.district,
-        village: formData.village,
-        farmSize: formData.farmSize,
-        crops: formData.crops,
-        aadhaarNumber: formData.aadhaarNumber,
-        kisanId: formData.kisanId,
-        businessName: formData.businessName,
-        businessType: formData.businessType,
-      };
-
-      const response = await apiService.auth.register(payload as any);
+      let response;
+      if (role === 'farmer' && kycFile) {
+        const fd = new FormData();
+        fd.append('name', formData.name.trim());
+        fd.append('phone', formData.phone.replace(/\D/g, ''));
+        fd.append('email', formData.email.trim());
+        fd.append('password', formData.password);
+        fd.append('emailVerificationCode', digits);
+        fd.append('role', 'farmer');
+        fd.append('state', formData.state);
+        fd.append('district', formData.district);
+        fd.append('village', formData.village || '');
+        fd.append('farmSize', formData.farmSize || '');
+        fd.append('crops', formData.crops || '');
+        fd.append('aadhaarNumber', formData.aadhaarNumber || '');
+        fd.append('kisanId', formData.kisanId || '');
+        fd.append('kycDocType', kycDocType);
+        fd.append('kycFile', kycFile);
+        response = await apiService.auth.registerWithKycForm(fd);
+      } else {
+        const payload = {
+          name: formData.name,
+          phone: formData.phone.replace(/\D/g, ''),
+          email: formData.email.trim(),
+          password: formData.password,
+          emailVerificationCode: digits,
+          role,
+          state: formData.state,
+          district: formData.district,
+          village: formData.village,
+          farmSize: formData.farmSize,
+          crops: formData.crops,
+          aadhaarNumber: formData.aadhaarNumber,
+          kisanId: formData.kisanId,
+          businessName: formData.businessName,
+          businessType: formData.businessType,
+        };
+        response = await apiService.auth.register(payload as any);
+      }
       const { user, token } = response.data || {};
 
       if (token) {
-        localStorage.setItem('authToken', token);
+        setAuthToken(token);
       }
 
       if (!user) {
         throw new Error('User data not returned from server');
       }
 
-      const mappedUser = {
-        id: user._id || user.id,
-        name: user.name,
-        email: user.email || '',
-        phone: user.phone,
-        role: user.role,
-        avatar: undefined,
-        isVerified: user.kycStatus === 'approved',
-        kycStatus: user.kycStatus || 'pending',
-        location: {
-          state: user.location?.state || '',
-          district: user.location?.district || '',
-          village: user.location?.village || '',
-        },
-        createdAt: user.createdAt || new Date().toISOString(),
-      };
-
+      const mappedUser = mapApiUserToAuth(user);
       dispatch(loginSuccess(mappedUser));
       toast({
         title: currentLanguage === 'en' ? 'Registration Successful!' : 'पंजीकरण सफल!',
         description:
-          currentLanguage === 'en'
-            ? 'Your account has been created. KYC verification is pending.'
-            : 'आपका खाता बना दिया गया है। KYC सत्यापन लंबित है।',
+          mappedUser.role === 'farmer'
+            ? currentLanguage === 'en'
+              ? 'Your account has been created. Admin KYC review is pending.'
+              : 'आपका खाता बन गया है। KYC प्रशासक समीक्षा लंबित है।'
+            : t.buyerWelcome,
       });
 
       if (mappedUser.role === 'farmer') {
@@ -187,7 +343,7 @@ const Register = () => {
       } else if (mappedUser.role === 'buyer') {
         navigate('/buyer/dashboard');
       } else {
-        navigate('/admin/dashboard');
+        navigate(ROUTES.ADMIN_DASHBOARD);
       }
     } catch (error: any) {
       console.error(error);
@@ -206,12 +362,29 @@ const Register = () => {
     }
   };
 
-  const handleFileUpload = () => {
-    setKycUploaded(true);
-    toast({
-      title: 'Document Uploaded',
-      description: 'Your KYC document has been uploaded for verification.',
-    });
+  const onKycInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    e.target.value = '';
+    if (!file) return;
+    if (file.size > MAX_KYC_BYTES) {
+      toast({
+        title: currentLanguage === 'en' ? 'File too large' : 'फ़ाइल बहुत बड़ी',
+        description: t.kycTooLarge,
+        variant: 'destructive',
+      });
+      setKycFile(null);
+      return;
+    }
+    if (!isAllowedKycFile(file)) {
+      toast({
+        title: currentLanguage === 'en' ? 'Invalid file' : 'अमान्य फ़ाइल',
+        description: t.kycInvalid,
+        variant: 'destructive',
+      });
+      setKycFile(null);
+      return;
+    }
+    setKycFile(file);
   };
 
   const states = [
@@ -238,15 +411,14 @@ const Register = () => {
         <div className="absolute top-20 right-20 w-32 h-32 bg-secondary/20 rounded-full blur-2xl" />
         <div className="absolute bottom-40 left-20 w-40 h-40 bg-accent/20 rounded-full blur-3xl" />
         
-        <div className="relative z-10">
-          <Link to="/" className="flex items-center gap-3 mb-12 group">
-            <div className="w-14 h-14 bg-white/20 backdrop-blur-md rounded-2xl flex items-center justify-center group-hover:scale-110 transition-transform border border-white/30">
-              <span className="text-3xl">🌾</span>
-            </div>
-            <div>
-              <h1 className="font-bold text-2xl">Direct Access</h1>
-              <p className="text-sm opacity-90">for Farmers</p>
-            </div>
+        <div className="relative z-10 isolate">
+          <Link to="/" className="mb-12 block group" aria-label="GaonBazaar home">
+            <img
+              src={`${import.meta.env.BASE_URL}assets/logo.png`}
+              alt="GaonBazaar"
+              className="h-[40px] w-auto max-w-[min(400px,92vw)] shrink-0 object-contain block m-0 p-0 align-middle border-0 bg-transparent group-hover:opacity-95 transition-opacity"
+              style={{ filter: 'brightness(0) invert(1)' }}
+            />
           </Link>
         </div>
 
@@ -314,11 +486,12 @@ const Register = () => {
           {/* Mobile Logo */}
           <AnimateOnScroll animation="fade-in">
             <div className="lg:hidden mb-8 text-center">
-              <Link to="/" className="inline-flex items-center gap-2 group">
-                <div className="w-12 h-12 bg-gradient-to-br from-primary to-primary-dark rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform shadow-lg">
-                  <span className="text-2xl">🌾</span>
-                </div>
-                <span className="font-bold text-xl">Direct Access</span>
+              <Link to="/" className="mx-auto flex max-w-[min(320px,90vw)] justify-center group" aria-label="GaonBazaar home">
+                <img
+                  src={`${import.meta.env.BASE_URL}assets/logo.png`}
+                  alt="GaonBazaar"
+                  className="h-[40px] w-auto max-w-[min(320px,90vw)] shrink-0 object-contain block m-0 p-0 align-middle border-0 bg-transparent group-hover:scale-[1.02] transition-transform"
+                />
               </Link>
             </div>
           </AnimateOnScroll>
@@ -479,17 +652,25 @@ const Register = () => {
                     </div>
                     <div>
                       <Label htmlFor="email" className="text-sm font-semibold mb-2 block">
-                        {currentLanguage === 'en' ? 'Email (Optional)' : 'ईमेल (वैकल्पिक)'}
+                        {currentLanguage === 'en' ? 'Email' : 'ईमेल'}
+                        <span className="text-destructive ml-0.5">*</span>
                       </Label>
                       <Input
                         id="email"
                         name="email"
                         type="email"
+                        autoComplete="email"
                         placeholder="your@email.com"
                         value={formData.email}
                         onChange={handleInputChange}
                         className="border-2 focus:border-primary py-6"
+                        required
                       />
+                      <p className="text-xs text-muted-foreground mt-1.5">
+                        {currentLanguage === 'en'
+                          ? 'We will send a verification code to this address.'
+                          : 'हम इस पते पर सत्यापन कोड भेजेंगे।'}
+                      </p>
                     </div>
                     <div>
                       <Label htmlFor="password" className="text-sm font-semibold mb-2 block">
@@ -639,53 +820,130 @@ const Register = () => {
             </AnimateOnScroll>
           )}
 
-          {/* Step 4: KYC Upload (no OTP) */}
+          {/* Step 4: Email OTP + optional farmer KYC */}
           {step === 4 && (
             <AnimateOnScroll animation="fade-in">
               <Card className="border-2 shadow-lg">
                 <CardContent className="p-6">
                   <div className="space-y-6">
+                    <div className="space-y-2">
+                      <Label htmlFor="email-otp" className="text-sm font-semibold block">
+                        {t.emailCodeLabel}
+                        <span className="text-destructive ml-0.5">*</span>
+                      </Label>
+                      <p className="text-xs text-muted-foreground">{t.emailCodeHint}</p>
+                      <Input
+                        id="email-otp"
+                        type="text"
+                        inputMode="numeric"
+                        autoComplete="one-time-code"
+                        maxLength={6}
+                        placeholder="000000"
+                        value={emailVerificationCode}
+                        onChange={(e) =>
+                          setEmailVerificationCode(e.target.value.replace(/\D/g, '').slice(0, 6))
+                        }
+                        className="text-center text-lg tracking-[0.35em] font-mono border-2 focus:border-primary py-6"
+                      />
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        className="w-full"
+                        disabled={isLoading || !formData.email?.trim()}
+                        onClick={async () => {
+                          try {
+                            setIsLoading(true);
+                            await apiService.auth.sendRegistrationEmailCode({
+                              email: formData.email.trim(),
+                            });
+                            toast({ title: t.codeSent, description: t.codeSentDesc });
+                          } catch (error: unknown) {
+                            const message =
+                              (error as { response?: { data?: { message?: string } } })?.response
+                                ?.data?.message || 'Could not resend.';
+                            toast({
+                              title: currentLanguage === 'en' ? 'Resend failed' : 'पुनः भेजना विफल',
+                              description: message,
+                              variant: 'destructive',
+                            });
+                          } finally {
+                            setIsLoading(false);
+                          }
+                        }}
+                      >
+                        {t.resendCode}
+                      </Button>
+                    </div>
                     {role === 'farmer' && (
-                      <div className="pt-6 border-t border-border">
-                        <Label className="text-sm font-semibold mb-2 block flex items-center gap-2">
-                          <FileText className="w-4 h-4" />
-                          {currentLanguage === 'en' ? 'Upload KYC Document' : 'KYC दस्तावेज़ अपलोड करें'}
-                        </Label>
-                        <p className="text-xs text-muted-foreground mb-4">
-                          {currentLanguage === 'en' 
-                            ? 'Upload Aadhaar Card or Kisan ID for verification'
-                            : 'सत्यापन के लिए आधार कार्ड या किसान ID अपलोड करें'}
-                        </p>
-                        
-                        <div 
-                          onClick={handleFileUpload}
-                          className={`border-2 border-dashed rounded-xl p-8 text-center cursor-pointer transition-all duration-300 hover:scale-105 ${
-                            kycUploaded 
-                              ? 'border-success bg-gradient-to-br from-success/10 to-success/5' 
-                              : 'border-border hover:border-primary/50 hover:bg-muted/50'
-                          }`}
-                        >
-                          {kycUploaded ? (
-                            <div className="text-success">
-                              <CheckCircle className="w-16 h-16 mx-auto mb-3" />
-                              <p className="font-semibold text-lg mb-1">
-                                {currentLanguage === 'en' ? 'Document Uploaded' : 'दस्तावेज़ अपलोड हो गया'}
-                              </p>
-                              <p className="text-sm">
-                                {currentLanguage === 'en' ? 'Pending verification' : 'सत्यापन लंबित'}
-                              </p>
-                            </div>
-                          ) : (
-                            <>
-                              <Upload className="w-16 h-16 mx-auto mb-3 text-muted-foreground" />
-                              <p className="font-semibold text-lg mb-1">
-                                {currentLanguage === 'en' ? 'Click to upload' : 'अपलोड करने के लिए क्लिक करें'}
-                              </p>
-                              <p className="text-sm text-muted-foreground">
-                                PNG, JPG, PDF up to 5MB
-                              </p>
-                            </>
-                          )}
+                      <div className="pt-6 border-t border-border space-y-4">
+                        <div>
+                          <Label htmlFor="kyc-doc-type" className="text-sm font-semibold mb-2 block">
+                            {t.kycDocTypeLabel}
+                            <span className="text-destructive ml-0.5">*</span>
+                          </Label>
+                          <select
+                            id="kyc-doc-type"
+                            value={kycDocType}
+                            onChange={(e) =>
+                              setKycDocType(e.target.value === 'kisan' ? 'kisan' : 'aadhaar')
+                            }
+                            className="w-full px-4 py-4 bg-background border-2 border-input rounded-xl focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary"
+                          >
+                            <option value="aadhaar">{t.kycAadhaar}</option>
+                            <option value="kisan">{t.kycKisan}</option>
+                          </select>
+                        </div>
+                        <div>
+                          <Label className="text-sm font-semibold mb-2 block flex items-center gap-2">
+                            <FileText className="w-4 h-4" />
+                            {currentLanguage === 'en' ? 'Upload KYC Document' : 'KYC दस्तावेज़ अपलोड करें'}
+                            <span className="text-destructive">*</span>
+                          </Label>
+                          <p className="text-xs text-muted-foreground mb-3">
+                            {currentLanguage === 'en'
+                              ? 'Aadhaar or Kisan ID — PNG, JPG, or PDF, max 5MB. Required to create your account.'
+                              : 'आधार या किसान ID — PNG, JPG या PDF, अधिकतम 5MB। खाता बनाने के लिए आवश्यक।'}
+                          </p>
+                          <input
+                            ref={kycInputRef}
+                            type="file"
+                            accept="image/png,image/jpeg,image/jpg,application/pdf,.pdf,.png,.jpg,.jpeg"
+                            className="hidden"
+                            onChange={onKycInputChange}
+                          />
+                          <button
+                            type="button"
+                            onClick={() => kycInputRef.current?.click()}
+                            className={`w-full border-2 border-dashed rounded-xl p-8 text-center cursor-pointer transition-all duration-300 hover:scale-[1.01] ${
+                              kycFile
+                                ? 'border-primary bg-primary/5'
+                                : 'border-border hover:border-primary/50 hover:bg-muted/50'
+                            }`}
+                          >
+                            {kycFile ? (
+                              <div className="text-foreground">
+                                <CheckCircle className="w-14 h-14 mx-auto mb-3 text-primary" />
+                                <p className="font-semibold text-lg mb-1">
+                                  {currentLanguage === 'en' ? 'Ready to submit' : 'जमा करने के लिए तैयार'}
+                                </p>
+                                <p className="text-sm text-muted-foreground break-all px-2">
+                                  {t.kycSelected}: {kycFile.name}
+                                </p>
+                                <p className="text-xs text-primary mt-3 font-medium">
+                                  {currentLanguage === 'en' ? 'Tap to choose a different file' : 'दूसरी फ़ाइल चुनने के लिए टैप करें'}
+                                </p>
+                              </div>
+                            ) : (
+                              <>
+                                <Upload className="w-16 h-16 mx-auto mb-3 text-muted-foreground" />
+                                <p className="font-semibold text-lg mb-1">
+                                  {currentLanguage === 'en' ? 'Click to upload' : 'अपलोड करने के लिए क्लिक करें'}
+                                </p>
+                                <p className="text-sm text-muted-foreground">PNG, JPG, PDF up to 5MB</p>
+                              </>
+                            )}
+                          </button>
                         </div>
                       </div>
                     )}

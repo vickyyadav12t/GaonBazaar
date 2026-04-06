@@ -30,6 +30,15 @@ const orderSchema = new mongoose.Schema(
     },
     items: [orderItemSchema],
     totalAmount: { type: Number, required: true },
+    // Buyer platform fee (2% of subtotal); Razorpay charges subtotal + platformFee in paise.
+    platformFee: { type: Number, default: 0 },
+    paymentMethod: {
+      type: String,
+      enum: ["cod", "razorpay", "bank_transfer"],
+      default: "cod",
+    },
+    razorpayOrderId: { type: String },
+    razorpayPaymentId: { type: String },
     status: {
       type: String,
       enum: ["pending", "processing", "shipped", "delivered", "cancelled"],
@@ -45,6 +54,8 @@ const orderSchema = new mongoose.Schema(
     },
     // optional negotiated price per unit (if negotiation flow used)
     negotiatedPrice: { type: Number },
+    // true if availableQuantity was decremented on create (used to restore on cancel)
+    stockAdjusted: { type: Boolean, default: false },
   },
   {
     timestamps: true,

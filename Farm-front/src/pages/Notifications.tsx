@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ArrowLeft, Bell, Check, CheckCheck, Trash2, Filter, Search, MessageCircle, ShoppingCart, Star, CreditCard, AlertCircle, Package, X } from 'lucide-react';
 import Layout from '@/components/layout/Layout';
@@ -8,21 +8,101 @@ import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useAppSelector } from '@/hooks/useRedux';
-import { mockNotifications } from '@/data/mockData';
 import { Notification } from '@/types';
 import { formatRelativeTime } from '@/lib/format';
-import { Link } from 'react-router-dom';
+import { apiService } from '@/services/api';
+import { FARM_NOTIFICATION_UNREAD_CHANGED_EVENT } from '@/constants';
+
+const NOTIF_PAGE = 40;
+
+function notifyNotificationUnreadChanged(unreadCount?: number) {
+  window.dispatchEvent(
+    new CustomEvent(FARM_NOTIFICATION_UNREAD_CHANGED_EVENT, {
+      detail: typeof unreadCount === 'number' ? { unreadCount } : undefined,
+    })
+  );
+}
 
 const Notifications = () => {
   const navigate = useNavigate();
   const { currentLanguage } = useAppSelector((state) => state.language);
   const { user } = useAppSelector((state) => state.auth);
   
-  const [notifications, setNotifications] = useState<Notification[]>(
-    mockNotifications.filter(n => n.userId === 'farmer-1' || n.userId === 'buyer-1')
-  );
+  const [notifications, setNotifications] = useState<Notification[]>([]);
   const [filterType, setFilterType] = useState<string>('all');
   const [searchQuery, setSearchQuery] = useState('');
+  const [notifTotal, setNotifTotal] = useState<number | null>(null);
+  const [loadingMoreNotif, setLoadingMoreNotif] = useState(false);
+  const [hasMoreNotifs, setHasMoreNotifs] = useState(true);
+
+  useEffect(() => {
+    const fetchNotifications = async () => {
+      try {
+        const res = await apiService.notifications.getAll({
+          limit: NOTIF_PAGE,
+          skip: 0,
+          includeTotal: true,
+        });
+        const backend: any[] = res.data?.notifications || [];
+        const mapped: Notification[] = backend.map((n) => ({
+          id: n.id,
+          userId: n.userId || n.userId, // backend sends user as userId field in mapper
+          type: n.type,
+          title: n.title,
+          message: n.message,
+          link: n.link,
+          isRead: n.isRead,
+          createdAt: n.createdAt,
+        }));
+        setNotifications(mapped);
+        const tot = typeof res.data?.total === 'number' ? res.data.total : null;
+        setNotifTotal(tot);
+        setHasMoreNotifs(
+          mapped.length === NOTIF_PAGE && (tot == null || mapped.length < tot)
+        );
+      } catch (error) {
+        console.error('Failed to load notifications', error);
+      }
+    };
+
+    if (user) {
+      fetchNotifications();
+    }
+  }, [user]);
+
+  const loadMoreNotifications = async () => {
+    if (loadingMoreNotif || !hasMoreNotifs) return;
+    setLoadingMoreNotif(true);
+    const skip = notifications.length;
+    try {
+      const res = await apiService.notifications.getAll({
+        limit: NOTIF_PAGE,
+        skip,
+        includeTotal: false,
+      });
+      const backend: any[] = res.data?.notifications || [];
+      const mapped: Notification[] = backend.map((n) => ({
+        id: n.id,
+        userId: n.userId || n.userId,
+        type: n.type,
+        title: n.title,
+        message: n.message,
+        link: n.link,
+        isRead: n.isRead,
+        createdAt: n.createdAt,
+      }));
+      const mergedLen = skip + mapped.length;
+      setNotifications((prev) => [...prev, ...mapped]);
+      setHasMoreNotifs(
+        mapped.length === NOTIF_PAGE &&
+          (notifTotal == null || mergedLen < notifTotal)
+      );
+    } catch (e) {
+      console.error(e);
+    } finally {
+      setLoadingMoreNotif(false);
+    }
+  };
 
   const getNotificationIcon = (type: Notification['type']) => {
     switch (type) {
@@ -68,23 +148,58 @@ const Notifications = () => {
   const unreadCount = notifications.filter(n => !n.isRead).length;
 
   const handleMarkAsRead = (id: string) => {
-    setNotifications(prev =>
-      prev.map(n => n.id === id ? { ...n, isRead: true } : n)
-    );
+    const next = notifications.map(n => (n.id === id ? { ...n, isRead: true } : n));
+    setNotifications(next);
+    apiService.notifications.markAsRead(id).catch(() => {});
+    notifyNotificationUnreadChanged(next.filter(n => !n.isRead).length);
   };
 
   const handleMarkAllAsRead = () => {
-    setNotifications(prev =>
-      prev.map(n => ({ ...n, isRead: true }))
-    );
+    const next = notifications.map(n => ({ ...n, isRead: true }));
+    setNotifications(next);
+    apiService.notifications.markAllAsRead().catch(() => {});
+    notifyNotificationUnreadChanged(0);
   };
 
   const handleDelete = (id: string) => {
-    setNotifications(prev => prev.filter(n => n.id !== id));
+    const next = notifications.filter(n => n.id !== id);
+    setNotifications(next);
+    apiService.notifications.delete(id).catch(() => {});
+    notifyNotificationUnreadChanged(next.filter(n => !n.isRead).length);
   };
 
   const handleClearAll = () => {
     setNotifications([]);
+    apiService.notifications.clearAll().catch(() => {});
+    notifyNotificationUnreadChanged(0);
+  };
+
+  const handleViewNotification = async (notif: Notification) => {
+    if (!notif.isRead) {
+      handleMarkAsRead(notif.id);
+    }
+
+    // Backward compatibility for older message notifications that were linked
+    // to role dashboards instead of a specific chat route.
+    if (
+      notif.type === 'message' &&
+      (notif.link === '/farmer/chats' || notif.link === '/buyer/chats')
+    ) {
+      try {
+        const res = await apiService.chats.getAll({ limit: 10, skip: 0 });
+        const chats: any[] = res.data?.chats || [];
+        if (chats.length > 0) {
+          navigate(`/chat/${chats[0].id}`);
+          return;
+        }
+      } catch {
+        // fall through to default link/navigation
+      }
+    }
+
+    if (notif.link) {
+      navigate(notif.link);
+    }
   };
 
   const groupedNotifications = filteredNotifications.reduce((acc, notif) => {
@@ -301,11 +416,14 @@ const Notifications = () => {
                                     <Trash2 className="w-3 h-3" />
                                   </Button>
                                   {notif.link && (
-                                    <Link to={notif.link}>
-                                      <Button variant="outline" size="sm" className="h-7">
-                                        {currentLanguage === 'en' ? 'View' : 'देखें'}
-                                      </Button>
-                                    </Link>
+                                    <Button
+                                      variant="outline"
+                                      size="sm"
+                                      className="h-7"
+                                      onClick={() => handleViewNotification(notif)}
+                                    >
+                                      {currentLanguage === 'en' ? 'View' : 'देखें'}
+                                    </Button>
                                   )}
                                 </div>
                               </div>
@@ -395,11 +513,14 @@ const Notifications = () => {
                                     <Trash2 className="w-3 h-3" />
                                   </Button>
                                   {notif.link && (
-                                    <Link to={notif.link}>
-                                      <Button variant="outline" size="sm" className="h-7">
-                                        {currentLanguage === 'en' ? 'View' : 'देखें'}
-                                      </Button>
-                                    </Link>
+                                    <Button
+                                      variant="outline"
+                                      size="sm"
+                                      className="h-7"
+                                      onClick={() => handleViewNotification(notif)}
+                                    >
+                                      {currentLanguage === 'en' ? 'View' : 'देखें'}
+                                    </Button>
                                   )}
                                 </div>
                               </div>
@@ -421,6 +542,25 @@ const Notifications = () => {
             )}
           </TabsContent>
         </Tabs>
+
+        {notifications.length > 0 && hasMoreNotifs && (
+          <div className="flex justify-center mt-8 pb-8">
+            <Button
+              type="button"
+              variant="outline"
+              disabled={loadingMoreNotif}
+              onClick={() => void loadMoreNotifications()}
+            >
+              {loadingMoreNotif
+                ? currentLanguage === 'en'
+                  ? 'Loading…'
+                  : 'लोड हो रहा है…'
+                : currentLanguage === 'en'
+                  ? 'Load more'
+                  : 'और लोड करें'}
+            </Button>
+          </div>
+        )}
       </div>
     </Layout>
   );

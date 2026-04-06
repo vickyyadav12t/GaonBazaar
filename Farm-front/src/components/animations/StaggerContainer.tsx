@@ -6,6 +6,8 @@ interface StaggerContainerProps {
   staggerDelay?: number; // Delay between each child (in seconds)
   animation?: 'fade-in' | 'slide-up' | 'slide-in-right' | 'scale-in';
   className?: string;
+  /** When true, each child wrapper is h-full so grid/flex rows can equalize card heights */
+  stretchGridItems?: boolean;
 }
 
 /**
@@ -19,6 +21,7 @@ const StaggerContainer = ({
   staggerDelay = 0.1,
   animation = 'fade-in',
   className,
+  stretchGridItems = false,
 }: StaggerContainerProps) => {
   const animationClasses = {
     'fade-in': 'animate-fade-in',
@@ -34,7 +37,7 @@ const StaggerContainer = ({
       {childrenArray.map((child, index) => (
         <div
           key={index}
-          className={animationClasses[animation]}
+          className={cn(animationClasses[animation], stretchGridItems && 'h-full min-h-0')}
           style={{
             animationDelay: `${index * staggerDelay}s`,
             animationFillMode: 'both',

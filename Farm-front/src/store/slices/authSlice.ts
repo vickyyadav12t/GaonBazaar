@@ -11,7 +11,7 @@ interface AuthState {
 const initialState: AuthState = {
   user: null,
   isAuthenticated: false,
-  isLoading: false,
+  isLoading: true,
   error: null,
 };
 
@@ -48,8 +48,11 @@ const authSlice = createSlice({
     clearError: (state) => {
       state.error = null;
     },
+    finishAuthCheck: (state) => {
+      state.isLoading = false;
+    },
   },
 });
 
-export const { setLoading, loginSuccess, loginFailure, logout, updateUser, clearError } = authSlice.actions;
+export const { setLoading, loginSuccess, loginFailure, logout, updateUser, clearError, finishAuthCheck } = authSlice.actions;
 export default authSlice.reducer;

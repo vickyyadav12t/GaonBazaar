@@ -14,7 +14,6 @@ export const USER_ROLES = {
 // Order Status
 export const ORDER_STATUS = {
   PENDING: 'pending',
-  CONFIRMED: 'confirmed',
   PROCESSING: 'processing',
   SHIPPED: 'shipped',
   DELIVERED: 'delivered',
@@ -132,7 +131,6 @@ export const APP_CONFIG = {
   SUPPORTED_IMAGE_FORMATS: ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'],
   SUPPORTED_DOCUMENT_FORMATS: ['application/pdf', 'image/jpeg', 'image/jpg', 'image/png'],
   PLATFORM_FEE_PERCENTAGE: 2, // 2%
-  OTP_LENGTH: 6,
   PHONE_LENGTH: 10,
   PINCODE_LENGTH: 6,
   AADHAAR_LENGTH: 12,
@@ -147,8 +145,29 @@ export const ROUTES = {
   SUPPORT: '/support',
   FARMER_DASHBOARD: '/farmer/dashboard',
   BUYER_DASHBOARD: '/buyer/dashboard',
-  ADMIN_DASHBOARD: '/admin/dashboard',
+  /** Admin shell: use ?tab=overview | orders | users | kyc | payouts | listings | reviews | audit */
+  ADMIN_DASHBOARD: '/admin?tab=overview',
+  ADMIN_PANEL: '/admin',
 } as const;
+
+/** Valid `tab` query values for `/admin?tab=…` (admin dashboard). */
+export const ADMIN_PANEL_TABS = [
+  'overview',
+  'orders',
+  'users',
+  'kyc',
+  'payouts',
+  'listings',
+  'reviews',
+  'support',
+  'audit',
+] as const;
+
+export type AdminPanelTab = (typeof ADMIN_PANEL_TABS)[number];
+
+export function adminPanelHref(tab: AdminPanelTab): string {
+  return `/admin?tab=${encodeURIComponent(tab)}`;
+}
 
 // Date Formats
 export const DATE_FORMATS = {
@@ -164,6 +183,12 @@ export const CURRENCY = {
   CODE: 'INR',
   LOCALE: 'en-IN',
 } as const;
+
+/** Window event: chat unread / list should refresh (e.g. new message for current user). */
+export const FARM_CHAT_UNREAD_CHANGED_EVENT = 'farm:chat-unread-changed';
+
+/** Window event: in-app notification read state changed (mark read / delete / clear). */
+export const FARM_NOTIFICATION_UNREAD_CHANGED_EVENT = 'farm:notification-unread-changed';
 
 
 

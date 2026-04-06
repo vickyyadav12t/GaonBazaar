@@ -1,24 +1,125 @@
 import { Link } from 'react-router-dom';
-import { ArrowRight, Users, Shield, MessageCircle, TrendingUp, Star, CheckCircle, Leaf, Truck, Sparkles, Award, Zap, Heart, TrendingDown } from 'lucide-react';
+import { useEffect, useMemo, useState } from 'react';
+import {
+  ArrowRight,
+  Users,
+  Shield,
+  MessageCircle,
+  TrendingUp,
+  Star,
+  CheckCircle,
+  Leaf,
+  Truck,
+  Sparkles,
+  Award,
+  Zap,
+  Heart,
+} from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import Layout from '@/components/layout/Layout';
 import { useAppSelector } from '@/hooks/useRedux';
-import { mockProducts, mockFarmers } from '@/data/mockData';
 import ProductCard from '@/components/product/ProductCard';
 import { AnimateOnScroll, StaggerContainer } from '@/components/animations';
+import { apiService } from '@/services/api';
+import { resolveFarmerAvatarUrl } from '@/lib/farmerAvatarUrl';
+import { farmerRatingFromApi } from '@/lib/farmerRatingFromApi';
+import type { Product } from '@/types';
+import {
+  formatLandingInteger,
+  getLandingStatsMode,
+  type PublicLandingStats,
+} from '@/lib/landingStats';
 
 const Landing = () => {
   const { currentLanguage } = useAppSelector((state) => state.language);
-  const featuredProducts = mockProducts.slice(0, 3);
+  const [featuredProducts, setFeaturedProducts] = useState<Product[]>([]);
+  const statsMode = getLandingStatsMode();
+  const [liveStats, setLiveStats] = useState<PublicLandingStats | null>(null);
+  const [liveStatsLoading, setLiveStatsLoading] = useState(() => statsMode === 'live');
+
+  useEffect(() => {
+    if (statsMode !== 'live') return;
+    let cancelled = false;
+    setLiveStatsLoading(true);
+    (async () => {
+      try {
+        const { data } = await apiService.public.getLandingStats();
+        if (!cancelled && data) setLiveStats(data);
+      } catch {
+        if (!cancelled) setLiveStats(null);
+      } finally {
+        if (!cancelled) setLiveStatsLoading(false);
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [statsMode]);
+
+  function mapBackendProduct(p: any): Product {
+    return {
+      id: p._id || p.id,
+      farmerId: p.farmer?._id || p.farmer || '',
+      farmerName: p.farmer?.name || 'Farmer',
+      farmerAvatar: resolveFarmerAvatarUrl(p.farmer?.avatar),
+      farmerRating: farmerRatingFromApi(p),
+      farmerLocation: p.farmer?.location
+        ? `${p.farmer.location.district}, ${p.farmer.location.state}`
+        : '',
+      name: p.name,
+      nameHindi: p.nameHindi,
+      category: p.category,
+      description: p.description || '',
+      images:
+        p.images && p.images.length > 0
+          ? p.images
+          : ['https://images.unsplash.com/photo-1574323347407-f5e1ad6d020b?w=600'],
+      price: p.price,
+      unit: p.unit,
+      minOrderQuantity: p.minOrderQuantity || 1,
+      availableQuantity: p.availableQuantity,
+      harvestDate: p.harvestDate || new Date().toISOString(),
+      isOrganic: !!p.isOrganic,
+      isNegotiable: !!p.isNegotiable,
+      status: (p.status as Product['status']) || 'active',
+      createdAt: p.createdAt || new Date().toISOString(),
+      views: p.views || 0,
+      inquiries: 0,
+    };
+  }
+
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      try {
+        const res = await apiService.products.getAll({ limit: 3, skip: 0, sort: 'newest' });
+        const backend: any[] = res.data?.products || [];
+        const mapped = backend.map(mapBackendProduct);
+        if (!cancelled) setFeaturedProducts(mapped);
+      } catch {
+        if (!cancelled) setFeaturedProducts([]);
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   const content = {
     en: {
       hero: {
-        title: 'Direct Access',
-        subtitle: 'for Farmers',
-        description: 'Connect directly with buyers. Eliminate middlemen. Get fair prices for your hard work.',
+        trustBadgeSoft: 'Building a direct farm-to-buyer network',
+        title: 'GaonBazaar',
+        subtitle: 'No middlemen, only fair deals',
+        description:
+          'Connect directly with buyers. Eliminate middlemen. Get fair prices for your hard work.',
         cta1: 'Join as Farmer',
         cta2: 'Join as Buyer',
+        quickFarmers: 'Farmers',
+        quickBuyers: 'Buyers',
+        quickTx: 'Delivered orders',
+        quickListings: 'Active listings',
+        marketingHeroStrip: ['Direct from farms', 'Fair negotiation', 'Secure payments'],
       },
       features: {
         title: 'Why Choose Us?',
@@ -30,10 +131,20 @@ const Landing = () => {
         ],
       },
       stats: {
-        farmers: 'Farmers Registered',
-        buyers: 'Active Buyers',
-        transactions: 'Successful Deals',
-        savings: 'Savings for Farmers',
+        farmers: 'Farmers registered',
+        buyers: 'Buyers',
+        transactions: 'Delivered orders',
+        listings: 'Active listings',
+        marketingCards: [
+          {
+            emoji: '👨‍🌾',
+            title: 'Sell direct',
+            sub: 'List produce and reach buyers yourself',
+          },
+          { emoji: '🛒', title: 'Meet buyers', sub: 'Connect with people who need your crop' },
+          { emoji: '🤝', title: 'Fair negotiation', sub: 'Chat to agree on a price that works' },
+          { emoji: '💰', title: 'Keep your margin', sub: 'More of each sale stays with you' },
+        ],
       },
       howItWorks: {
         title: 'How It Works',
@@ -44,21 +155,34 @@ const Landing = () => {
         ],
       },
       testimonials: {
-        title: 'What Farmers Say',
+        title: 'How direct trade helps',
+        attribution: 'Farmer',
+        role: 'Community voice',
       },
       cta: {
         title: 'Ready to Grow Your Business?',
-        desc: 'Join thousands of farmers who are already selling directly to buyers.',
+        desc: 'List your produce or source directly—free to get started.',
         button: 'Get Started Free',
+        browse: 'Browse Marketplace',
+        zapLine: 'Fair prices, secure payments, real conversations',
+        trustSecure: 'Secure Payments',
+        trustVerified: 'Verified Farmers',
+        trustSupport: '24/7 Support',
       },
     },
     hi: {
       hero: {
-        title: 'किसानों के लिए',
-        subtitle: 'सीधा संपर्क',
+        trustBadgeSoft: 'किसान से खरीदार तक सीधा जाल बन रहा है',
+        title: 'GaonBazaar',
+        subtitle: 'बिना बिचौलिये, केवल उचित सौदे',
         description: 'खरीदारों से सीधे जुड़ें। बिचौलियों को हटाएं। अपनी मेहनत का उचित दाम पाएं।',
         cta1: 'किसान बनें',
         cta2: 'खरीदार बनें',
+        quickFarmers: 'किसान',
+        quickBuyers: 'खरीदार',
+        quickTx: 'डिलीवर ऑर्डर',
+        quickListings: 'सक्रिय सूचियाँ',
+        marketingHeroStrip: ['सीधे खेत से', 'उचित बातचीत', 'सुरक्षित भुगतान'],
       },
       features: {
         title: 'हमें क्यों चुनें?',
@@ -71,9 +195,19 @@ const Landing = () => {
       },
       stats: {
         farmers: 'पंजीकृत किसान',
-        buyers: 'सक्रिय खरीदार',
-        transactions: 'सफल सौदे',
-        savings: 'किसानों की बचत',
+        buyers: 'खरीदार',
+        transactions: 'डिलीवर ऑर्डर',
+        listings: 'सक्रिय सूचियाँ',
+        marketingCards: [
+          {
+            emoji: '👨‍🌾',
+            title: 'सीधे बेचें',
+            sub: 'उपज सूचीबद्ध करें और खरीदारों तक पहुँचें',
+          },
+          { emoji: '🛒', title: 'खरीदार', sub: 'जिन्हें आपकी फसल चाहिए उनसे जुड़ें' },
+          { emoji: '🤝', title: 'उचित बातचीत', sub: 'चैट से मूल्य पर सहमति' },
+          { emoji: '💰', title: 'मुनाफा आपका', sub: 'हर बिक्री का ज़्यादा हिस्सा आपके पास' },
+        ],
       },
       howItWorks: {
         title: 'यह कैसे काम करता है',
@@ -84,173 +218,325 @@ const Landing = () => {
         ],
       },
       testimonials: {
-        title: 'किसान क्या कहते हैं',
+        title: 'सीधी बिक्री कैसे मदद करती है',
+        attribution: 'किसान',
+        role: 'सामुदायिक आवाज़',
       },
       cta: {
         title: 'अपना व्यापार बढ़ाने के लिए तैयार?',
-        desc: 'हजारों किसानों से जुड़ें जो पहले से ही सीधे खरीदारों को बेच रहे हैं।',
+        desc: 'उपज सूचीबद्ध करें या सीधे खरीदें—शुरुआत मुफ्त।',
         button: 'मुफ्त शुरू करें',
+        browse: 'बाज़ार देखें',
+        zapLine: 'उचित दाम, सुरक्षित भुगतान, सच्ची बातचीत',
+        trustSecure: 'सुरक्षित भुगतान',
+        trustVerified: 'सत्यापित किसान',
+        trustSupport: '२४/७ सहायता',
       },
     },
   };
 
   const t = content[currentLanguage];
 
-  const testimonials = [
-    {
-      name: 'Rajesh Kumar',
-      location: 'Punjab',
-      image: mockFarmers[0].avatar,
-      quote: currentLanguage === 'en' 
-        ? 'I increased my income by 40% after selling directly through this platform. No more middlemen taking my profits!'
-        : 'इस प्लेटफॉर्म के माध्यम से सीधे बेचने के बाद मैंने अपनी आय 40% बढ़ा दी। अब कोई बिचौलिया मेरा मुनाफा नहीं लेता!',
-      rating: 5,
-    },
-    {
-      name: 'Sunita Devi',
-      location: 'Maharashtra',
-      image: mockFarmers[1].avatar,
-      quote: currentLanguage === 'en'
-        ? 'The negotiation feature helped me get 30% better prices for my onions. Very easy to use!'
-        : 'बातचीत की सुविधा ने मुझे अपने प्याज के लिए 30% बेहतर कीमत दिलाने में मदद की। उपयोग करना बहुत आसान है!',
-      rating: 5,
-    },
-    {
-      name: 'Mohammed Ismail',
-      location: 'Karnataka',
-      image: mockFarmers[2].avatar,
-      quote: currentLanguage === 'en'
-        ? 'Fast payments and reliable buyers. This platform has changed how I sell my produce.'
-        : 'तेज़ भुगतान और विश्वसनीय खरीदार। इस प्लेटफॉर्म ने मेरे उपज बेचने का तरीका बदल दिया है।',
-      rating: 5,
-    },
-  ];
+  const trustBadgeText =
+    statsMode === 'live' && liveStats
+      ? currentLanguage === 'en'
+        ? `${formatLandingInteger(liveStats.farmerCount)} farmers · ${formatLandingInteger(liveStats.buyerCount)} buyers on GaonBazaar`
+        : `GaonBazaar पर ${formatLandingInteger(liveStats.farmerCount)} किसान · ${formatLandingInteger(liveStats.buyerCount)} खरीदार`
+      : t.hero.trustBadgeSoft;
+
+  const heroStrip =
+    statsMode === 'live' && liveStats
+      ? [
+          {
+            value: formatLandingInteger(liveStats.farmerCount),
+            label: t.hero.quickFarmers,
+          },
+          {
+            value: formatLandingInteger(liveStats.buyerCount),
+            label: t.hero.quickBuyers,
+          },
+          {
+            value: formatLandingInteger(liveStats.deliveredDeals),
+            label: t.hero.quickTx,
+          },
+        ]
+      : t.hero.marketingHeroStrip.map((line) => ({ value: '', label: line, marketing: true as const }));
+
+  const statCards = useMemo(() => {
+    const tr = content[currentLanguage];
+    if (statsMode === 'live' && liveStats) {
+      return [
+        {
+          kind: 'live' as const,
+          value: formatLandingInteger(liveStats.farmerCount),
+          label: tr.stats.farmers,
+          emoji: '👨‍🌾',
+          color: 'from-primary/10 to-primary/5',
+          iconColor: 'text-primary',
+        },
+        {
+          kind: 'live' as const,
+          value: formatLandingInteger(liveStats.buyerCount),
+          label: tr.stats.buyers,
+          emoji: '🛒',
+          color: 'from-secondary/10 to-secondary/5',
+          iconColor: 'text-secondary',
+        },
+        {
+          kind: 'live' as const,
+          value: formatLandingInteger(liveStats.deliveredDeals),
+          label: tr.stats.transactions,
+          emoji: '🤝',
+          color: 'from-accent/10 to-accent/5',
+          iconColor: 'text-accent',
+        },
+        {
+          kind: 'live' as const,
+          value: formatLandingInteger(liveStats.activeListings),
+          label: tr.stats.listings,
+          emoji: '📋',
+          color: 'from-success/10 to-success/5',
+          iconColor: 'text-success',
+        },
+      ];
+    }
+    return tr.stats.marketingCards.map((c, index) => {
+      const colors = [
+        { color: 'from-primary/10 to-primary/5', iconColor: 'text-primary' },
+        { color: 'from-secondary/10 to-secondary/5', iconColor: 'text-secondary' },
+        { color: 'from-accent/10 to-accent/5', iconColor: 'text-accent' },
+        { color: 'from-success/10 to-success/5', iconColor: 'text-success' },
+      ];
+      const pal = colors[index % colors.length];
+      return {
+        kind: 'marketing' as const,
+        headline: c.title,
+        sub: c.sub,
+        emoji: c.emoji,
+        ...pal,
+      };
+    });
+  }, [statsMode, liveStats, currentLanguage]);
+
+  const testimonials = useMemo(() => {
+    const base = `${import.meta.env.BASE_URL}assets/testimonials`;
+    return [
+      {
+        region: currentLanguage === 'en' ? 'North India' : 'उत्तर भारत',
+        image: `${base}/testimonial-north.png`,
+        quote:
+          currentLanguage === 'en'
+            ? 'Selling directly helped me keep more of what I earn. Chat made pricing clearer for both sides.'
+            : 'सीधे बेचने से मेहनत का ज़्यादा हिस्सा मेरे पास रहा। चैट से कीमत दोनों के लिए साफ़ हुई।',
+        rating: 5,
+      },
+      {
+        region: currentLanguage === 'en' ? 'Western India' : 'पश्चिम भारत',
+        image: `${base}/testimonial-west.png`,
+        quote:
+          currentLanguage === 'en'
+            ? 'Negotiating in the app was easier than repeated phone calls with multiple traders.'
+            : 'ऐप में बातचीत कई व्यापारियों को बार-बार फोन करने से आसान रही।',
+        rating: 5,
+      },
+      {
+        region: currentLanguage === 'en' ? 'Southern India' : 'दक्षिण भारत',
+        image: `${base}/testimonial-south.png`,
+        quote:
+          currentLanguage === 'en'
+            ? 'Having buyers and payment steps in one place reduced confusion at harvest time.'
+            : 'खरीदार और भुगतान एक जगह होने से फसल के समय भ्रम कम हुआ।',
+        rating: 5,
+      },
+    ];
+  }, [currentLanguage]);
 
   return (
     <Layout showMobileNav={false}>
-      {/* Hero Section */}
-      <section className="relative overflow-hidden bg-gradient-to-br from-primary via-primary/90 to-primary-dark text-primary-foreground min-h-[90vh] flex items-center">
-        {/* Animated Background Pattern */}
+      {/* Hero — green gradient (original theme) */}
+      <section className="relative flex min-h-[90vh] items-center overflow-hidden bg-gradient-to-br from-primary via-primary/90 to-primary-dark text-primary-foreground">
         <div className="absolute inset-0 bg-[url('data:image/svg+xml,%3Csvg%20width%3D%2260%22%20height%3D%2260%22%20viewBox%3D%220%200%2060%2060%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%3E%3Cg%20fill%3D%22none%22%20fill-rule%3D%22evenodd%22%3E%3Cg%20fill%3D%22%23ffffff%22%20fill-opacity%3D%220.08%22%3E%3Cpath%20d%3D%22M36%2034v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6%2034v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6%204V0H4v4H0v2h4v4h2V6h4V4H6z%22%2F%3E%3C%2Fg%3E%3C%2Fg%3E%3C%2Fsvg%3E')] opacity-40" />
-        
-        {/* Floating Elements */}
-        <div className="absolute top-20 left-10 w-20 h-20 bg-secondary/20 rounded-full blur-xl animate-pulse-slow" style={{ animationDelay: '0s' }} />
-        <div className="absolute top-40 right-20 w-32 h-32 bg-accent/20 rounded-full blur-2xl animate-pulse-slow" style={{ animationDelay: '1s' }} />
-        <div className="absolute bottom-20 left-1/4 w-24 h-24 bg-secondary-light/20 rounded-full blur-xl animate-pulse-slow" style={{ animationDelay: '2s' }} />
-        
-        <div className="container mx-auto px-4 py-20 md:py-32 relative z-10">
-          <div className="max-w-4xl mx-auto text-center">
-            {/* Trust Badge */}
+
+        <div
+          className="absolute left-10 top-20 h-20 w-20 animate-pulse-slow rounded-full bg-secondary/20 blur-xl"
+          style={{ animationDelay: '0s' }}
+        />
+        <div
+          className="absolute right-20 top-40 h-32 w-32 animate-pulse-slow rounded-full bg-accent/20 blur-2xl"
+          style={{ animationDelay: '1s' }}
+        />
+        <div
+          className="absolute bottom-20 left-1/4 h-24 w-24 animate-pulse-slow rounded-full bg-secondary-light/20 blur-xl"
+          style={{ animationDelay: '2s' }}
+        />
+
+        <div className="container relative z-10 mx-auto px-4 py-20 md:py-32">
+          <div className="mx-auto max-w-4xl text-center">
             <AnimateOnScroll animation="fade-in" delay={0}>
-              <div className="inline-flex items-center gap-2 bg-white/15 backdrop-blur-md px-5 py-2.5 rounded-full mb-8 border border-white/20 shadow-lg hover:bg-white/20 transition-all duration-300">
-                <Sparkles className="w-4 h-4 text-secondary-light" />
-                <span className="text-sm font-semibold">Trusted by 3,200+ Farmers Nationwide</span>
-                <Award className="w-4 h-4 text-secondary-light" />
+              <div className="mb-8 inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/15 px-5 py-2.5 shadow-lg backdrop-blur-md transition-all duration-300 hover:bg-white/20">
+                <Sparkles className="h-4 w-4 text-secondary-light" />
+                <span className="text-sm font-semibold">{trustBadgeText}</span>
+                <Award className="h-4 w-4 text-secondary-light" />
               </div>
             </AnimateOnScroll>
-            
-            {/* Main Heading */}
+
             <AnimateOnScroll animation="slide-up" delay={0.1}>
-              <h1 className={`text-5xl md:text-7xl lg:text-8xl font-extrabold mb-6 leading-tight ${currentLanguage === 'hi' ? 'font-hindi' : ''}`}>
+              <h1
+                className={`mb-6 text-5xl font-extrabold leading-tight md:text-7xl lg:text-8xl ${currentLanguage === 'hi' ? 'font-hindi' : ''}`}
+              >
                 <span className="block">{t.hero.title}</span>
-                <span className="block text-secondary-light drop-shadow-lg mt-2">{t.hero.subtitle}</span>
+                <span className="mt-2 block text-secondary-light drop-shadow-lg">{t.hero.subtitle}</span>
               </h1>
             </AnimateOnScroll>
-            
-            {/* Description */}
+
             <AnimateOnScroll animation="slide-up" delay={0.2}>
-              <p className={`text-xl md:text-2xl opacity-95 mb-10 max-w-3xl mx-auto leading-relaxed font-medium ${currentLanguage === 'hi' ? 'font-hindi' : ''}`}>
+              <p
+                className={`mx-auto mb-10 max-w-3xl text-xl font-medium leading-relaxed opacity-95 md:text-2xl ${currentLanguage === 'hi' ? 'font-hindi' : ''}`}
+              >
                 {t.hero.description}
               </p>
             </AnimateOnScroll>
-            
-            {/* CTA Buttons */}
+
             <AnimateOnScroll animation="slide-up" delay={0.3}>
-              <div className="flex flex-col sm:flex-row gap-4 justify-center items-center mb-12">
+              <div className="mb-12 flex flex-col items-center justify-center gap-4 sm:flex-row">
                 <Link to="/register?role=farmer" className="group">
-                  <Button className="btn-hero text-lg px-10 py-7 w-full sm:w-auto shadow-2xl hover:shadow-secondary/50 group-hover:scale-105 transition-all duration-300">
-                    <span className="text-2xl mr-2">🧑‍🌾</span>
+                  <Button className="btn-hero w-full px-10 py-7 text-lg shadow-2xl transition-all duration-300 hover:shadow-secondary/50 group-hover:scale-105 sm:w-auto">
+                    <span className="mr-2 text-2xl">🧑‍🌾</span>
                     {t.hero.cta1}
-                    <ArrowRight className="ml-2 w-5 h-5 group-hover:translate-x-1 transition-transform" />
+                    <ArrowRight className="ml-2 h-5 w-5 transition-transform group-hover:translate-x-1" />
                   </Button>
                 </Link>
                 <Link to="/register?role=buyer" className="group">
-                  <Button variant="outline" className="text-lg px-10 py-7 bg-white/10 backdrop-blur-md border-2 border-white/30 hover:bg-white/20 hover:border-white/50 w-full sm:w-auto shadow-xl group-hover:scale-105 transition-all duration-300">
-                    <span className="text-2xl mr-2">🛒</span>
+                  <Button
+                    variant="outline"
+                    className="w-full border-2 border-white/30 bg-white/10 px-10 py-7 text-lg shadow-xl backdrop-blur-md transition-all duration-300 hover:border-white/50 hover:bg-white/20 sm:w-auto group-hover:scale-105"
+                  >
+                    <span className="mr-2 text-2xl">🛒</span>
                     {t.hero.cta2}
-                    <ArrowRight className="ml-2 w-5 h-5 group-hover:translate-x-1 transition-transform" />
+                    <ArrowRight className="ml-2 h-5 w-5 transition-transform group-hover:translate-x-1" />
                   </Button>
                 </Link>
               </div>
             </AnimateOnScroll>
 
-            {/* Quick Stats */}
             <AnimateOnScroll animation="fade-in" delay={0.4}>
-              <div className="grid grid-cols-3 gap-6 max-w-2xl mx-auto pt-8 border-t border-white/20">
-                <div className="text-center">
-                  <div className="text-3xl font-bold text-secondary-light">3,200+</div>
-                  <div className="text-sm opacity-80 mt-1">Farmers</div>
-                </div>
-                <div className="text-center">
-                  <div className="text-3xl font-bold text-secondary-light">15K+</div>
-                  <div className="text-sm opacity-80 mt-1">Transactions</div>
-                </div>
-                <div className="text-center">
-                  <div className="text-3xl font-bold text-secondary-light">₹4.5Cr+</div>
-                  <div className="text-sm opacity-80 mt-1">Saved</div>
-                </div>
+              <div className="mx-auto grid max-w-2xl grid-cols-3 gap-6 border-t border-white/20 pt-8">
+                {heroStrip.map((item, i) => (
+                  <div key={i} className="text-center">
+                    {'marketing' in item && item.marketing ? (
+                      <div
+                        className={`text-base font-bold leading-snug text-secondary-light md:text-lg ${currentLanguage === 'hi' ? 'font-hindi' : ''}`}
+                      >
+                        {item.label}
+                      </div>
+                    ) : (
+                      <>
+                        <div className="text-3xl font-bold text-secondary-light">{item.value}</div>
+                        <div
+                          className={`mt-1 text-sm opacity-80 ${currentLanguage === 'hi' ? 'font-hindi' : ''}`}
+                        >
+                          {item.label}
+                        </div>
+                      </>
+                    )}
+                  </div>
+                ))}
               </div>
             </AnimateOnScroll>
           </div>
         </div>
 
-        {/* Enhanced Wave */}
         <div className="absolute bottom-0 left-0 right-0">
-          <svg viewBox="0 0 1440 120" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-full h-auto">
-            <path d="M0 120L60 110C120 100 240 80 360 70C480 60 600 60 720 65C840 70 960 80 1080 85C1200 90 1320 90 1380 90L1440 90V120H1380C1320 120 1200 120 1080 120C960 120 840 120 720 120C600 120 480 120 360 120C240 120 120 120 60 120H0Z" fill="hsl(var(--background))"/>
+          <svg viewBox="0 0 1440 120" fill="none" xmlns="http://www.w3.org/2000/svg" className="h-auto w-full">
+            <path
+              d="M0 120L60 110C120 100 240 80 360 70C480 60 600 60 720 65C840 70 960 80 1080 85C1200 90 1320 90 1380 90L1440 90V120H1380C1320 120 1200 120 1080 120C960 120 840 120 720 120C600 120 480 120 360 120C240 120 120 120 60 120H0Z"
+              fill="hsl(var(--background))"
+            />
           </svg>
         </div>
       </section>
 
       {/* Stats */}
-      <section className="py-16 bg-gradient-to-b from-background to-muted/30 -mt-1">
+      <section className="-mt-1 bg-gradient-to-b from-background to-muted/30 py-16">
         <div className="container mx-auto px-4">
-          <StaggerContainer staggerDelay={0.1} animation="slide-up" className="grid grid-cols-2 md:grid-cols-4 gap-6 max-w-6xl mx-auto">
-            {[
-              { value: '3,200+', label: t.stats.farmers, emoji: '👨‍🌾', color: 'from-primary/10 to-primary/5', iconColor: 'text-primary' },
-              { value: '2,200+', label: t.stats.buyers, emoji: '🛒', color: 'from-secondary/10 to-secondary/5', iconColor: 'text-secondary' },
-              { value: '15,000+', label: t.stats.transactions, emoji: '🤝', color: 'from-accent/10 to-accent/5', iconColor: 'text-accent' },
-              { value: '₹4.5Cr+', label: t.stats.savings, emoji: '💰', color: 'from-success/10 to-success/5', iconColor: 'text-success' },
-            ].map((stat, index) => (
-              <div key={index} className={`text-center p-8 rounded-3xl bg-gradient-to-br ${stat.color} border border-border/50 shadow-lg hover:scale-105 hover:shadow-xl transition-all duration-300 group backdrop-blur-sm`}>
-                <div className={`text-4xl mb-4 animate-float-slow group-hover:scale-110 transition-transform duration-300 ${stat.iconColor}`}>{stat.emoji}</div>
-                <div className="text-3xl md:text-4xl font-extrabold text-foreground mb-2">{stat.value}</div>
-                <div className={`text-sm font-medium text-muted-foreground ${currentLanguage === 'hi' ? 'font-hindi' : ''}`}>{stat.label}</div>
+          <StaggerContainer
+            staggerDelay={0.1}
+            animation="slide-up"
+            stretchGridItems
+            className="mx-auto grid max-w-6xl grid-cols-2 gap-6 md:grid-cols-4 md:items-stretch"
+          >
+            {statCards.map((stat, index) => (
+              <div
+                key={index}
+                className={`group flex h-full flex-col rounded-3xl border border-border/50 bg-gradient-to-br ${stat.color} p-8 text-center shadow-lg backdrop-blur-sm transition-all duration-300 hover:scale-105 hover:shadow-xl`}
+              >
+                <div
+                  className={`mb-4 shrink-0 animate-float-slow text-4xl transition-transform duration-300 group-hover:scale-110 ${stat.iconColor}`}
+                >
+                  {stat.emoji}
+                </div>
+                <div className="flex min-h-0 flex-1 flex-col justify-start">
+                  {stat.kind === 'live' ? (
+                    <>
+                      <div className="mb-2 text-3xl font-extrabold text-foreground md:text-4xl">{stat.value}</div>
+                      <div
+                        className={`text-balance text-sm font-medium leading-snug text-muted-foreground ${currentLanguage === 'hi' ? 'font-hindi' : ''}`}
+                      >
+                        {stat.label}
+                      </div>
+                    </>
+                  ) : (
+                    <>
+                      <div
+                        className={`mb-2 text-xl font-extrabold leading-tight text-foreground md:text-2xl ${currentLanguage === 'hi' ? 'font-hindi' : ''}`}
+                      >
+                        {stat.headline}
+                      </div>
+                      <div
+                        className={`text-balance text-sm font-medium leading-snug text-muted-foreground ${currentLanguage === 'hi' ? 'font-hindi' : ''}`}
+                      >
+                        {stat.sub}
+                      </div>
+                    </>
+                  )}
+                </div>
               </div>
             ))}
           </StaggerContainer>
+          {statsMode === 'live' && !liveStatsLoading && !liveStats && (
+            <p
+              className={`mx-auto mt-8 max-w-2xl text-center text-sm text-muted-foreground ${currentLanguage === 'hi' ? 'font-hindi' : ''}`}
+            >
+              {currentLanguage === 'en'
+                ? 'Live stats could not be loaded; showing theme cards instead.'
+                : 'लाइव आँकड़े लोड नहीं हो सके; थीम कार्ड दिखाए जा रहे हैं।'}
+            </p>
+          )}
         </div>
       </section>
 
       {/* Features */}
       <AnimateOnScroll animation="fade-in">
-        <section className="py-20 bg-background relative overflow-hidden">
-          {/* Background decoration */}
-          <div className="absolute top-0 right-0 w-96 h-96 bg-primary/5 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2" />
-          <div className="absolute bottom-0 left-0 w-96 h-96 bg-secondary/5 rounded-full blur-3xl translate-y-1/2 -translate-x-1/2" />
-          
-          <div className="container mx-auto px-4 relative z-10">
-            <div className="text-center mb-16">
-              <h2 className={`text-4xl md:text-5xl font-extrabold mb-4 ${currentLanguage === 'hi' ? 'font-hindi' : ''}`}>
+        <section className="relative overflow-hidden bg-background py-20">
+          <div className="absolute right-0 top-0 h-96 w-96 -translate-y-1/2 translate-x-1/2 rounded-full bg-primary/5 blur-3xl" />
+          <div className="absolute bottom-0 left-0 h-96 w-96 -translate-x-1/2 translate-y-1/2 rounded-full bg-secondary/5 blur-3xl" />
+
+          <div className="container relative z-10 mx-auto px-4">
+            <div className="mb-16 text-center">
+              <h2 className={`mb-4 text-4xl font-extrabold md:text-5xl ${currentLanguage === 'hi' ? 'font-hindi' : ''}`}>
                 {t.features.title}
               </h2>
-              <p className={`text-lg text-muted-foreground max-w-2xl mx-auto ${currentLanguage === 'hi' ? 'font-hindi' : ''}`}>
-                {currentLanguage === 'en' 
+              <p className={`mx-auto max-w-2xl text-lg text-muted-foreground ${currentLanguage === 'hi' ? 'font-hindi' : ''}`}>
+                {currentLanguage === 'en'
                   ? 'Everything you need to grow your agricultural business'
                   : 'अपने कृषि व्यवसाय को बढ़ाने के लिए आपको जो कुछ चाहिए'}
               </p>
             </div>
-            <StaggerContainer staggerDelay={0.1} animation="slide-up" className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 max-w-7xl mx-auto">
+            <StaggerContainer
+              staggerDelay={0.1}
+              animation="slide-up"
+              className="mx-auto grid max-w-7xl grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-4"
+            >
               {t.features.items.map((feature, index) => {
                 const colors = [
                   { bg: 'bg-primary/10', icon: 'text-primary', border: 'border-primary/20' },
@@ -259,17 +545,23 @@ const Landing = () => {
                   { bg: 'bg-success/10', icon: 'text-success', border: 'border-success/20' },
                 ];
                 const color = colors[index % colors.length];
-                
                 return (
-                  <div key={index} className={`card-elevated p-8 text-center hover:shadow-2xl hover:scale-105 hover:-translate-y-2 transition-all duration-300 group relative overflow-hidden ${color.border} border-2`}>
-                    {/* Hover effect background */}
-                    <div className={`absolute inset-0 ${color.bg} opacity-0 group-hover:opacity-100 transition-opacity duration-300`} />
-                    
-                    <div className={`w-20 h-20 ${color.bg} rounded-3xl flex items-center justify-center mx-auto mb-6 group-hover:scale-110 group-hover:rotate-6 transition-all duration-300 relative z-10 ${color.border} border-2`}>
-                      <feature.icon className={`w-10 h-10 ${color.icon}`} />
+                  <div
+                    key={index}
+                    className={`card-elevated group relative overflow-hidden border-2 p-8 text-center transition-all duration-300 hover:-translate-y-2 hover:scale-105 hover:shadow-2xl ${color.border}`}
+                  >
+                    <div className={`absolute inset-0 ${color.bg} opacity-0 transition-opacity duration-300 group-hover:opacity-100`} />
+                    <div
+                      className={`relative z-10 mx-auto mb-6 flex h-20 w-20 items-center justify-center rounded-3xl border-2 ${color.bg} ${color.border} transition-all duration-300 group-hover:rotate-6 group-hover:scale-110`}
+                    >
+                      <feature.icon className={`h-10 w-10 ${color.icon}`} />
                     </div>
-                    <h3 className={`text-xl font-bold mb-3 relative z-10 ${currentLanguage === 'hi' ? 'font-hindi' : ''}`}>{feature.title}</h3>
-                    <p className={`text-muted-foreground text-sm leading-relaxed relative z-10 ${currentLanguage === 'hi' ? 'font-hindi' : ''}`}>{feature.desc}</p>
+                    <h3 className={`relative z-10 mb-3 text-xl font-bold ${currentLanguage === 'hi' ? 'font-hindi' : ''}`}>
+                      {feature.title}
+                    </h3>
+                    <p className={`relative z-10 text-sm leading-relaxed text-muted-foreground ${currentLanguage === 'hi' ? 'font-hindi' : ''}`}>
+                      {feature.desc}
+                    </p>
                   </div>
                 );
               })}
@@ -280,40 +572,37 @@ const Landing = () => {
 
       {/* How It Works */}
       <AnimateOnScroll animation="fade-in">
-        <section className="py-20 bg-gradient-to-b from-muted/30 to-background relative">
+        <section className="relative bg-gradient-to-b from-muted/30 to-background py-20">
           <div className="container mx-auto px-4">
-            <div className="text-center mb-16">
-              <h2 className={`text-4xl md:text-5xl font-extrabold mb-4 ${currentLanguage === 'hi' ? 'font-hindi' : ''}`}>
+            <div className="mb-16 text-center">
+              <h2 className={`mb-4 text-4xl font-extrabold md:text-5xl ${currentLanguage === 'hi' ? 'font-hindi' : ''}`}>
                 {t.howItWorks.title}
               </h2>
-              <p className={`text-lg text-muted-foreground max-w-2xl mx-auto ${currentLanguage === 'hi' ? 'font-hindi' : ''}`}>
-                {currentLanguage === 'en' 
-                  ? 'Get started in just three simple steps'
-                  : 'बस तीन सरल चरणों में शुरू करें'}
+              <p className={`mx-auto max-w-2xl text-lg text-muted-foreground ${currentLanguage === 'hi' ? 'font-hindi' : ''}`}>
+                {currentLanguage === 'en' ? 'Get started in just three simple steps' : 'बस तीन सरल चरणों में शुरू करें'}
               </p>
             </div>
-            <StaggerContainer staggerDelay={0.15} animation="scale-in" className="grid grid-cols-1 md:grid-cols-3 gap-12 max-w-6xl mx-auto relative">
-              {/* Connection Line */}
-              <div className="hidden md:block absolute top-20 left-0 right-0 h-1 bg-gradient-to-r from-primary via-secondary to-accent opacity-20" />
-              
+            <StaggerContainer
+              staggerDelay={0.15}
+              animation="scale-in"
+              className="relative mx-auto grid max-w-6xl grid-cols-1 gap-12 md:grid-cols-3"
+            >
+              <div className="absolute left-0 right-0 top-20 hidden h-1 bg-gradient-to-r from-primary via-secondary to-accent opacity-20 md:block" />
               {t.howItWorks.steps.map((step, index) => (
-                <div key={index} className="relative text-center group">
-                  {/* Step Number Badge */}
-                  <div className="absolute -top-4 left-1/2 -translate-x-1/2 z-20">
-                    <div className="w-12 h-12 bg-gradient-to-br from-secondary to-accent text-white rounded-full flex items-center justify-center text-lg font-bold shadow-lg group-hover:scale-125 group-hover:rotate-12 transition-all duration-300">
+                <div key={index} className="group relative text-center">
+                  <div className="absolute -top-4 left-1/2 z-20 -translate-x-1/2">
+                    <div className="flex h-12 w-12 items-center justify-center rounded-full bg-gradient-to-br from-secondary to-accent text-lg font-bold text-white shadow-lg transition-all duration-300 group-hover:rotate-12 group-hover:scale-125">
                       {index + 1}
                     </div>
                   </div>
-                  
-                  {/* Icon Circle */}
-                  <div className="w-24 h-24 bg-gradient-to-br from-primary to-primary-light rounded-3xl flex items-center justify-center mx-auto mb-6 shadow-2xl group-hover:scale-110 group-hover:rotate-6 transition-all duration-300 relative z-10">
-                    <step.icon className="w-12 h-12 text-primary-foreground" />
+                  <div className="relative z-10 mx-auto mb-6 flex h-24 w-24 items-center justify-center rounded-3xl bg-gradient-to-br from-primary to-primary-light shadow-2xl transition-all duration-300 group-hover:rotate-6 group-hover:scale-110">
+                    <step.icon className="h-12 w-12 text-primary-foreground" />
                   </div>
-                  
-                  {/* Content Card */}
-                  <div className="card-elevated p-8 pt-12 hover:shadow-2xl hover:scale-105 transition-all duration-300">
-                    <h3 className={`text-xl font-bold mb-3 ${currentLanguage === 'hi' ? 'font-hindi' : ''}`}>{step.title}</h3>
-                    <p className={`text-muted-foreground leading-relaxed ${currentLanguage === 'hi' ? 'font-hindi' : ''}`}>{step.desc}</p>
+                  <div className="card-elevated p-8 pt-12 transition-all duration-300 hover:scale-105 hover:shadow-2xl">
+                    <h3 className={`mb-3 text-xl font-bold ${currentLanguage === 'hi' ? 'font-hindi' : ''}`}>{step.title}</h3>
+                    <p className={`leading-relaxed text-muted-foreground ${currentLanguage === 'hi' ? 'font-hindi' : ''}`}>
+                      {step.desc}
+                    </p>
                   </div>
                 </div>
               ))}
@@ -324,31 +613,33 @@ const Landing = () => {
 
       {/* Featured Products */}
       <AnimateOnScroll animation="fade-in">
-        <section className="py-20 bg-background relative overflow-hidden">
-          {/* Background decoration */}
-          <div className="absolute top-1/2 left-0 w-96 h-96 bg-primary/5 rounded-full blur-3xl -translate-y-1/2" />
-          <div className="absolute top-1/2 right-0 w-96 h-96 bg-secondary/5 rounded-full blur-3xl -translate-y-1/2" />
-          
-          <div className="container mx-auto px-4 relative z-10">
-            <div className="flex flex-col md:flex-row items-center justify-between mb-12">
+        <section className="relative overflow-hidden bg-background py-20">
+          <div className="absolute left-0 top-1/2 h-96 w-96 -translate-y-1/2 rounded-full bg-primary/5 blur-3xl" />
+          <div className="absolute right-0 top-1/2 h-96 w-96 -translate-y-1/2 rounded-full bg-secondary/5 blur-3xl" />
+
+          <div className="container relative z-10 mx-auto px-4">
+            <div className="mb-12 flex flex-col items-center justify-between md:flex-row">
               <div>
-                <h2 className="text-4xl md:text-5xl font-extrabold mb-2">
+                <h2 className="mb-2 text-4xl font-extrabold md:text-5xl">
                   {currentLanguage === 'en' ? 'Fresh From Farms' : 'खेतों से ताज़ा'}
                 </h2>
-                <p className="text-muted-foreground text-lg">
-                  {currentLanguage === 'en' 
+                <p className="text-lg text-muted-foreground">
+                  {currentLanguage === 'en'
                     ? 'Handpicked quality produce from verified farmers'
                     : 'सत्यापित किसानों से चुनी गई गुणवत्तापूर्ण उपज'}
                 </p>
               </div>
-              <Link to="/marketplace" className="mt-4 md:mt-0 group">
-                <Button variant="outline" className="text-lg px-8 py-6 border-2 hover:bg-primary hover:text-primary-foreground transition-all duration-300 group-hover:scale-105">
+              <Link to="/marketplace" className="group mt-4 md:mt-0">
+                <Button
+                  variant="outline"
+                  className="border-2 px-8 py-6 text-lg transition-all duration-300 hover:bg-primary hover:text-primary-foreground group-hover:scale-105"
+                >
                   {currentLanguage === 'en' ? 'View All Products' : 'सभी उत्पाद देखें'}
-                  <ArrowRight className="ml-2 w-5 h-5 group-hover:translate-x-1 transition-transform" />
+                  <ArrowRight className="ml-2 h-5 w-5 transition-transform group-hover:translate-x-1" />
                 </Button>
               </Link>
             </div>
-            <StaggerContainer staggerDelay={0.1} animation="slide-up" className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            <StaggerContainer staggerDelay={0.1} animation="slide-up" className="grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-3">
               {featuredProducts.map((product) => (
                 <ProductCard key={product.id} product={product} />
               ))}
@@ -359,56 +650,53 @@ const Landing = () => {
 
       {/* Testimonials */}
       <AnimateOnScroll animation="fade-in">
-        <section className="py-20 bg-gradient-to-b from-background via-muted/20 to-background relative overflow-hidden">
-          {/* Background decoration */}
-          <div className="absolute top-0 left-1/4 w-72 h-72 bg-primary/5 rounded-full blur-3xl" />
-          <div className="absolute bottom-0 right-1/4 w-72 h-72 bg-secondary/5 rounded-full blur-3xl" />
-          
-          <div className="container mx-auto px-4 relative z-10">
-            <div className="text-center mb-16">
-              <h2 className={`text-4xl md:text-5xl font-extrabold mb-4 ${currentLanguage === 'hi' ? 'font-hindi' : ''}`}>
+        <section className="relative overflow-hidden bg-gradient-to-b from-background via-muted/20 to-background py-20">
+          <div className="absolute left-1/4 top-0 h-72 w-72 rounded-full bg-primary/5 blur-3xl" />
+          <div className="absolute bottom-0 right-1/4 h-72 w-72 rounded-full bg-secondary/5 blur-3xl" />
+
+          <div className="container relative z-10 mx-auto px-4">
+            <div className="mb-16 text-center">
+              <h2 className={`text-4xl font-extrabold md:text-5xl ${currentLanguage === 'hi' ? 'font-hindi' : ''}`}>
                 {t.testimonials.title}
               </h2>
-              <p className={`text-lg text-muted-foreground max-w-2xl mx-auto ${currentLanguage === 'hi' ? 'font-hindi' : ''}`}>
-                {currentLanguage === 'en' 
-                  ? 'Real stories from farmers who transformed their business'
-                  : 'किसानों की वास्तविक कहानियाँ जिन्होंने अपना व्यवसाय बदल दिया'}
-              </p>
             </div>
-            <StaggerContainer staggerDelay={0.1} animation="slide-up" className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-7xl mx-auto">
+            <StaggerContainer staggerDelay={0.1} animation="slide-up" className="mx-auto grid max-w-7xl grid-cols-1 gap-8 md:grid-cols-3">
               {testimonials.map((testimonial, index) => (
-                <div key={index} className="card-elevated p-8 hover:shadow-2xl hover:scale-105 hover:-translate-y-2 transition-all duration-300 group relative overflow-hidden">
-                  {/* Quote icon */}
-                  <div className="absolute top-4 right-4 text-primary/10 group-hover:text-primary/20 transition-colors">
-                    <svg className="w-16 h-16" fill="currentColor" viewBox="0 0 24 24">
-                      <path d="M14.017 21v-7.391c0-5.704 3.731-9.57 8.983-10.609l.996 2.151c-2.432.917-3.995 3.638-3.995 5.849h4v10h-9.984zm-14.017 0v-7.391c0-5.704 3.748-9.57 9-10.609l.996 2.151c-2.433.917-3.996 3.638-3.996 5.849h3.983v10h-9.983z"/>
+                <div
+                  key={index}
+                  className="card-elevated group relative overflow-hidden p-8 transition-all duration-300 hover:-translate-y-2 hover:scale-105 hover:shadow-2xl"
+                >
+                  <div className="absolute right-4 top-4 text-primary/10 transition-colors group-hover:text-primary/20">
+                    <svg className="h-16 w-16" fill="currentColor" viewBox="0 0 24 24">
+                      <path d="M14.017 21v-7.391c0-5.704 3.731-9.57 8.983-10.609l.996 2.151c-2.432.917-3.995 3.638-3.995 5.849h4v10h-9.984zm-14.017 0v-7.391c0-5.704 3.748-9.57 9-10.609l.996 2.151c-2.433.917-3.996 3.638-3.996 5.849h3.983v10h-9.983z" />
                     </svg>
                   </div>
-                  
-                  <div className="flex items-center gap-1 mb-6 relative z-10">
+                  <div className="relative z-10 mb-6 flex items-center gap-1">
                     {[...Array(testimonial.rating)].map((_, i) => (
-                      <Star key={i} className="w-5 h-5 text-secondary fill-secondary" />
+                      <Star key={i} className="h-5 w-5 fill-secondary text-secondary" />
                     ))}
                   </div>
-                  <p className={`text-foreground mb-6 leading-relaxed text-lg relative z-10 ${currentLanguage === 'hi' ? 'font-hindi' : ''}`}>
-                    "{testimonial.quote}"
+                  <p className={`relative z-10 mb-6 text-lg leading-relaxed text-foreground ${currentLanguage === 'hi' ? 'font-hindi' : ''}`}>
+                    &ldquo;{testimonial.quote}&rdquo;
                   </p>
-                  <div className="flex items-center gap-4 pt-6 border-t border-border relative z-10">
-                    <div className="relative">
-                      <img 
-                        src={testimonial.image} 
-                        alt={testimonial.name}
-                        className="w-14 h-14 rounded-full object-cover ring-2 ring-primary/20 group-hover:ring-primary/40 transition-all"
+                  <div className="relative z-10 flex items-center gap-4 border-t border-border pt-6">
+                    <div className="relative shrink-0">
+                      <img
+                        src={testimonial.image}
+                        alt=""
+                        width={56}
+                        height={56}
+                        loading="lazy"
+                        decoding="async"
+                        className="h-14 w-14 rounded-full object-cover ring-2 ring-primary/20 transition-all group-hover:ring-primary/40"
                       />
-                      <div className="absolute -bottom-1 -right-1 w-5 h-5 bg-primary rounded-full flex items-center justify-center border-2 border-background">
-                        <CheckCircle className="w-3 h-3 text-primary-foreground fill-primary-foreground" />
-                      </div>
                     </div>
-                    <div className="flex-1">
-                      <h4 className="font-bold text-foreground text-lg">{testimonial.name}</h4>
-                      <p className="text-sm text-muted-foreground flex items-center gap-1 mt-1">
-                        <span className="w-1 h-1 bg-primary rounded-full" />
-                        Verified Farmer • {testimonial.location}
+                    <div className="min-w-0 flex-1 text-left">
+                      <h4 className="text-lg font-bold text-foreground">{t.testimonials.attribution}</h4>
+                      <p className="mt-1 text-sm text-muted-foreground">
+                        <span className="font-medium text-foreground/80">{t.testimonials.role}</span>
+                        <span className="mx-1.5 text-border">·</span>
+                        <span className={currentLanguage === 'hi' ? 'font-hindi' : ''}>{testimonial.region}</span>
                       </p>
                     </div>
                   </div>
@@ -419,56 +707,54 @@ const Landing = () => {
         </section>
       </AnimateOnScroll>
 
-      {/* CTA Section */}
+      {/* CTA */}
       <AnimateOnScroll animation="zoom-in">
-        <section className="py-24 bg-gradient-to-br from-primary via-primary/95 to-primary-dark text-primary-foreground relative overflow-hidden">
-          {/* Animated background elements */}
+        <section className="relative overflow-hidden bg-gradient-to-br from-primary via-primary/95 to-primary-dark py-24 text-primary-foreground">
           <div className="absolute inset-0 bg-[url('data:image/svg+xml,%3Csvg%20width%3D%2260%22%20height%3D%2260%22%20viewBox%3D%220%200%2060%2060%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%3E%3Cg%20fill%3D%22none%22%20fill-rule%3D%22evenodd%22%3E%3Cg%20fill%3D%22%23ffffff%22%20fill-opacity%3D%220.1%22%3E%3Cpath%20d%3D%22M36%2034v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6%2034v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6%204V0H4v4H0v2h4v4h2V6h4V4H6z%22%2F%3E%3C%2Fg%3E%3C%2Fg%3E%3C%2Fsvg%3E')] opacity-30" />
-          <div className="absolute top-0 left-0 w-96 h-96 bg-secondary/20 rounded-full blur-3xl -translate-x-1/2 -translate-y-1/2" />
-          <div className="absolute bottom-0 right-0 w-96 h-96 bg-accent/20 rounded-full blur-3xl translate-x-1/2 translate-y-1/2" />
-          
-          <div className="container mx-auto px-4 text-center relative z-10">
-            <div className="max-w-3xl mx-auto">
-              <div className="inline-flex items-center gap-2 bg-white/15 backdrop-blur-md px-4 py-2 rounded-full mb-6 border border-white/20">
-                <Zap className="w-4 h-4 text-secondary-light" />
-                <span className="text-sm font-semibold">Join thousands of successful farmers</span>
+          <div className="absolute left-0 top-0 h-96 w-96 -translate-x-1/2 -translate-y-1/2 rounded-full bg-secondary/20 blur-3xl" />
+          <div className="absolute bottom-0 right-0 h-96 w-96 translate-x-1/2 translate-y-1/2 rounded-full bg-accent/20 blur-3xl" />
+
+          <div className="container relative z-10 mx-auto px-4 text-center">
+            <div className="mx-auto max-w-3xl">
+              <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/15 px-4 py-2 backdrop-blur-md">
+                <Zap className="h-4 w-4 text-secondary-light" />
+                <span className="text-sm font-semibold">{t.cta.zapLine}</span>
               </div>
-              
-              <h2 className={`text-4xl md:text-6xl font-extrabold mb-6 leading-tight ${currentLanguage === 'hi' ? 'font-hindi' : ''}`}>
+              <h2 className={`mb-6 text-4xl font-extrabold leading-tight md:text-6xl ${currentLanguage === 'hi' ? 'font-hindi' : ''}`}>
                 {t.cta.title}
               </h2>
-              <p className={`text-xl md:text-2xl opacity-95 mb-10 leading-relaxed ${currentLanguage === 'hi' ? 'font-hindi' : ''}`}>
+              <p className={`mb-10 text-xl leading-relaxed opacity-95 md:text-2xl ${currentLanguage === 'hi' ? 'font-hindi' : ''}`}>
                 {t.cta.desc}
               </p>
-              
-              <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
+              <div className="flex flex-col items-center justify-center gap-4 sm:flex-row">
                 <Link to="/register" className="group">
-                  <Button className="btn-hero text-xl px-12 py-8 shadow-2xl hover:shadow-secondary/50 group-hover:scale-110 transition-all duration-300">
+                  <Button className="btn-hero px-12 py-8 text-xl shadow-2xl transition-all duration-300 hover:shadow-secondary/50 group-hover:scale-110">
                     {t.cta.button}
-                    <ArrowRight className="ml-3 w-6 h-6 group-hover:translate-x-2 transition-transform" />
+                    <ArrowRight className="ml-3 h-6 w-6 transition-transform group-hover:translate-x-2" />
                   </Button>
                 </Link>
                 <Link to="/marketplace" className="group">
-                  <Button variant="outline" className="text-xl px-12 py-8 bg-white/10 backdrop-blur-md border-2 border-white/30 hover:bg-white/20 hover:border-white/50 group-hover:scale-110 transition-all duration-300">
-                    Browse Marketplace
-                    <ArrowRight className="ml-3 w-6 h-6 group-hover:translate-x-2 transition-transform" />
+                  <Button
+                    variant="outline"
+                    className="border-2 border-white/30 bg-white/10 px-12 py-8 text-xl backdrop-blur-md transition-all duration-300 hover:border-white/50 hover:bg-white/20 group-hover:scale-110"
+                  >
+                    {t.cta.browse}
+                    <ArrowRight className="ml-3 h-6 w-6 transition-transform group-hover:translate-x-2" />
                   </Button>
                 </Link>
               </div>
-              
-              {/* Trust indicators */}
               <div className="mt-12 flex flex-wrap items-center justify-center gap-8 text-sm opacity-80">
                 <div className="flex items-center gap-2">
-                  <Shield className="w-5 h-5 text-secondary-light" />
-                  <span>Secure Payments</span>
+                  <Shield className="h-5 w-5 text-secondary-light" />
+                  <span>{t.cta.trustSecure}</span>
                 </div>
                 <div className="flex items-center gap-2">
-                  <CheckCircle className="w-5 h-5 text-secondary-light" />
-                  <span>Verified Farmers</span>
+                  <CheckCircle className="h-5 w-5 text-secondary-light" />
+                  <span>{t.cta.trustVerified}</span>
                 </div>
                 <div className="flex items-center gap-2">
-                  <Heart className="w-5 h-5 text-secondary-light" />
-                  <span>24/7 Support</span>
+                  <Heart className="h-5 w-5 text-secondary-light" />
+                  <span>{t.cta.trustSupport}</span>
                 </div>
               </div>
             </div>

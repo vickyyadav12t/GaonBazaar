@@ -1,5 +1,6 @@
 const express = require("express");
 const auth = require("../middleware/auth");
+const optionalAuth = require("../middleware/optionalAuth");
 const {
   getAllProducts,
   getProductById,
@@ -10,9 +11,9 @@ const {
 
 const router = express.Router();
 
-// Public listing & detail
-router.get("/", getAllProducts);
-router.get("/:id", getProductById);
+// Public listing & detail (optional auth enables role-based visibility)
+router.get("/", optionalAuth, getAllProducts);
+router.get("/:id", optionalAuth, getProductById);
 
 // Protected CRUD for farmers/admins
 router.post("/", auth, createProduct);

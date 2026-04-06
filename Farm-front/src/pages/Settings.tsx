@@ -1,6 +1,21 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, User, Bell, Globe, Shield, Lock, CreditCard, Trash2, Save, Eye, EyeOff } from 'lucide-react';
+import {
+  ArrowLeft,
+  User,
+  Bell,
+  Globe,
+  Shield,
+  Lock,
+  CreditCard,
+  Trash2,
+  Save,
+  Eye,
+  EyeOff,
+  LogOut,
+  Camera,
+  Loader2,
+} from 'lucide-react';
 import Layout from '@/components/layout/Layout';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -13,9 +28,24 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { useAppSelector, useAppDispatch } from '@/hooks/useRedux';
 import { toggleLanguage, setLanguage } from '@/store/slices/languageSlice';
 import { logout, updateUser } from '@/store/slices/authSlice';
+import { clearCart } from '@/store/slices/cartSlice';
 import { useToast } from '@/hooks/use-toast';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
 import { apiService } from '@/services/api';
+import { clearAuthToken } from '@/services/api';
+import { mapApiUserToAuth } from '@/lib/mapAuthUser';
+import type { NotificationPreferences } from '@/types';
+
+function prefsFromUser(np: NotificationPreferences | undefined) {
+  return {
+    emailNotifications: np?.emailNotifications ?? true,
+    pushNotifications: np?.pushNotifications ?? true,
+    orderUpdates: np?.orderUpdates ?? true,
+    messageNotifications: np?.messageNotifications ?? true,
+    reviewNotifications: np?.reviewNotifications ?? true,
+    promotionalEmails: np?.promotionalEmails ?? false,
+  };
+}
 
 const Settings = () => {
   const navigate = useNavigate();
@@ -23,6 +53,8 @@ const Settings = () => {
   const { toast } = useToast();
   const { currentLanguage } = useAppSelector((state) => state.language);
   const { user } = useAppSelector((state) => state.auth);
+  const avatarFileRef = useRef<HTMLInputElement>(null);
+  const [avatarUploading, setAvatarUploading] = useState(false);
 
   const [settings, setSettings] = useState({
     // Account Settings
@@ -30,13 +62,8 @@ const Settings = () => {
     email: user?.email || '',
     phone: user?.phone || '',
     
-    // Notification Settings
-    emailNotifications: true,
-    pushNotifications: true,
-    orderUpdates: true,
-    messageNotifications: true,
-    reviewNotifications: true,
-    promotionalEmails: false,
+    // Notification Settings (defaults match server)
+    ...prefsFromUser(user?.notificationPreferences),
     
     // Privacy Settings
     profileVisibility: 'public',
@@ -54,24 +81,6 @@ const Settings = () => {
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
 
-  // Map backend user object to frontend User shape
-  const mapUserFromBackend = (backendUser: any) => ({
-    id: backendUser._id || backendUser.id,
-    name: backendUser.name,
-    email: backendUser.email || '',
-    phone: backendUser.phone,
-    role: backendUser.role,
-    avatar: undefined,
-    isVerified: backendUser.kycStatus === 'approved',
-    kycStatus: backendUser.kycStatus || 'pending',
-    location: {
-      state: backendUser.location?.state || '',
-      district: backendUser.location?.district || '',
-      village: backendUser.location?.village || '',
-    },
-    createdAt: backendUser.createdAt || new Date().toISOString(),
-  });
-
   // Load latest profile from backend on mount
   useEffect(() => {
     const fetchProfile = async () => {
@@ -80,13 +89,14 @@ const Settings = () => {
         const backendUser = response.data?.user;
         if (!backendUser) return;
 
-        const mapped = mapUserFromBackend(backendUser);
+        const mapped = mapApiUserToAuth(backendUser);
         dispatch(updateUser(mapped));
         setSettings((prev) => ({
           ...prev,
           name: mapped.name,
           email: mapped.email,
           phone: mapped.phone,
+          ...prefsFromUser(mapped.notificationPreferences),
         }));
       } catch (error: any) {
         // 401s are already handled globally – only show other errors
@@ -123,7 +133,7 @@ const Settings = () => {
         const backendUser = response.data?.user;
 
         if (backendUser) {
-          const mapped = mapUserFromBackend(backendUser);
+          const mapped = mapApiUserToAuth(backendUser);
           dispatch(updateUser(mapped));
         }
 
@@ -144,6 +154,55 @@ const Settings = () => {
           (currentLanguage === 'en'
             ? 'Failed to update account settings.'
             : 'खाता सेटिंग्स अपडेट करने में विफल।');
+        toast({
+          title: currentLanguage === 'en' ? 'Error' : 'त्रुटि',
+          description: message,
+          variant: 'destructive',
+        });
+      } finally {
+        setIsSaving(false);
+      }
+      return;
+    }
+
+    if (section === 'notifications') {
+      try {
+        setIsSaving(true);
+        const notificationPreferences: NotificationPreferences = {
+          emailNotifications: settings.emailNotifications,
+          pushNotifications: settings.pushNotifications,
+          orderUpdates: settings.orderUpdates,
+          messageNotifications: settings.messageNotifications,
+          reviewNotifications: settings.reviewNotifications,
+          promotionalEmails: settings.promotionalEmails,
+        };
+        const response = await apiService.users.updateProfile({ notificationPreferences });
+        const backendUser = response.data?.user;
+        if (backendUser) {
+          const mapped = mapApiUserToAuth(backendUser);
+          dispatch(updateUser(mapped));
+          setSettings((prev) => ({
+            ...prev,
+            ...prefsFromUser(mapped.notificationPreferences),
+          }));
+        }
+        toast({
+          title:
+            currentLanguage === 'en'
+              ? 'Settings Saved'
+              : 'सेटिंग्स सहेजी गईं',
+          description:
+            currentLanguage === 'en'
+              ? 'Your notification preferences have been updated.'
+              : 'आपकी सूचना सेटिंग्स अपडेट की गई हैं।',
+        });
+      } catch (error: unknown) {
+        const message =
+          (error as { response?: { data?: { message?: string } } })?.response?.data?.message ||
+          (error instanceof Error ? error.message : '') ||
+          (currentLanguage === 'en'
+            ? 'Failed to save notification settings.'
+            : 'सूचना सेटिंग्स सहेजने में विफल।');
         toast({
           title: currentLanguage === 'en' ? 'Error' : 'त्रुटि',
           description: message,
@@ -200,7 +259,107 @@ const Settings = () => {
     }));
   };
 
+  const displayAvatarUrl =
+    user?.avatar?.trim() ||
+    `https://ui-avatars.com/api/?name=${encodeURIComponent(user?.name || 'User')}&background=random`;
+
+  const handleAvatarFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    e.target.value = '';
+    if (!file) return;
+    if (!file.type.startsWith('image/')) {
+      toast({
+        title: currentLanguage === 'en' ? 'Invalid file' : 'अमान्य फ़ाइल',
+        description:
+          currentLanguage === 'en'
+            ? 'Please choose an image (JPEG, PNG, WebP, or GIF).'
+            : 'कृपया एक छवि चुनें।',
+        variant: 'destructive',
+      });
+      return;
+    }
+    try {
+      setAvatarUploading(true);
+      const uploadRes = await apiService.uploads.uploadAvatar(file);
+      const url = uploadRes.data?.url;
+      if (!url) throw new Error('No URL returned');
+
+      const updateRes = await apiService.users.updateProfile({ avatar: url });
+      const backendUser = updateRes.data?.user;
+      if (backendUser) {
+        dispatch(updateUser(mapApiUserToAuth(backendUser)));
+      } else {
+        const profileRes = await apiService.users.getProfile();
+        const u = profileRes.data?.user;
+        if (u) dispatch(updateUser(mapApiUserToAuth(u)));
+      }
+
+      toast({
+        title: currentLanguage === 'en' ? 'Photo updated' : 'फोटो अपडेट',
+        description:
+          currentLanguage === 'en'
+            ? 'Your profile picture has been saved.'
+            : 'आपकी प्रोफ़ाइल फोटो सहेजी गई।',
+      });
+    } catch (error: unknown) {
+      const message =
+        (error as { response?: { data?: { message?: string } } })?.response?.data?.message ||
+        (error as Error)?.message ||
+        (currentLanguage === 'en' ? 'Upload failed.' : 'अपलोड विफल।');
+      toast({
+        title: currentLanguage === 'en' ? 'Error' : 'त्रुटि',
+        description: message,
+        variant: 'destructive',
+      });
+    } finally {
+      setAvatarUploading(false);
+    }
+  };
+
+  const handleRemoveAvatar = async () => {
+    if (!user?.avatar?.trim()) return;
+    try {
+      setAvatarUploading(true);
+      const updateRes = await apiService.users.updateProfile({ avatar: '' });
+      const backendUser = updateRes.data?.user;
+      if (backendUser) {
+        dispatch(updateUser(mapApiUserToAuth(backendUser)));
+      } else {
+        const profileRes = await apiService.users.getProfile();
+        const u = profileRes.data?.user;
+        if (u) dispatch(updateUser(mapApiUserToAuth(u)));
+      }
+      toast({
+        title: currentLanguage === 'en' ? 'Photo removed' : 'फोटो हटाई गई',
+        description:
+          currentLanguage === 'en'
+            ? 'Your profile picture was cleared.'
+            : 'आपकी प्रोफ़ाइल फोटो हटा दी गई।',
+      });
+    } catch (error: unknown) {
+      const message =
+        (error as { response?: { data?: { message?: string } } })?.response?.data?.message ||
+        (currentLanguage === 'en' ? 'Could not remove photo.' : 'फोटो नहीं हटा सके।');
+      toast({
+        title: currentLanguage === 'en' ? 'Error' : 'त्रुटि',
+        description: message,
+        variant: 'destructive',
+      });
+    } finally {
+      setAvatarUploading(false);
+    }
+  };
+
+  const handleLogout = () => {
+    clearAuthToken();
+    dispatch(clearCart());
+    dispatch(logout());
+    navigate('/login');
+  };
+
   const handleDeleteAccount = () => {
+    clearAuthToken();
+    dispatch(clearCart());
     dispatch(logout());
     navigate('/');
     toast({
@@ -247,6 +406,14 @@ const Settings = () => {
       delete: 'Delete',
       english: 'English',
       hindi: 'Hindi',
+      logOut: 'Log out',
+      logOutHint: 'Sign out on this device. You can sign in again anytime.',
+      profilePhoto: 'Profile photo',
+      uploadPhoto: 'Upload photo',
+      removePhoto: 'Remove photo',
+      photoHint: 'JPG, PNG, WebP or GIF. Max 2 MB.',
+      promoHint:
+        'When off, you will not be included in admin announcement broadcasts in the app. Order and account messages are not affected.',
     },
     hi: {
       title: 'सेटिंग्स',
@@ -283,6 +450,14 @@ const Settings = () => {
       delete: 'हटाएं',
       english: 'अंग्रेजी',
       hindi: 'हिंदी',
+      logOut: 'लॉग आउट',
+      logOutHint: 'इस डिवाइस से साइन आउट करें। आप कभी भी फिर से लॉग इन कर सकते हैं।',
+      profilePhoto: 'प्रोफ़ाइल फोटो',
+      uploadPhoto: 'फोटो अपलोड करें',
+      removePhoto: 'फोटो हटाएं',
+      photoHint: 'JPG, PNG, WebP या GIF। अधिकतम 2 MB।',
+      promoHint:
+        'बंद होने पर ऐप में व्यवस्थापक की घोषणा प्रसारण सूचनाओं में आप शामिल नहीं होंगे। ऑर्डर और खाता संबंधी संदेश पर असर नहीं पड़ता।',
     },
   };
 
@@ -338,6 +513,56 @@ const Settings = () => {
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
+                <div className="flex flex-col sm:flex-row sm:items-center gap-4 pb-2">
+                  <div className="relative shrink-0">
+                    <img
+                      src={displayAvatarUrl}
+                      alt=""
+                      className="h-24 w-24 rounded-full object-cover border-2 border-border bg-muted"
+                    />
+                    {avatarUploading && (
+                      <div className="absolute inset-0 rounded-full bg-background/70 flex items-center justify-center">
+                        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+                      </div>
+                    )}
+                  </div>
+                  <div className="space-y-2 flex-1 min-w-0">
+                    <Label>{t.profilePhoto}</Label>
+                    <p className="text-xs text-muted-foreground">{t.photoHint}</p>
+                    <div className="flex flex-wrap gap-2">
+                      <input
+                        ref={avatarFileRef}
+                        type="file"
+                        accept="image/jpeg,image/png,image/webp,image/gif"
+                        className="hidden"
+                        onChange={(ev) => void handleAvatarFileChange(ev)}
+                      />
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        disabled={avatarUploading}
+                        onClick={() => avatarFileRef.current?.click()}
+                      >
+                        <Camera className="w-4 h-4 mr-2" />
+                        {t.uploadPhoto}
+                      </Button>
+                      {user?.avatar?.trim() ? (
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="sm"
+                          className="text-destructive hover:text-destructive"
+                          disabled={avatarUploading}
+                          onClick={() => void handleRemoveAvatar()}
+                        >
+                          {t.removePhoto}
+                        </Button>
+                      ) : null}
+                    </div>
+                  </div>
+                </div>
+                <Separator />
                 <div>
                   <Label htmlFor="name">{t.name}</Label>
                   <Input
@@ -410,6 +635,22 @@ const Settings = () => {
                     <SelectItem value="hi">{t.hindi}</SelectItem>
                   </SelectContent>
                 </Select>
+              </CardContent>
+            </Card>
+
+            <Card className="border-border">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <LogOut className="w-5 h-5" />
+                  {t.logOut}
+                </CardTitle>
+                <CardDescription>{t.logOutHint}</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <Button type="button" variant="outline" onClick={handleLogout} className="gap-2">
+                  <LogOut className="w-4 h-4" />
+                  {t.logOut}
+                </Button>
               </CardContent>
             </Card>
           </TabsContent>
@@ -521,16 +762,20 @@ const Settings = () => {
 
                 <Separator />
 
-                <div className="flex items-center justify-between">
-                  <div className="space-y-0.5">
+                <div className="flex items-center justify-between gap-4">
+                  <div className="space-y-0.5 min-w-0">
                     <Label>{t.promoEmails}</Label>
                     <p className="text-sm text-muted-foreground">
                       {currentLanguage === 'en' 
                         ? 'Receive promotional emails and offers' 
                         : 'प्रचार ईमेल और ऑफ़र प्राप्त करें'}
                     </p>
+                    <p className={`text-xs text-muted-foreground pt-1 ${currentLanguage === 'hi' ? 'font-hindi' : ''}`}>
+                      {t.promoHint}
+                    </p>
                   </div>
                   <Switch
+                    className="shrink-0"
                     checked={settings.promotionalEmails}
                     onCheckedChange={(checked) => 
                       setSettings(prev => ({ ...prev, promotionalEmails: checked }))

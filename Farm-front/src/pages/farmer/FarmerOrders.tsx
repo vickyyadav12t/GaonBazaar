@@ -1,6 +1,6 @@
-import { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, Check, X, Truck, Package, Clock, Filter, Search } from 'lucide-react';
+import { useEffect, useRef, useState } from 'react';
+import { Link, useNavigate, useSearchParams } from 'react-router-dom';
+import { ArrowLeft, Check, X, Truck, Package, Clock, Filter, Search, Download, Loader2 } from 'lucide-react';
 import Layout from '@/components/layout/Layout';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -10,45 +10,78 @@ import { useAppSelector } from '@/hooks/useRedux';
 import { Order } from '@/types';
 import { useToast } from '@/hooks/use-toast';
 import { apiService } from '@/services/api';
+import { saveCsvFromApi } from '@/lib/downloadCsv';
+import { mapApiOrderToOrder } from '@/lib/mapOrderFromApi';
+import { paymentLineLabel } from '@/lib/orderPaymentCopy';
+
+const ORDER_STATUS_FILTER_VALUES = new Set([
+  'pending',
+  'processing',
+  'shipped',
+  'delivered',
+  'cancelled',
+]);
+
+const ORDER_PAGE = 50;
 
 const FarmerOrders = () => {
   const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
   const { toast } = useToast();
   const { currentLanguage } = useAppSelector((state) => state.language);
   const { user } = useAppSelector((state) => state.auth);
-  const [filterStatus, setFilterStatus] = useState<string>('all');
+
+  const statusParam = searchParams.get('status');
+  const filterStatus =
+    statusParam && ORDER_STATUS_FILTER_VALUES.has(statusParam) ? statusParam : 'all';
+
+  const setFilterStatus = (value: string) => {
+    setSearchParams(
+      (prev) => {
+        const next = new URLSearchParams(prev);
+        if (value === 'all') next.delete('status');
+        else next.set('status', value);
+        return next;
+      },
+      { replace: true }
+    );
+  };
   const [searchQuery, setSearchQuery] = useState('');
   const [orders, setOrders] = useState<Order[]>([]);
   const [isLoading, setIsLoading] = useState(false);
+  const [loadingMore, setLoadingMore] = useState(false);
+  const [hasMore, setHasMore] = useState(true);
+  const [orderTotal, setOrderTotal] = useState<number | null>(null);
+  const ordersRef = useRef<Order[]>([]);
+  ordersRef.current = orders;
+  const [exportingCsv, setExportingCsv] = useState(false);
 
   useEffect(() => {
     const fetchOrders = async () => {
+      if (!user) return;
       try {
         setIsLoading(true);
-        const response = await apiService.orders.getAll();
+        const params: {
+          limit: number;
+          skip: number;
+          includeTotal: boolean;
+          status?: string;
+        } = {
+          limit: ORDER_PAGE,
+          skip: 0,
+          includeTotal: true,
+        };
+        if (filterStatus !== 'all') params.status = filterStatus;
+        const response = await apiService.orders.getAll(params);
         const backendOrders = response.data?.orders || [];
-        const mapped: Order[] = backendOrders.map((o: any) => ({
-          id: o._id || o.id,
-          buyerId: o.buyer?._id || o.buyer,
-          buyerName: o.buyer?.name || 'Buyer',
-          farmerId: o.farmer?._id || o.farmer,
-          farmerName: o.farmer?.name || 'Farmer',
-          productId: o.items?.[0]?.product || '',
-          productName: o.items?.[0]?.name || 'Product',
-          productImage:
-            o.items?.[0]?.image ||
-            'https://images.unsplash.com/photo-1574323347407-f5e1ad6d020b?w=600',
-          quantity: o.items?.[0]?.quantity || 1,
-          unit: o.items?.[0]?.unit || 'kg',
-          pricePerUnit: o.items?.[0]?.price || 0,
-          totalAmount: o.totalAmount || 0,
-          status: o.status,
-          paymentStatus: o.paymentStatus || 'pending',
-          deliveryAddress: o.shippingAddress || '',
-          createdAt: o.createdAt || new Date().toISOString(),
-          expectedDelivery: undefined,
-        }));
+        const mapped: Order[] = backendOrders.map((o: any) => mapApiOrderToOrder(o));
         setOrders(mapped);
+        const tot = response.data?.total;
+        const t = typeof tot === 'number' ? tot : null;
+        setOrderTotal(t);
+        setHasMore(
+          mapped.length === ORDER_PAGE && (t == null || mapped.length < t)
+        );
       } catch (error: any) {
         console.error('Failed to load orders', error);
         toast({
@@ -66,10 +99,58 @@ const FarmerOrders = () => {
       }
     };
 
-    if (user) {
-      fetchOrders();
+    void fetchOrders();
+  }, [user, currentLanguage, toast, filterStatus]);
+
+  const loadMoreOrders = async () => {
+    if (!user || loadingMore || !hasMore) return;
+    setLoadingMore(true);
+    const skip = ordersRef.current.length;
+    try {
+      const params: {
+        limit: number;
+        skip: number;
+        status?: string;
+      } = { limit: ORDER_PAGE, skip };
+      if (filterStatus !== 'all') params.status = filterStatus;
+      const response = await apiService.orders.getAll(params);
+      const backendOrders = response.data?.orders || [];
+      const mapped: Order[] = backendOrders.map((o: any) => mapApiOrderToOrder(o));
+      const mergedLen = skip + mapped.length;
+      setOrders((prev) => [...prev, ...mapped]);
+      const t = orderTotal;
+      setHasMore(
+        mapped.length === ORDER_PAGE && (t == null || mergedLen < t)
+      );
+    } catch (e) {
+      console.error(e);
+    } finally {
+      setLoadingMore(false);
     }
-  }, [user, currentLanguage, toast]);
+  };
+
+  const handleExportOrdersCsv = async () => {
+    try {
+      setExportingCsv(true);
+      await saveCsvFromApi(() => apiService.orders.exportCsv(), 'orders.csv');
+      toast({
+        title: currentLanguage === 'en' ? 'Export started' : 'निर्यात शुरू',
+        description:
+          currentLanguage === 'en'
+            ? 'Your orders CSV is downloading.'
+            : 'आपका ऑर्डर CSV डाउनलोड हो रहा है।',
+      });
+    } catch (e: unknown) {
+      const msg = e instanceof Error ? e.message : '';
+      toast({
+        title: currentLanguage === 'en' ? 'Export failed' : 'निर्यात विफल',
+        description: msg || (currentLanguage === 'en' ? 'Could not download CSV.' : 'CSV डाउनलोड नहीं हो सका।'),
+        variant: 'destructive',
+      });
+    } finally {
+      setExportingCsv(false);
+    }
+  };
 
   const filteredOrders = orders.filter(order => {
     const matchesSearch = order.productName.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -80,10 +161,10 @@ const FarmerOrders = () => {
 
   const handleAcceptOrder = async (orderId: string) => {
     try {
-      await apiService.orders.update(orderId, { status: 'confirmed' });
+      await apiService.orders.update(orderId, { status: 'processing' });
       setOrders((prev) =>
         prev.map((o) =>
-          o.id === orderId ? { ...o, status: 'confirmed' as const } : o
+          o.id === orderId ? { ...o, status: 'processing' as const } : o
         )
       );
       toast({
@@ -163,7 +244,6 @@ const FarmerOrders = () => {
   const getStatusBadge = (status: string) => {
     const statusConfig: Record<string, { color: string; label: string; labelHi: string }> = {
       pending: { color: 'bg-warning/10 text-warning', label: 'Pending', labelHi: 'लंबित' },
-      confirmed: { color: 'bg-primary/10 text-primary', label: 'Confirmed', labelHi: 'पुष्टि' },
       processing: { color: 'bg-accent/10 text-accent', label: 'Processing', labelHi: 'प्रोसेसिंग' },
       shipped: { color: 'bg-info/10 text-info', label: 'Shipped', labelHi: 'भेज दिया' },
       delivered: { color: 'bg-success/10 text-success', label: 'Delivered', labelHi: 'पहुंचा दिया' },
@@ -178,21 +258,21 @@ const FarmerOrders = () => {
   };
 
   const stats = {
-    pending: orders.filter(o => o.status === 'pending').length,
-    confirmed: orders.filter(o => o.status === 'confirmed').length,
-    shipped: orders.filter(o => o.status === 'shipped').length,
-    delivered: orders.filter(o => o.status === 'delivered').length,
+    pending: orders.filter((o) => o.status === 'pending').length,
+    processing: orders.filter((o) => o.status === 'processing').length,
+    shipped: orders.filter((o) => o.status === 'shipped').length,
+    delivered: orders.filter((o) => o.status === 'delivered').length,
   };
 
   return (
     <Layout>
       <div className="container mx-auto px-4 py-6">
         {/* Header */}
-        <div className="flex items-center gap-4 mb-6">
+        <div className="flex flex-wrap items-center gap-4 mb-6">
           <button onClick={() => navigate(-1)} className="p-2 hover:bg-muted rounded-lg">
             <ArrowLeft className="w-5 h-5" />
           </button>
-          <div>
+          <div className="min-w-0 flex-1">
             <h1 className="text-2xl font-bold">
               {currentLanguage === 'en' ? 'Orders' : 'ऑर्डर'}
             </h1>
@@ -200,6 +280,21 @@ const FarmerOrders = () => {
               {currentLanguage === 'en' ? 'Manage your incoming orders' : 'अपने आने वाले ऑर्डर प्रबंधित करें'}
             </p>
           </div>
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            className="shrink-0"
+            disabled={exportingCsv}
+            onClick={() => void handleExportOrdersCsv()}
+          >
+            {exportingCsv ? (
+              <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+            ) : (
+              <Download className="w-4 h-4 mr-2" />
+            )}
+            {currentLanguage === 'en' ? 'Export CSV' : 'CSV निर्यात'}
+          </Button>
         </div>
 
         {/* Stats */}
@@ -218,8 +313,8 @@ const FarmerOrders = () => {
               <Check className="w-5 h-5 text-primary" />
             </div>
             <div>
-              <p className="text-2xl font-bold">{stats.confirmed}</p>
-              <p className="text-sm text-muted-foreground">{currentLanguage === 'en' ? 'Confirmed' : 'पुष्टि'}</p>
+              <p className="text-2xl font-bold">{stats.processing}</p>
+              <p className="text-sm text-muted-foreground">{currentLanguage === 'en' ? 'Processing' : 'प्रोसेसिंग'}</p>
             </div>
           </div>
           <div className="card-elevated p-4 flex items-center gap-3">
@@ -241,6 +336,13 @@ const FarmerOrders = () => {
             </div>
           </div>
         </div>
+        {hasMore && filterStatus === 'all' && (
+          <p className="text-xs text-muted-foreground mb-4">
+            {currentLanguage === 'en'
+              ? 'Summary counts reflect loaded orders only. Use Load more for additional rows.'
+              : 'सारांश केवल लोड किए गए ऑर्डर पर आधारित है। और पंक्तियों के लिए लोड करें।'}
+          </p>
+        )}
 
         {/* Filters */}
         <div className="flex flex-col sm:flex-row gap-4 mb-6">
@@ -261,7 +363,6 @@ const FarmerOrders = () => {
             <SelectContent>
               <SelectItem value="all">{currentLanguage === 'en' ? 'All Status' : 'सभी स्थिति'}</SelectItem>
               <SelectItem value="pending">{currentLanguage === 'en' ? 'Pending' : 'लंबित'}</SelectItem>
-              <SelectItem value="confirmed">{currentLanguage === 'en' ? 'Confirmed' : 'पुष्टि'}</SelectItem>
               <SelectItem value="processing">{currentLanguage === 'en' ? 'Processing' : 'प्रोसेसिंग'}</SelectItem>
               <SelectItem value="shipped">{currentLanguage === 'en' ? 'Shipped' : 'भेज दिया'}</SelectItem>
               <SelectItem value="delivered">{currentLanguage === 'en' ? 'Delivered' : 'पहुंचा दिया'}</SelectItem>
@@ -281,7 +382,8 @@ const FarmerOrders = () => {
               </p>
             </div>
           ) : (
-            filteredOrders.map((order) => (
+            <>
+            {filteredOrders.map((order) => (
             <div key={order.id} className="card-elevated p-4">
               <div className="flex flex-col lg:flex-row lg:items-center gap-4">
                 {/* Product Info */}
@@ -316,16 +418,25 @@ const FarmerOrders = () => {
                     {currentLanguage === 'en' ? 'Delivery:' : 'डिलीवरी:'}{' '}
                     {order.deliveryAddress.substring(0, 40)}...
                   </p>
-                  <p className="text-sm text-muted-foreground">
+                  <div className="text-sm text-muted-foreground">
                     {currentLanguage === 'en' ? 'Payment:' : 'भुगतान:'}{' '}
-                    <Badge variant="outline" className="text-xs">
-                      {order.paymentStatus === 'paid' ? '✓ Paid' : 'Pending'}
+                    <Badge variant="outline" className="text-xs font-normal">
+                      {paymentLineLabel(
+                        order.paymentStatus,
+                        order.paymentMethod,
+                        currentLanguage === 'en'
+                      )}
                     </Badge>
-                  </p>
+                  </div>
                 </div>
 
                 {/* Actions */}
                 <div className="flex flex-wrap gap-2 lg:flex-col">
+                  <Button size="sm" variant="secondary" asChild className="flex-1 lg:flex-none">
+                    <Link to={`/farmer/orders/${order.id}`}>
+                      {currentLanguage === 'en' ? 'View order' : 'ऑर्डर देखें'}
+                    </Link>
+                  </Button>
                   {order.status === 'pending' && (
                     <>
                       <Button
@@ -346,16 +457,6 @@ const FarmerOrders = () => {
                         {currentLanguage === 'en' ? 'Reject' : 'अस्वीकार'}
                       </Button>
                     </>
-                  )}
-                  {order.status === 'confirmed' && (
-                    <Button
-                      size="sm"
-                      onClick={() => handleUpdateStatus(order.id, 'processing')}
-                      className="btn-primary-gradient"
-                    >
-                      <Package className="w-4 h-4 mr-1" />
-                      {currentLanguage === 'en' ? 'Start Processing' : 'प्रोसेसिंग शुरू'}
-                    </Button>
                   )}
                   {order.status === 'processing' && (
                     <Button
@@ -380,7 +481,27 @@ const FarmerOrders = () => {
                 </div>
               </div>
             </div>
-          )))}
+          ))}
+            {!isLoading && hasMore && searchQuery.trim() === '' && (
+              <div className="flex justify-center pt-4">
+                <Button
+                  type="button"
+                  variant="outline"
+                  disabled={loadingMore}
+                  onClick={() => void loadMoreOrders()}
+                >
+                  {loadingMore
+                    ? currentLanguage === 'en'
+                      ? 'Loading…'
+                      : 'लोड हो रहा है…'
+                    : currentLanguage === 'en'
+                      ? 'Load more orders'
+                      : 'और ऑर्डर लोड करें'}
+                </Button>
+              </div>
+            )}
+            </>
+          )}
         </div>
 
         {filteredOrders.length === 0 && (

@@ -1,5 +1,6 @@
 import { Navigate, useLocation } from 'react-router-dom';
 import { useAppSelector } from '@/hooks/useRedux';
+import { ROUTES } from '@/constants';
 import { UserRole } from '@/types';
 
 interface ProtectedRouteProps {
@@ -19,8 +20,12 @@ const ProtectedRoute = ({
   allowedRoles,
   redirectTo = '/login'
 }: ProtectedRouteProps) => {
-  const { isAuthenticated, user } = useAppSelector((state) => state.auth);
+  const { isAuthenticated, user, isLoading } = useAppSelector((state) => state.auth);
   const location = useLocation();
+
+  if (isLoading) {
+    return null;
+  }
 
   // Check if user is authenticated
   if (!isAuthenticated || !user) {
@@ -37,7 +42,7 @@ const ProtectedRoute = ({
       case 'buyer':
         return <Navigate to="/buyer/dashboard" replace />;
       case 'admin':
-        return <Navigate to="/admin/dashboard" replace />;
+        return <Navigate to={ROUTES.ADMIN_DASHBOARD} replace />;
       default:
         return <Navigate to="/" replace />;
     }

@@ -1,233 +1,118 @@
-# Direct Access for Farmers - Frontend
+# GaonBazaar (Direct Access for Farmers)
 
-A comprehensive, production-ready frontend for a farmer-to-buyer agricultural marketplace platform that directly connects Indian farmers with buyers and retailers, eliminating middlemen.
+Full-stack marketplace connecting farmers and buyers: **React + Vite** frontend, **Express + MongoDB** backend, **Socket.IO** for chat, **Razorpay** for payments.
 
-## 🌾 Project Overview
+## Repository layout
 
-This is a capstone project frontend built with React 18, Tailwind CSS, and modern web technologies. The platform enables farmers to sell directly to buyers through a user-friendly, mobile-first interface designed for low digital literacy users.
+| Path | Role |
+|------|------|
+| `Farm-front/` | React 18, TypeScript, Tailwind, Redux |
+| `Farm-back/` | Express 5 API, Mongoose, JWT auth |
 
-## ✨ Features
+## Prerequisites
 
-### For Farmers
-- 📊 **Dashboard** with earnings, orders, and listings overview
-- 📝 **Product Listing Management** - Add, edit, delete crop listings
-- 💬 **Real-time Negotiation** - Chat and negotiate prices with buyers
-- 📦 **Order Management** - Accept/reject orders, track status
-- ⭐ **Reviews & Ratings** - View and reply to buyer reviews
-- 📄 **KYC Upload** - Upload Aadhaar/Kisan ID for verification
+- Node.js **20+** (mongoose 9 expects a recent 20.x)
+- MongoDB (local or Atlas)
 
-### For Buyers
-- 🛒 **Marketplace** - Browse crops with advanced filters
-- 🔍 **Product Details** - View farmer profiles, prices, and details
-- 💬 **Negotiation Chat** - Negotiate prices directly with farmers
-- 🛍️ **Shopping Cart** - Manage orders before checkout
-- 💳 **Secure Payments** - Razorpay integration (UI ready)
-- 📦 **Order Tracking** - Track orders from placement to delivery
-- ⭐ **Reviews** - Rate and review farmers after delivery
+## Quick start
 
-### For Admins
-- 📊 **Analytics Dashboard** - Sales, users, and revenue charts
-- 👥 **User Management** - View and manage farmers and buyers
-- ✅ **KYC Verification** - Approve/reject farmer KYC documents
-- 🛡️ **Content Moderation** - Moderate listings and reviews
-- 📈 **Reports** - Category distribution and growth analytics
-
-### General Features
-- 🌐 **Multi-language Support** - English and Hindi
-- 📱 **Mobile-first Design** - Optimized for smartphones
-- 🎨 **Rural-friendly UI** - Simple, icon-based navigation
-- ♿ **Accessibility** - Large buttons, readable fonts
-- 🌙 **Dark Mode Ready** - CSS variables configured
-- 🔒 **Secure Authentication** - OTP-based login
-- 💬 **Real-time Chat** - Socket.io integration (ready)
-
-## 🛠️ Tech Stack
-
-- **React 18** - UI library
-- **TypeScript** - Type safety
-- **Tailwind CSS** - Styling
-- **React Router** - Routing
-- **Redux Toolkit** - State management
-- **Axios** - HTTP client (API ready)
-- **Socket.io Client** - Real-time chat
-- **Razorpay** - Payment integration (UI ready)
-- **shadcn/ui** - UI component library
-- **Recharts** - Charts and analytics
-- **Vite** - Build tool
-
-## 📁 Project Structure
-
-```
-src/
-├── components/      # Reusable UI components
-├── pages/          # Page components
-├── services/       # API & Socket services
-├── hooks/          # Custom React hooks
-├── store/          # Redux store & slices
-├── types/          # TypeScript definitions
-├── data/           # Mock data
-└── lib/            # Utilities
-```
-
-## 🚀 Getting Started
-
-### Prerequisites
-
-- Node.js 18+ and npm/yarn/pnpm
-- Git
-
-### Installation
+### 1. Backend
 
 ```bash
-# Clone the repository
-git clone <your-repo-url>
-cd farm-front
+cd Farm-back
+cp .env.example .env
+# Edit .env — at minimum MONGO_URI and JWT_SECRET
 
-# Install dependencies
 npm install
-
-# Start development server
 npm run dev
 ```
 
-The app will be available at `http://localhost:8080`
+API defaults to **http://localhost:5000** (see `PORT` in `.env`).
 
-### Build for Production
-
-```bash
-npm run build
-npm run preview
-```
-
-## 🔧 Environment Variables
-
-Create a `.env` file in the root directory:
-
-```env
-VITE_API_BASE_URL=http://localhost:3000/api
-VITE_SOCKET_URL=http://localhost:3001
-VITE_RAZORPAY_KEY=rzp_test_your_key_here
-```
-
-## 📱 Demo Accounts
-
-The login page includes quick demo account buttons:
-
-- **Farmer** - Access farmer dashboard
-- **Buyer** - Access buyer dashboard  
-- **Admin** - Access admin dashboard
-
-## 🎨 Design Principles
-
-- **Mobile-first** - Designed for smartphones (primary user device)
-- **Rural-friendly** - Simple, icon-based navigation
-- **Accessible** - Large buttons, clear typography
-- **Color Palette** - Green (agriculture), earth tones, warm backgrounds
-- **Typography** - Plus Jakarta Sans (English), Noto Sans Devanagari (Hindi)
-
-## 📋 Available Routes
-
-### Public
-- `/` - Landing page
-- `/login` - Login
-- `/register` - Registration
-- `/marketplace` - Browse products
-- `/product/:id` - Product details
-- `/support` - Help & FAQ
-
-### Farmer
-- `/farmer/dashboard` - Dashboard
-- `/farmer/listings` - Manage listings
-- `/farmer/orders` - Order management
-- `/farmer/reviews` - Reviews
-- `/farmer/profile` - Profile
-
-### Buyer
-- `/buyer/dashboard` - Dashboard
-- `/buyer/orders` - Order tracking
-- `/buyer/cart` - Shopping cart
-- `/buyer/checkout` - Checkout
-- `/buyer/reviews` - Reviews
-- `/buyer/profile` - Profile
-
-### Admin
-- `/admin/dashboard` - Analytics dashboard
-- `/admin/users` - User management
-- `/admin/listings` - Listing moderation
-- `/admin/reviews` - Review moderation
-
-### Chat
-- `/chat/:id` - Negotiation chat
-
-## 🔌 Backend Integration
-
-The frontend is ready for backend integration:
-
-### API Service
-All API endpoints are defined in `src/services/api.ts`. Connect to your backend by setting `VITE_API_BASE_URL`.
-
-### Socket.io
-Real-time chat service is configured in `src/services/socket.ts`. Set `VITE_SOCKET_URL` to connect to your Socket.io server.
-
-### Payment
-Razorpay integration structure is in `src/lib/razorpay.ts`. Add your Razorpay key to enable payments.
-
-## 📚 Key Files
-
-- `src/App.tsx` - Main app component with routes
-- `src/services/api.ts` - API service with all endpoints
-- `src/services/socket.ts` - Socket.io service
-- `src/store/` - Redux store configuration
-- `src/data/mockData.ts` - Mock data for development
-- `src/types/index.ts` - TypeScript type definitions
-
-## 🧪 Development
-
-### Mock Data
-The app uses mock data from `src/data/mockData.ts` for development. This includes:
-- 3 farmers
-- 6 products
-- 3 orders
-- 2 chat conversations
-- Reviews and notifications
-
-### State Management
-- Redux Toolkit for global state
-- React Query ready for server state
-- Local state for component-specific data
-
-## 📦 Build & Deploy
+### 2. Frontend
 
 ```bash
-# Development build
-npm run build:dev
+cd Farm-front
+cp .env.example .env.local
+# Set VITE_API_BASE_URL and VITE_SOCKET_URL to match your API (see .env.example)
 
-# Production build
-npm run build
-
-# Preview production build
-npm run preview
+npm install
+npm run dev
 ```
 
-## 🎯 Project Status
+App defaults to **http://localhost:8080**.
 
-✅ **Complete** - All features implemented
-✅ **Production Ready** - Ready for capstone submission
-✅ **Backend Ready** - Integration points prepared
-✅ **No Errors** - Linting and compilation clean
+### 3. CORS
 
-## 📄 License
+The API allows origins listed in **`CORS_ORIGINS`** (comma-separated). For local dev, `http://localhost:8080` is the default if unset. For production, set all real web origins there.
 
-This project is for educational/capstone purposes.
+## Authentication
 
-## 👥 Author
+- **Email + password** registration and login (JWT).
+- Optional **Google Sign-In** when `GOOGLE_CLIENT_ID` (backend) and `VITE_GOOGLE_CLIENT_ID` (frontend) are set to the same OAuth client.
 
-Capstone Project - Direct Access for Farmers
+There is **no OTP-only** login path in the current backend; treat any old docs mentioning OTP as outdated.
 
-## 📖 Documentation
+## Environment variables
 
-For detailed project review, see `PROJECT_REVIEW.md`
+### Backend (`Farm-back/.env`)
 
----
+| Variable | Required | Purpose |
+|----------|----------|---------|
+| `MONGO_URI` | Yes | MongoDB connection string |
+| `JWT_SECRET` | Yes (prod) | Signs auth tokens |
+| `PORT` | No | Default `5000` |
+| `CORS_ORIGINS` | No | Comma-separated browser origins; default `http://localhost:8080` |
+| `FRONTEND_URL` | For links | Password reset / emails |
+| `RAZORPAY_KEY_ID`, `RAZORPAY_KEY_SECRET` | For payments | Server-side order + verify |
+| `GOOGLE_CLIENT_ID` | Optional | Verify Google ID tokens |
+| `SMTP_*` | Optional | Email via nodemailer (`utils/mail.js`) |
+| `TRUST_PROXY` | Deploy | Set `1` behind reverse proxy |
+| `RATE_LIMIT_MAX` | No | Requests per IP per 15 min under `/api` (default `400`) |
+| `RATE_LIMIT_DISABLED` | Dev | Set `1` to disable API rate limiting |
 
-**Built with ❤️ for Indian Farmers**
+See **`Farm-back/.env.example`** for the full list.
+
+### Frontend (`Farm-front/.env` or `.env.local`)
+
+| Variable | Purpose |
+|----------|---------|
+| `VITE_API_BASE_URL` | REST API base (e.g. `http://localhost:5000/api`) |
+| `VITE_SOCKET_URL` | Socket.IO server origin (same host as API, no `/api`) |
+| `VITE_GOOGLE_CLIENT_ID` | Google OAuth web client ID |
+
+See **`Farm-front/.env.example`**.
+
+## Scripts
+
+| Location | Command | Description |
+|----------|---------|-------------|
+| `Farm-front` | `npm run dev` | Vite dev server |
+| `Farm-front` | `npm run build` | Production build |
+| `Farm-front` | `npm run test` | Vitest unit tests |
+| `Farm-back` | `npm run dev` | Nodemon API |
+| `Farm-back` | `npm start` | Run API once |
+| `Farm-back` | `npm test` | Node.js built-in tests (`utils/corsConfig.test.js`) |
+
+## Production hardening (already partially applied)
+
+- **Helmet** security headers on the API.
+- **Rate limiting** on `/api` (tunable via env).
+- **CORS** driven by `CORS_ORIGINS`; Socket.IO uses the same rules (no open `*` in production config).
+- **Request logging** (method, path, status, duration) to stdout.
+- **Trust proxy** optional for correct IPs behind nginx/Render/etc.
+
+Still recommended before a public launch: structured logging, monitoring, database backups, moving large uploads off base64-in-JSON to object storage, and expanding automated tests (API integration tests, e2e).
+
+## Repo hygiene
+
+- **Do not commit** `node_modules/`, `.env`, or files under `Farm-back/uploads/` (only `.gitkeep` is tracked).
+- Use **`.env.example`** files as the source of truth for required keys.
+
+## Further reading
+
+- `Farm-front/PROJECT_REVIEW.md` — frontend-focused notes (if present).
+
+## License
+
+Educational / capstone use unless otherwise stated.

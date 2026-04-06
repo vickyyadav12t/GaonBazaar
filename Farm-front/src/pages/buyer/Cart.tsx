@@ -6,10 +6,12 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { useAppSelector, useAppDispatch } from '@/hooks/useRedux';
 import { removeFromCart, updateQuantity, clearCart } from '@/store/slices/cartSlice';
+import { useToast } from '@/hooks/use-toast';
 
 const Cart = () => {
   const navigate = useNavigate();
   const dispatch = useAppDispatch();
+  const { toast } = useToast();
   const { items, totalAmount } = useAppSelector((state) => state.cart);
   const { currentLanguage } = useAppSelector((state) => state.language);
   const [couponCode, setCouponCode] = useState('');
@@ -152,7 +154,19 @@ const Cart = () => {
                   value={couponCode}
                   onChange={(e) => setCouponCode(e.target.value)}
                 />
-                <Button variant="outline">
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() =>
+                    toast({
+                      title: currentLanguage === 'en' ? 'Coupons' : 'कूपन',
+                      description:
+                        currentLanguage === 'en'
+                          ? 'Coupon codes are not available yet.'
+                          : 'कूपन कोड अभी उपलब्ध नहीं हैं।',
+                    })
+                  }
+                >
                   {currentLanguage === 'en' ? 'Apply' : 'लागू करें'}
                 </Button>
               </div>

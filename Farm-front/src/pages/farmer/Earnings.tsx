@@ -1,6 +1,20 @@
-import { useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, Wallet, TrendingUp, Clock, Download, ArrowDownToLine, Calendar, Filter, IndianRupee, CheckCircle, XCircle, Loader } from 'lucide-react';
+import {
+  ArrowLeft,
+  Wallet,
+  TrendingUp,
+  TrendingDown,
+  Clock,
+  ArrowDownToLine,
+  Filter,
+  IndianRupee,
+  CheckCircle,
+  Info,
+  RefreshCw,
+  Download,
+  Loader2,
+} from 'lucide-react';
 import Layout from '@/components/layout/Layout';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -10,48 +24,114 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Alert, AlertDescription } from '@/components/ui/alert';
 import { useAppSelector } from '@/hooks/useRedux';
 import { useToast } from '@/hooks/use-toast';
-import { mockTransactions, mockWithdrawals, mockEarningsSummary } from '@/data/mockData';
-import { Transaction, Withdrawal } from '@/types';
+import { Transaction, Withdrawal, EarningsSummary } from '@/types';
 import { formatPrice, formatDate, formatRelativeTime } from '@/lib/format';
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, AreaChart, Area } from 'recharts';
+import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
+import { apiService } from '@/services/api';
+import { saveCsvFromApi } from '@/lib/downloadCsv';
+
+const emptySummary: EarningsSummary = {
+  totalEarnings: 0,
+  availableBalance: 0,
+  pendingPayments: 0,
+  withdrawnAmount: 0,
+  thisMonth: 0,
+  lastMonth: 0,
+  growth: 0,
+};
+
+type ChartRow = { month: string; earnings: number };
+type MonthlyRow = { month: string; amount: number; orders: number };
 
 const Earnings = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
   const { currentLanguage } = useAppSelector((state) => state.language);
-  
-  const [summary] = useState(mockEarningsSummary);
-  const [transactions, setTransactions] = useState<Transaction[]>(mockTransactions);
-  const [withdrawals, setWithdrawals] = useState<Withdrawal[]>(mockWithdrawals);
+  const { user } = useAppSelector((state) => state.auth);
+
+  const [summary, setSummary] = useState<EarningsSummary>(emptySummary);
+  const [chartByMonth, setChartByMonth] = useState<ChartRow[]>([]);
+  const [monthlyBreakdown, setMonthlyBreakdown] = useState<MonthlyRow[]>([]);
+  const [transactions, setTransactions] = useState<Transaction[]>([]);
+  const [withdrawals, setWithdrawals] = useState<Withdrawal[]>([]);
   const [filterPeriod, setFilterPeriod] = useState<'week' | 'month' | 'year' | 'all'>('month');
   const [withdrawalAmount, setWithdrawalAmount] = useState('');
   const [isWithdrawalDialogOpen, setIsWithdrawalDialogOpen] = useState(false);
-  const [selectedTransaction, setSelectedTransaction] = useState<Transaction | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
+  const [isSubmittingWithdrawal, setIsSubmittingWithdrawal] = useState(false);
+  const [exportingPayoutsCsv, setExportingPayoutsCsv] = useState(false);
+  const [bankForm, setBankForm] = useState({
+    bankName: '',
+    accountNumber: '',
+    ifscCode: '',
+    accountHolderName: '',
+  });
 
-  // Mock chart data (in real app, this would come from API)
-  const earningsChartData = [
-    { month: 'Aug', earnings: 18000 },
-    { month: 'Sep', earnings: 22000 },
-    { month: 'Oct', earnings: 23000 },
-    { month: 'Nov', earnings: 25000 },
-    { month: 'Dec', earnings: 29420 },
-  ];
+  const loadEarnings = useCallback(async () => {
+    if (!user || user.role !== 'farmer') return;
+    try {
+      setIsLoading(true);
+      const res = await apiService.earnings.getDashboard();
+      const data = res.data as {
+        summary: EarningsSummary;
+        chartByMonth: ChartRow[];
+        monthlyBreakdown: MonthlyRow[];
+        transactions: Transaction[];
+        withdrawals: Withdrawal[];
+      };
+      if (data.summary) setSummary(data.summary);
+      setChartByMonth(data.chartByMonth || []);
+      setMonthlyBreakdown(data.monthlyBreakdown || []);
+      setTransactions(data.transactions || []);
+      setWithdrawals(data.withdrawals || []);
+    } catch (error: any) {
+      console.error('Failed to load earnings', error);
+      toast({
+        title: currentLanguage === 'en' ? 'Error' : 'त्रुटि',
+        description:
+          error?.response?.data?.message ||
+          error?.message ||
+          (currentLanguage === 'en'
+            ? 'Failed to load earnings.'
+            : 'कमाई लोड करने में विफल।'),
+        variant: 'destructive',
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  }, [user, currentLanguage, toast]);
 
-  const monthlyBreakdown = [
-    { month: 'December 2024', amount: 29420, orders: 3 },
-    { month: 'November 2024', amount: 25000, orders: 5 },
-    { month: 'October 2024', amount: 23000, orders: 4 },
-  ];
+  useEffect(() => {
+    loadEarnings();
+  }, [loadEarnings]);
 
-  const handleWithdrawal = () => {
+  const filteredTransactions = useMemo(() => {
+    if (filterPeriod === 'all') return transactions;
+    const now = Date.now();
+    const days = filterPeriod === 'week' ? 7 : filterPeriod === 'month' ? 30 : 365;
+    const ms = days * 86400000;
+    return transactions.filter((t) => now - new Date(t.createdAt).getTime() <= ms);
+  }, [transactions, filterPeriod]);
+
+  const filteredWithdrawals = useMemo(() => {
+    if (filterPeriod === 'all') return withdrawals;
+    const now = Date.now();
+    const days = filterPeriod === 'week' ? 7 : filterPeriod === 'month' ? 30 : 365;
+    const ms = days * 86400000;
+    return withdrawals.filter((w) => now - new Date(w.requestedAt).getTime() <= ms);
+  }, [withdrawals, filterPeriod]);
+
+  const handleWithdrawal = async () => {
     const amount = parseFloat(withdrawalAmount);
-    
+
     if (!amount || amount <= 0) {
       toast({
         title: currentLanguage === 'en' ? 'Invalid Amount' : 'अमान्य राशि',
-        description: currentLanguage === 'en' ? 'Please enter a valid amount' : 'कृपया एक वैध राशि दर्ज करें',
+        description:
+          currentLanguage === 'en' ? 'Please enter a valid amount' : 'कृपया एक वैध राशि दर्ज करें',
         variant: 'destructive',
       });
       return;
@@ -60,7 +140,10 @@ const Earnings = () => {
     if (amount > summary.availableBalance) {
       toast({
         title: currentLanguage === 'en' ? 'Insufficient Balance' : 'अपर्याप्त शेष',
-        description: currentLanguage === 'en' ? 'You don\'t have enough balance' : 'आपके पास पर्याप्त शेष नहीं है',
+        description:
+          currentLanguage === 'en'
+            ? "You don't have enough available balance"
+            : 'आपके पास पर्याप्त उपलब्ध शेष नहीं है',
         variant: 'destructive',
       });
       return;
@@ -69,49 +152,48 @@ const Earnings = () => {
     if (amount < 1000) {
       toast({
         title: currentLanguage === 'en' ? 'Minimum Amount' : 'न्यूनतम राशि',
-        description: currentLanguage === 'en' ? 'Minimum withdrawal amount is ₹1,000' : 'न्यूनतम निकासी राशि ₹1,000 है',
+        description:
+          currentLanguage === 'en'
+            ? 'Minimum withdrawal amount is ₹1,000'
+            : 'न्यूनतम निकासी राशि ₹1,000 है',
         variant: 'destructive',
       });
       return;
     }
 
-    // Simulate withdrawal request
-    const newWithdrawal: Withdrawal = {
-      id: `wd-${Date.now()}`,
-      amount,
-      bankAccount: {
-        accountNumber: '1234567890',
-        ifscCode: 'HDFC0001234',
-        bankName: 'HDFC Bank',
-        accountHolderName: 'Rajesh Kumar',
-      },
-      status: 'pending',
-      requestedAt: new Date().toISOString(),
-    };
-
-    setWithdrawals(prev => [newWithdrawal, ...prev]);
-    
-    // Add transaction
-    const transaction: Transaction = {
-      id: `txn-${Date.now()}`,
-      type: 'withdrawal',
-      amount: -amount,
-      status: 'pending',
-      description: `Withdrawal request of ${formatPrice(amount)}`,
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
-    };
-    
-    setTransactions(prev => [transaction, ...prev]);
-    setWithdrawalAmount('');
-    setIsWithdrawalDialogOpen(false);
-    
-    toast({
-      title: currentLanguage === 'en' ? 'Withdrawal Requested' : 'निकासी अनुरोध',
-      description: currentLanguage === 'en' 
-        ? `Withdrawal of ${formatPrice(amount)} has been requested. It will be processed within 1-2 business days.`
-        : `${formatPrice(amount)} की निकासी का अनुरोध किया गया है। इसे 1-2 व्यावसायिक दिनों के भीतर संसाधित किया जाएगा।`,
-    });
+    try {
+      setIsSubmittingWithdrawal(true);
+      await apiService.earnings.requestWithdrawal({
+        amount,
+        bankName: bankForm.bankName.trim() || undefined,
+        accountNumber: bankForm.accountNumber.trim() || undefined,
+        ifscCode: bankForm.ifscCode.trim() || undefined,
+        accountHolderName: bankForm.accountHolderName.trim() || undefined,
+      });
+      toast({
+        title: currentLanguage === 'en' ? 'Withdrawal Requested' : 'निकासी अनुरोध',
+        description:
+          currentLanguage === 'en'
+            ? `Request for ${formatPrice(amount)} submitted. It will be reviewed for payout.`
+            : `${formatPrice(amount)} का अनुरोध जमा हुआ। भुगतान की समीक्षा होगी।`,
+      });
+      setWithdrawalAmount('');
+      setIsWithdrawalDialogOpen(false);
+      await loadEarnings();
+    } catch (error: any) {
+      toast({
+        title: currentLanguage === 'en' ? 'Error' : 'त्रुटि',
+        description:
+          error?.response?.data?.message ||
+          error?.message ||
+          (currentLanguage === 'en'
+            ? 'Could not submit withdrawal.'
+            : 'निकासी जमा नहीं हो सकी।'),
+        variant: 'destructive',
+      });
+    } finally {
+      setIsSubmittingWithdrawal(false);
+    }
   };
 
   const getTransactionIcon = (type: Transaction['type']) => {
@@ -153,6 +235,12 @@ const Earnings = () => {
     }
   };
 
+  const maskAccount = (num: string) => {
+    const digits = num.replace(/\D/g, '');
+    if (digits.length >= 4) return `****${digits.slice(-4)}`;
+    return num || '—';
+  };
+
   const content = {
     en: {
       title: 'Earnings & Wallet',
@@ -163,6 +251,7 @@ const Earnings = () => {
       withdrawn: 'Withdrawn',
       thisMonth: 'This Month',
       growth: 'Growth',
+      growthVsPrev: 'vs last month',
       overview: 'Overview',
       transactions: 'Transactions',
       withdrawals: 'Withdrawals',
@@ -187,6 +276,16 @@ const Earnings = () => {
       month: 'Last Month',
       year: 'Last Year',
       all: 'All Time',
+      dataNote:
+        'Totals are calculated from orders marked paid and withdrawal requests in this app. Bank payouts are not automated here.',
+      bankDetails: 'Payout bank details',
+      bankName: 'Bank name',
+      accountNumber: 'Account number',
+      ifsc: 'IFSC',
+      accountHolder: 'Account holder name',
+      loading: 'Loading…',
+      refresh: 'Refresh',
+      exportPayoutsCsv: 'Export payouts (CSV)',
     },
     hi: {
       title: 'कमाई और वॉलेट',
@@ -197,6 +296,7 @@ const Earnings = () => {
       withdrawn: 'निकाला गया',
       thisMonth: 'इस महीने',
       growth: 'वृद्धि',
+      growthVsPrev: 'पिछले माह की तुलना में',
       overview: 'अवलोकन',
       transactions: 'लेनदेन',
       withdrawals: 'निकासी',
@@ -221,18 +321,56 @@ const Earnings = () => {
       month: 'पिछला महीना',
       year: 'पिछला साल',
       all: 'सभी समय',
+      dataNote:
+        'योग इस ऐप में भुगतान किए ऑर्डर और निकासी अनुरोधों से निकाले गए हैं। बैंक ट्रांसफ़र यहाँ स्वचालित नहीं हैं।',
+      bankDetails: 'भुगतान बैंक विवरण',
+      bankName: 'बैंक का नाम',
+      accountNumber: 'खाता संख्या',
+      ifsc: 'IFSC',
+      accountHolder: 'खाताधारक का नाम',
+      loading: 'लोड हो रहा है…',
+      refresh: 'रिफ्रेश',
+      exportPayoutsCsv: 'निकासी CSV निर्यात',
     },
   };
 
   const t = content[currentLanguage];
 
+  const handleExportPayoutsCsv = async () => {
+    try {
+      setExportingPayoutsCsv(true);
+      await saveCsvFromApi(() => apiService.earnings.exportWithdrawalsCsv(), 'payouts.csv');
+      toast({
+        title: currentLanguage === 'en' ? 'Export started' : 'निर्यात शुरू',
+        description:
+          currentLanguage === 'en'
+            ? 'Your payouts CSV is downloading.'
+            : 'आपका भुगतान CSV डाउनलोड हो रहा है।',
+      });
+    } catch (e: unknown) {
+      const msg = e instanceof Error ? e.message : '';
+      toast({
+        title: currentLanguage === 'en' ? 'Export failed' : 'निर्यात विफल',
+        description:
+          msg ||
+          (currentLanguage === 'en' ? 'Could not download CSV.' : 'CSV डाउनलोड नहीं हो सका।'),
+        variant: 'destructive',
+      });
+    } finally {
+      setExportingPayoutsCsv(false);
+    }
+  };
+
+  const growthPositive = summary.growth >= 0;
+  const showGrowth =
+    summary.thisMonth > 0 || summary.lastMonth > 0 || summary.totalEarnings > 0;
+
   return (
     <Layout>
-      <div className="container mx-auto px-4 py-6">
-        {/* Header */}
+      <div className={`container mx-auto px-4 py-6 transition-opacity ${isLoading ? 'opacity-70' : ''}`}>
         <div className="flex items-center justify-between mb-6">
           <div className="flex items-center gap-4">
-            <button onClick={() => navigate(-1)} className="p-2 hover:bg-muted rounded-lg">
+            <button type="button" onClick={() => navigate(-1)} className="p-2 hover:bg-muted rounded-lg">
               <ArrowLeft className="w-5 h-5" />
             </button>
             <div>
@@ -244,10 +382,21 @@ const Earnings = () => {
               </p>
             </div>
           </div>
-          
-          <Dialog open={isWithdrawalDialogOpen} onOpenChange={setIsWithdrawalDialogOpen}>
+
+          <div className="flex items-center gap-2">
+            <Button
+              type="button"
+              variant="outline"
+              size="icon"
+              onClick={() => void loadEarnings()}
+              disabled={isLoading}
+              title={t.refresh}
+            >
+              <RefreshCw className={`h-4 w-4 ${isLoading ? 'animate-spin' : ''}`} />
+            </Button>
+            <Dialog open={isWithdrawalDialogOpen} onOpenChange={setIsWithdrawalDialogOpen}>
             <DialogTrigger asChild>
-              <Button className="btn-primary-gradient">
+              <Button className="btn-primary-gradient" disabled={isLoading}>
                 <ArrowDownToLine className="w-4 h-4 mr-2" />
                 {t.requestWithdrawal}
               </Button>
@@ -258,18 +407,16 @@ const Earnings = () => {
               </DialogHeader>
               <div className="space-y-4 py-4">
                 <div className="p-4 bg-muted rounded-lg">
-                  <p className="text-sm text-muted-foreground mb-1">
-                    {currentLanguage === 'en' ? 'Available Balance' : 'उपलब्ध शेष'}
-                  </p>
+                  <p className="text-sm text-muted-foreground mb-1">{t.availableBalance}</p>
                   <p className="text-2xl font-bold">{formatPrice(summary.availableBalance)}</p>
                 </div>
-                
+
                 <div>
                   <Label htmlFor="amount">{t.withdrawalAmount}</Label>
                   <Input
                     id="amount"
                     type="number"
-                    placeholder="Enter amount"
+                    placeholder="1000"
                     value={withdrawalAmount}
                     onChange={(e) => setWithdrawalAmount(e.target.value)}
                     className="mt-1.5"
@@ -277,15 +424,51 @@ const Earnings = () => {
                   <p className="text-xs text-muted-foreground mt-1">{t.minWithdrawal}</p>
                 </div>
 
-                <div className="p-4 bg-primary/5 rounded-lg border border-primary/20">
-                  <p className="text-sm font-medium mb-2">{t.bankAccount}</p>
-                  <p className="text-sm">HDFC Bank</p>
-                  <p className="text-sm text-muted-foreground">A/C: ****7890</p>
-                  <p className="text-sm text-muted-foreground">IFSC: HDFC0001234</p>
+                <div className="space-y-3">
+                  <p className="text-sm font-medium">{t.bankDetails}</p>
+                  <div>
+                    <Label htmlFor="bn">{t.bankName}</Label>
+                    <Input
+                      id="bn"
+                      value={bankForm.bankName}
+                      onChange={(e) => setBankForm((f) => ({ ...f, bankName: e.target.value }))}
+                      className="mt-1.5"
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="ac">{t.accountNumber}</Label>
+                    <Input
+                      id="ac"
+                      value={bankForm.accountNumber}
+                      onChange={(e) => setBankForm((f) => ({ ...f, accountNumber: e.target.value }))}
+                      className="mt-1.5"
+                    />
+                  </div>
+                  <div className="grid grid-cols-2 gap-2">
+                    <div>
+                      <Label htmlFor="ifsc">{t.ifsc}</Label>
+                      <Input
+                        id="ifsc"
+                        value={bankForm.ifscCode}
+                        onChange={(e) => setBankForm((f) => ({ ...f, ifscCode: e.target.value }))}
+                        className="mt-1.5"
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="holder">{t.accountHolder}</Label>
+                      <Input
+                        id="holder"
+                        value={bankForm.accountHolderName}
+                        onChange={(e) => setBankForm((f) => ({ ...f, accountHolderName: e.target.value }))}
+                        className="mt-1.5"
+                      />
+                    </div>
+                  </div>
                 </div>
 
                 <div className="flex gap-3">
                   <Button
+                    type="button"
                     variant="outline"
                     onClick={() => setIsWithdrawalDialogOpen(false)}
                     className="flex-1"
@@ -293,19 +476,29 @@ const Earnings = () => {
                     {t.cancel}
                   </Button>
                   <Button
-                    onClick={handleWithdrawal}
+                    type="button"
+                    onClick={() => void handleWithdrawal()}
                     className="flex-1 btn-primary-gradient"
-                    disabled={!withdrawalAmount || parseFloat(withdrawalAmount) <= 0}
+                    disabled={
+                      !withdrawalAmount ||
+                      parseFloat(withdrawalAmount) <= 0 ||
+                      isSubmittingWithdrawal
+                    }
                   >
-                    {t.withdraw}
+                    {isSubmittingWithdrawal ? t.loading : t.withdraw}
                   </Button>
                 </div>
               </div>
             </DialogContent>
           </Dialog>
+          </div>
         </div>
 
-        {/* Summary Cards */}
+        <Alert className="mb-6 border-primary/30 bg-primary/5">
+          <Info className="h-4 w-4" />
+          <AlertDescription className={currentLanguage === 'hi' ? 'font-hindi' : ''}>{t.dataNote}</AlertDescription>
+        </Alert>
+
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
           <Card>
             <CardHeader className="pb-3">
@@ -313,10 +506,20 @@ const Earnings = () => {
               <CardTitle className="text-2xl">{formatPrice(summary.totalEarnings)}</CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="flex items-center gap-1 text-success text-sm">
-                <TrendingUp className="w-4 h-4" />
-                <span>+{summary.growth.toFixed(1)}%</span>
-              </div>
+              {showGrowth ? (
+                <div
+                  className={`flex items-center gap-1 text-sm ${growthPositive ? 'text-success' : 'text-destructive'}`}
+                >
+                  {growthPositive ? <TrendingUp className="w-4 h-4" /> : <TrendingDown className="w-4 h-4" />}
+                  <span>
+                    {growthPositive ? '+' : ''}
+                    {summary.growth.toFixed(1)}%{' '}
+                    <span className="text-muted-foreground font-normal">{t.growthVsPrev}</span>
+                  </span>
+                </div>
+              ) : (
+                <p className="text-sm text-muted-foreground">—</p>
+              )}
             </CardContent>
           </Card>
 
@@ -326,8 +529,9 @@ const Earnings = () => {
               <CardTitle className="text-2xl">{formatPrice(summary.availableBalance)}</CardTitle>
             </CardHeader>
             <CardContent>
-              <Button 
-                variant="ghost" 
+              <Button
+                type="button"
+                variant="ghost"
                 size="sm"
                 onClick={() => setIsWithdrawalDialogOpen(true)}
                 className="h-7"
@@ -346,7 +550,7 @@ const Earnings = () => {
             <CardContent>
               <div className="flex items-center gap-1 text-warning text-sm">
                 <Clock className="w-4 h-4" />
-                <span>{currentLanguage === 'en' ? 'Processing' : 'प्रसंस्करण'}</span>
+                <span>{currentLanguage === 'en' ? 'Awaiting payment' : 'भुगतान लंबित'}</span>
               </div>
             </CardContent>
           </Card>
@@ -359,33 +563,33 @@ const Earnings = () => {
             <CardContent>
               <div className="flex items-center gap-1 text-muted-foreground text-sm">
                 <Wallet className="w-4 h-4" />
-                <span>{currentLanguage === 'en' ? 'All Time' : 'सभी समय'}</span>
+                <span>{currentLanguage === 'en' ? 'Completed payouts' : 'पूर्ण भुगतान'}</span>
               </div>
             </CardContent>
           </Card>
         </div>
 
-        {/* Charts and Breakdown */}
         <div className="grid lg:grid-cols-2 gap-6 mb-6">
-          {/* Earnings Trend Chart */}
           <Card>
             <CardHeader>
               <CardTitle>{t.earningsChart}</CardTitle>
-              <CardDescription>{t.thisMonth}: {formatPrice(summary.thisMonth)}</CardDescription>
+              <CardDescription>
+                {t.thisMonth}: {formatPrice(summary.thisMonth)}
+              </CardDescription>
             </CardHeader>
             <CardContent>
               <div className="h-64">
                 <ResponsiveContainer width="100%" height="100%">
-                  <AreaChart data={earningsChartData}>
+                  <AreaChart data={chartByMonth.length > 0 ? chartByMonth : [{ month: '—', earnings: 0 }]}>
                     <CartesianGrid strokeDasharray="3 3" className="opacity-30" />
                     <XAxis dataKey="month" className="text-xs" />
                     <YAxis className="text-xs" />
                     <Tooltip formatter={(value) => formatPrice(Number(value))} />
-                    <Area 
-                      type="monotone" 
-                      dataKey="earnings" 
-                      stroke="hsl(var(--primary))" 
-                      fill="hsl(var(--primary) / 0.2)" 
+                    <Area
+                      type="monotone"
+                      dataKey="earnings"
+                      stroke="hsl(var(--primary))"
+                      fill="hsl(var(--primary) / 0.2)"
                     />
                   </AreaChart>
                 </ResponsiveContainer>
@@ -393,38 +597,42 @@ const Earnings = () => {
             </CardContent>
           </Card>
 
-          {/* Monthly Breakdown */}
           <Card>
             <CardHeader>
               <CardTitle>{t.monthlyBreakdown}</CardTitle>
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
-                {monthlyBreakdown.map((month) => (
-                  <div key={month.month} className="flex items-center justify-between p-3 bg-muted/50 rounded-lg">
-                    <div>
-                      <p className="font-medium text-sm">{month.month}</p>
-                      <p className="text-xs text-muted-foreground">
-                        {month.orders} {currentLanguage === 'en' ? 'orders' : 'ऑर्डर'}
-                      </p>
+                {monthlyBreakdown.length > 0 ? (
+                  monthlyBreakdown.map((row) => (
+                    <div key={row.month} className="flex items-center justify-between p-3 bg-muted/50 rounded-lg">
+                      <div>
+                        <p className="font-medium text-sm">{row.month}</p>
+                        <p className="text-xs text-muted-foreground">
+                          {row.orders} {currentLanguage === 'en' ? 'paid orders' : 'भुगतान किए ऑर्डर'}
+                        </p>
+                      </div>
+                      <p className="font-bold">{formatPrice(row.amount)}</p>
                     </div>
-                    <p className="font-bold">{formatPrice(month.amount)}</p>
-                  </div>
-                ))}
+                  ))
+                ) : (
+                  <p className="text-sm text-muted-foreground text-center py-8">
+                    {currentLanguage === 'en' ? 'No paid orders yet' : 'अभी कोई भुगतान किया ऑर्डर नहीं'}
+                  </p>
+                )}
               </div>
             </CardContent>
           </Card>
         </div>
 
-        {/* Tabs */}
         <Tabs defaultValue="transactions" className="space-y-4">
-          <div className="flex items-center justify-between">
+          <div className="flex items-center justify-between flex-wrap gap-2">
             <TabsList>
               <TabsTrigger value="transactions">{t.transactions}</TabsTrigger>
               <TabsTrigger value="withdrawals">{t.withdrawals}</TabsTrigger>
             </TabsList>
-            
-            <Select value={filterPeriod} onValueChange={(v: any) => setFilterPeriod(v)}>
+
+            <Select value={filterPeriod} onValueChange={(v: 'week' | 'month' | 'year' | 'all') => setFilterPeriod(v)}>
               <SelectTrigger className="w-40">
                 <Filter className="w-4 h-4 mr-2" />
                 <SelectValue />
@@ -438,18 +646,13 @@ const Earnings = () => {
             </Select>
           </div>
 
-          {/* Transactions Tab */}
           <TabsContent value="transactions" className="space-y-4">
-            {transactions.length > 0 ? (
+            {filteredTransactions.length > 0 ? (
               <Card>
                 <CardContent className="p-0">
                   <div className="divide-y divide-border">
-                    {transactions.map((transaction) => (
-                      <div
-                        key={transaction.id}
-                        className="p-4 hover:bg-muted/50 transition-colors cursor-pointer"
-                        onClick={() => setSelectedTransaction(transaction)}
-                      >
+                    {filteredTransactions.map((transaction) => (
+                      <div key={transaction.id} className="p-4 hover:bg-muted/50 transition-colors">
                         <div className="flex items-center justify-between">
                           <div className="flex items-center gap-3">
                             <div className="w-10 h-10 bg-muted rounded-lg flex items-center justify-center">
@@ -463,8 +666,11 @@ const Earnings = () => {
                             </div>
                           </div>
                           <div className="text-right">
-                            <p className={`font-bold ${transaction.amount > 0 ? 'text-success' : 'text-destructive'}`}>
-                              {transaction.amount > 0 ? '+' : ''}{formatPrice(Math.abs(transaction.amount))}
+                            <p
+                              className={`font-bold ${transaction.amount > 0 ? 'text-success' : 'text-destructive'}`}
+                            >
+                              {transaction.amount > 0 ? '+' : ''}
+                              {formatPrice(Math.abs(transaction.amount))}
                             </p>
                             {getTransactionBadge(transaction.status)}
                           </div>
@@ -486,26 +692,41 @@ const Earnings = () => {
             )}
           </TabsContent>
 
-          {/* Withdrawals Tab */}
           <TabsContent value="withdrawals" className="space-y-4">
-            {withdrawals.length > 0 ? (
+            <div className="flex justify-end">
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                disabled={exportingPayoutsCsv}
+                onClick={() => void handleExportPayoutsCsv()}
+              >
+                {exportingPayoutsCsv ? (
+                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                ) : (
+                  <Download className="w-4 h-4 mr-2" />
+                )}
+                {t.exportPayoutsCsv}
+              </Button>
+            </div>
+            {filteredWithdrawals.length > 0 ? (
               <Card>
                 <CardContent className="p-0">
                   <div className="divide-y divide-border">
-                    {withdrawals.map((withdrawal) => (
+                    {filteredWithdrawals.map((withdrawal) => (
                       <div key={withdrawal.id} className="p-4">
                         <div className="flex items-center justify-between mb-3">
                           <div>
-                            <p className="font-bold text-lg">
-                              {formatPrice(withdrawal.amount)}
-                            </p>
+                            <p className="font-bold text-lg">{formatPrice(withdrawal.amount)}</p>
                             {getWithdrawalBadge(withdrawal.status)}
                           </div>
                         </div>
                         <div className="space-y-2 text-sm">
-                          <div className="flex justify-between">
-                            <span className="text-muted-foreground">{t.bankAccount}:</span>
-                            <span>{withdrawal.bankAccount.bankName} - ****{withdrawal.bankAccount.accountNumber.slice(-4)}</span>
+                          <div className="flex justify-between gap-2">
+                            <span className="text-muted-foreground shrink-0">{t.bankAccount}:</span>
+                            <span className="text-right">
+                              {withdrawal.bankAccount.bankName} — {maskAccount(withdrawal.bankAccount.accountNumber)}
+                            </span>
                           </div>
                           <div className="flex justify-between">
                             <span className="text-muted-foreground">{t.requestedOn}:</span>
@@ -546,4 +767,3 @@ const Earnings = () => {
 };
 
 export default Earnings;
-

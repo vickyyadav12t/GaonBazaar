@@ -1,5 +1,7 @@
-import { useEffect, useState } from 'react';
-import { Search, Filter, SlidersHorizontal, X, Grid3x3, List, TrendingUp, Package, Sparkles } from 'lucide-react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useInfiniteQuery } from '@tanstack/react-query';
+import { useSearchParams } from 'react-router-dom';
+import { Search, SlidersHorizontal, X, Grid3x3, List, TrendingUp, Package, Sparkles } from 'lucide-react';
 import Layout from '@/components/layout/Layout';
 import ProductCard from '@/components/product/ProductCard';
 import { Button } from '@/components/ui/button';
@@ -9,88 +11,213 @@ import { useAppSelector } from '@/hooks/useRedux';
 import { CropCategory, Product } from '@/types';
 import { StaggerContainer, AnimateOnScroll } from '@/components/animations';
 import { apiService } from '@/services/api';
+import { resolveFarmerAvatarUrl } from '@/lib/farmerAvatarUrl';
+import { farmerRatingFromApi } from '@/lib/farmerRatingFromApi';
+import { useCopilot } from '@/context/CopilotContext';
+
+const PAGE_SIZE = 30;
+
+function marketplaceQueryParams(opts: {
+  skip: number;
+  includeTotal: boolean;
+  search: string;
+  category: CropCategory | 'all';
+  minPrice: string;
+  maxPrice: string;
+  organicOnly: boolean;
+  negotiableOnly: boolean;
+  sortBy: 'newest' | 'price_low' | 'price_high' | 'rating';
+  /** Filter to one farmer's public listings (Mongo ObjectId). */
+  farmerShopId?: string;
+}) {
+  const sort =
+    opts.sortBy === 'price_low'
+      ? 'price_asc'
+      : opts.sortBy === 'price_high'
+        ? 'price_desc'
+        : opts.sortBy === 'rating'
+          ? 'popular'
+          : 'newest';
+
+  const params: Record<string, string | number> = {
+    limit: PAGE_SIZE,
+    skip: opts.skip,
+    sort,
+  };
+  if (opts.includeTotal) params.includeTotal = 'true';
+  const q = opts.search.trim();
+  if (q) params.search = q;
+  if (opts.category !== 'all') params.category = opts.category;
+  const minN = opts.minPrice !== '' ? Number(opts.minPrice) : NaN;
+  const maxN = opts.maxPrice !== '' ? Number(opts.maxPrice) : NaN;
+  if (Number.isFinite(minN)) params.minPrice = minN;
+  if (Number.isFinite(maxN)) params.maxPrice = maxN;
+  if (opts.organicOnly) params.organic = 'true';
+  if (opts.negotiableOnly) params.negotiable = 'true';
+  const fid = (opts.farmerShopId || '').trim();
+  if (fid && /^[a-f0-9]{24}$/i.test(fid)) {
+    params.farmer = fid;
+  }
+  return params;
+}
+
+function mapBackendProduct(p: any): Product {
+  return {
+    id: p._id || p.id,
+    farmerId: p.farmer?._id || p.farmer || '',
+    farmerName: p.farmer?.name || 'Farmer',
+    farmerAvatar: resolveFarmerAvatarUrl(p.farmer?.avatar),
+    farmerRating: farmerRatingFromApi(p),
+    farmerLocation: p.farmer?.location
+      ? `${p.farmer.location.district}, ${p.farmer.location.state}`
+      : '',
+    name: p.name,
+    nameHindi: p.nameHindi,
+    category: p.category,
+    description: p.description || '',
+    images:
+      p.images && p.images.length > 0
+        ? p.images
+        : ['https://images.unsplash.com/photo-1574323347407-f5e1ad6d020b?w=600'],
+    price: p.price,
+    unit: p.unit,
+    minOrderQuantity: p.minOrderQuantity || 1,
+    availableQuantity: p.availableQuantity,
+    harvestDate: p.harvestDate || new Date().toISOString(),
+    isOrganic: !!p.isOrganic,
+    isNegotiable: !!p.isNegotiable,
+    status: (p.status as Product['status']) || 'active',
+    createdAt: p.createdAt || new Date().toISOString(),
+    views: p.views || 0,
+    inquiries: 0,
+  };
+}
+
+const MARKETPLACE_CATEGORY_IDS = new Set(cropCategories.map((c) => c.id));
 
 const Marketplace = () => {
+  const [searchParams, setSearchParams] = useSearchParams();
   const { currentLanguage } = useAppSelector((state) => state.language);
+  const { setCopilotContext } = useCopilot();
   const [searchQuery, setSearchQuery] = useState('');
-  const [selectedCategory, setSelectedCategory] = useState<CropCategory | 'all'>('all');
+  const [debouncedSearch, setDebouncedSearch] = useState('');
+
+  const selectedCategory = useMemo((): CropCategory | 'all' => {
+    const c = searchParams.get('category');
+    if (c && MARKETPLACE_CATEGORY_IDS.has(c)) return c as CropCategory;
+    return 'all';
+  }, [searchParams]);
+
+  const farmerShopId = useMemo(() => {
+    const f = searchParams.get('farmer');
+    if (!f || !/^[a-f0-9]{24}$/i.test(f.trim())) return '';
+    return f.trim();
+  }, [searchParams]);
+
+  const setMarketplaceCategory = useCallback(
+    (cat: CropCategory | 'all') => {
+      setSearchParams(
+        (prev) => {
+          const next = new URLSearchParams(prev);
+          if (cat === 'all') next.delete('category');
+          else next.set('category', cat);
+          return next;
+        },
+        { replace: true }
+      );
+    },
+    [setSearchParams]
+  );
   const [sortBy, setSortBy] = useState<'newest' | 'price_low' | 'price_high' | 'rating'>('newest');
   const [showFilters, setShowFilters] = useState(false);
   const [priceRange, setPriceRange] = useState({ min: '', max: '' });
   const [organicOnly, setOrganicOnly] = useState(false);
+  const [negotiableOnly, setNegotiableOnly] = useState(false);
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
-  const [products, setProducts] = useState<Product[]>([]);
-  const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
-    const fetchProducts = async () => {
-      try {
-        setIsLoading(true);
-        const response = await apiService.products.getAll();
-        const backendProducts = response.data?.products || [];
+    const t = setTimeout(() => setDebouncedSearch(searchQuery.trim()), 400);
+    return () => clearTimeout(t);
+  }, [searchQuery]);
 
-        const mapped: Product[] = backendProducts.map((p: any) => ({
-          id: p._id || p.id,
-          farmerId: p.farmer?._id || p.farmer || '',
-          farmerName: p.farmer?.name || 'Farmer',
-          farmerAvatar: undefined,
-          farmerRating: 4.8,
-          farmerLocation: p.farmer?.location
-            ? `${p.farmer.location.district}, ${p.farmer.location.state}`
-            : '',
-          name: p.name,
-          nameHindi: p.nameHindi,
-          category: p.category,
-          description: p.description || '',
-          images: p.images && p.images.length > 0
-            ? p.images
-            : ['https://images.unsplash.com/photo-1574323347407-f5e1ad6d020b?w=600'],
-          price: p.price,
-          unit: p.unit,
-          minOrderQuantity: p.minOrderQuantity || 1,
-          availableQuantity: p.availableQuantity,
-          harvestDate: p.harvestDate || new Date().toISOString(),
-          isOrganic: !!p.isOrganic,
-          isNegotiable: !!p.isNegotiable,
-          status: 'active',
-          createdAt: p.createdAt || new Date().toISOString(),
-          views: p.views || 0,
-          inquiries: 0,
-        }));
+  useEffect(() => {
+    setCopilotContext({ page: 'marketplace' });
+    return () => setCopilotContext(null);
+  }, [setCopilotContext]);
 
-        setProducts(mapped);
-      } catch (error) {
-        console.error('Failed to load products', error);
-      } finally {
-        setIsLoading(false);
-      }
-    };
+  const filterArgs = useMemo(
+    () => ({
+      search: debouncedSearch,
+      category: selectedCategory,
+      minPrice: priceRange.min,
+      maxPrice: priceRange.max,
+      organicOnly,
+      negotiableOnly,
+      sortBy,
+      farmerShopId: farmerShopId || undefined,
+    }),
+    [
+      debouncedSearch,
+      selectedCategory,
+      priceRange.min,
+      priceRange.max,
+      organicOnly,
+      negotiableOnly,
+      sortBy,
+      farmerShopId,
+    ]
+  );
 
-    fetchProducts();
-  }, []);
+  const {
+    data,
+    fetchNextPage,
+    hasNextPage,
+    isPending,
+    isFetchingNextPage,
+    isFetching,
+    isError,
+    refetch,
+  } = useInfiniteQuery({
+    queryKey: ['marketplace-products', filterArgs],
+    initialPageParam: 0,
+    queryFn: async ({ pageParam }) => {
+      const skip = pageParam as number;
+      const includeTotal = skip === 0;
+      const response = await apiService.products.getAll(
+        marketplaceQueryParams({
+          skip,
+          includeTotal,
+          ...filterArgs,
+        })
+      );
+      const backendProducts = response.data?.products || [];
+      return {
+        products: backendProducts.map(mapBackendProduct),
+        total: response.data?.total,
+        rawCount: backendProducts.length,
+      };
+    },
+    getNextPageParam: (lastPage, allPages) => {
+      if (lastPage.rawCount < PAGE_SIZE) return undefined;
+      return allPages.reduce((sum, p) => sum + p.rawCount, 0);
+    },
+    staleTime: 60_000,
+    gcTime: 5 * 60_000,
+    retry: 1,
+  });
 
-  const filteredProducts = products
-    .filter((product) => {
-      const matchesSearch = product.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        (product.nameHindi && product.nameHindi.includes(searchQuery));
-      const matchesCategory = selectedCategory === 'all' || product.category === selectedCategory;
-      const matchesOrganic = !organicOnly || product.isOrganic;
-      const matchesPriceMin = !priceRange.min || product.price >= parseFloat(priceRange.min);
-      const matchesPriceMax = !priceRange.max || product.price <= parseFloat(priceRange.max);
-      return matchesSearch && matchesCategory && matchesOrganic && matchesPriceMin && matchesPriceMax;
-    })
-    .sort((a, b) => {
-      switch (sortBy) {
-        case 'price_low':
-          return a.price - b.price;
-        case 'price_high':
-          return b.price - a.price;
-        case 'rating':
-          return b.farmerRating - a.farmerRating;
-        default:
-          return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
-      }
-    });
+  const products = useMemo(() => data?.pages.flatMap((p) => p.products) ?? [], [data]);
+  const totalMatchCount = useMemo(
+    () => (typeof data?.pages[0]?.total === 'number' ? data.pages[0].total : null),
+    [data]
+  );
+  const isLoading = isPending;
+  const isLoadingMore = isFetchingNextPage;
+  const hasMore = !!hasNextPage;
+  const loadMoreProducts = useCallback(() => {
+    if (!hasNextPage || isFetchingNextPage) return;
+    void fetchNextPage();
+  }, [fetchNextPage, hasNextPage, isFetchingNextPage]);
 
   const content = {
     en: {
@@ -108,6 +235,7 @@ const Marketplace = () => {
       minPrice: 'Min Price',
       maxPrice: 'Max Price',
       organicOnly: 'Organic Only',
+      negotiableOnly: 'Negotiable only',
       clearFilters: 'Clear All',
       applyFilters: 'Apply Filters',
       results: 'products found',
@@ -117,6 +245,11 @@ const Marketplace = () => {
       trending: 'Trending Now',
       totalProducts: 'Total Products',
       activeFarmers: 'Active Farmers',
+      loadMore: 'Load more',
+      loadingMore: 'Loading more...',
+      farmerShopBanner:
+        'Filtered to one farmer’s shop. Clear below to see listings from all sellers.',
+      clearShopFilter: 'Show all farmers',
     },
     hi: {
       title: 'बाज़ार',
@@ -133,6 +266,7 @@ const Marketplace = () => {
       minPrice: 'न्यूनतम मूल्य',
       maxPrice: 'अधिकतम मूल्य',
       organicOnly: 'केवल जैविक',
+      negotiableOnly: 'केवल बातचीत योग्य',
       clearFilters: 'सभी साफ करें',
       applyFilters: 'फ़िल्टर लागू करें',
       results: 'उत्पाद मिले',
@@ -142,13 +276,38 @@ const Marketplace = () => {
       trending: 'ट्रेंडिंग अब',
       totalProducts: 'कुल उत्पाद',
       activeFarmers: 'सक्रिय किसान',
+      loadMore: 'और लोड करें',
+      loadingMore: 'और लोड हो रहा है...',
+      farmerShopBanner:
+        'एक किसान की दुकान पर फ़िल्टर लगा है। सभी विक्रेताओं की लिस्टिंग देखने के लिए नीचे साफ़ करें।',
+      clearShopFilter: 'सभी किसान दिखाएं',
     },
   };
 
   const t = content[currentLanguage];
 
-  const totalProducts = products.length;
-  const uniqueFarmers = new Set(products.map(p => p.farmerId)).size;
+  const displayTotal = totalMatchCount ?? products.length;
+  const uniqueFarmers = new Set(products.map((p) => p.farmerId)).size;
+  const filtersActive =
+    selectedCategory !== 'all' ||
+    !!priceRange.min ||
+    !!priceRange.max ||
+    organicOnly ||
+    negotiableOnly ||
+    sortBy !== 'newest' ||
+    !!debouncedSearch ||
+    !!farmerShopId;
+
+  const clearFarmerShop = useCallback(() => {
+    setSearchParams(
+      (prev) => {
+        const next = new URLSearchParams(prev);
+        next.delete('farmer');
+        return next;
+      },
+      { replace: true }
+    );
+  }, [setSearchParams]);
 
   return (
     <Layout>
@@ -173,18 +332,33 @@ const Marketplace = () => {
                       <Package className="w-4 h-4" />
                       <span className="text-xs">{t.totalProducts}</span>
                     </div>
-                    <p className="text-2xl font-bold text-foreground">{totalProducts}+</p>
+                    <p className="text-2xl font-bold text-foreground">
+                      {isLoading ? '…' : displayTotal}
+                    </p>
                   </div>
                   <div className="bg-card rounded-xl p-4 border border-border shadow-sm">
                     <div className="flex items-center gap-2 text-muted-foreground mb-1">
                       <TrendingUp className="w-4 h-4" />
                       <span className="text-xs">{t.activeFarmers}</span>
                     </div>
-                    <p className="text-2xl font-bold text-foreground">{uniqueFarmers}+</p>
+                    <p className="text-2xl font-bold text-foreground">
+                      {uniqueFarmers}
+                      {hasMore ? '+' : ''}
+                    </p>
                   </div>
                 </div>
               </div>
             </div>
+            {farmerShopId ? (
+              <div className="mb-6 flex flex-col gap-3 rounded-xl border border-primary/30 bg-primary/5 px-4 py-3 sm:flex-row sm:items-center sm:justify-between">
+                <p className={`text-sm text-foreground/90 ${currentLanguage === 'hi' ? 'font-hindi' : ''}`}>
+                  {t.farmerShopBanner}
+                </p>
+                <Button type="button" variant="outline" size="sm" className="shrink-0" onClick={clearFarmerShop}>
+                  {t.clearShopFilter}
+                </Button>
+              </div>
+            ) : null}
           </AnimateOnScroll>
 
           {/* Search & Filter Bar */}
@@ -208,7 +382,7 @@ const Marketplace = () => {
                 >
                   <SlidersHorizontal className="w-5 h-5" />
                   {t.filters}
-                  {((priceRange.min || priceRange.max) || organicOnly || sortBy !== 'newest') && (
+                  {(filtersActive || !!searchQuery) && (
                     <span className="w-2 h-2 bg-primary rounded-full" />
                   )}
                 </Button>
@@ -234,7 +408,7 @@ const Marketplace = () => {
           <AnimateOnScroll animation="slide-up" delay={0.2}>
             <div className="flex gap-3 overflow-x-auto pb-4 scrollbar-hide mb-6">
               <button
-                onClick={() => setSelectedCategory('all')}
+                onClick={() => setMarketplaceCategory('all')}
                 className={`px-6 py-3 rounded-full whitespace-nowrap transition-all duration-300 hover:scale-105 flex items-center gap-2 font-medium ${
                   selectedCategory === 'all'
                     ? 'bg-gradient-to-r from-primary to-primary-light text-primary-foreground shadow-lg scale-105'
@@ -247,7 +421,7 @@ const Marketplace = () => {
               {cropCategories.map((category, index) => (
                 <button
                   key={category.id}
-                  onClick={() => setSelectedCategory(category.id as CropCategory)}
+                  onClick={() => setMarketplaceCategory(category.id as CropCategory)}
                   className={`px-6 py-3 rounded-full whitespace-nowrap transition-all duration-300 hover:scale-105 flex items-center gap-2 font-medium ${
                     selectedCategory === category.id
                       ? 'bg-gradient-to-r from-primary to-primary-light text-primary-foreground shadow-lg scale-105'
@@ -280,7 +454,7 @@ const Marketplace = () => {
                   </button>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-6">
                   {/* Sort */}
                   <div>
                     <label className={`text-sm font-semibold mb-2 block text-foreground ${currentLanguage === 'hi' ? 'font-hindi' : ''}`}>
@@ -337,15 +511,31 @@ const Marketplace = () => {
                     </label>
                   </div>
 
+                  {/* Negotiable */}
+                  <div className="flex items-end">
+                    <label className="flex items-center gap-3 cursor-pointer p-4 rounded-xl border-2 border-border hover:border-primary/50 transition-colors w-full">
+                      <input
+                        type="checkbox"
+                        checked={negotiableOnly}
+                        onChange={(e) => setNegotiableOnly(e.target.checked)}
+                        className="w-5 h-5 rounded border-2 border-primary text-primary focus:ring-primary"
+                      />
+                      <span className={`text-sm font-semibold ${currentLanguage === 'hi' ? 'font-hindi' : ''}`}>
+                        {t.negotiableOnly}
+                      </span>
+                    </label>
+                  </div>
+
                   {/* Clear Filters */}
                   <div className="flex items-end">
                     <Button
                       variant="outline"
                       onClick={() => {
-                        setSelectedCategory('all');
+                        setMarketplaceCategory('all');
                         setSortBy('newest');
                         setPriceRange({ min: '', max: '' });
                         setOrganicOnly(false);
+                        setNegotiableOnly(false);
                         setSearchQuery('');
                       }}
                       className="w-full py-3 border-2 hover:bg-destructive hover:text-destructive-foreground hover:border-destructive"
@@ -363,11 +553,16 @@ const Marketplace = () => {
             <div className="flex items-center gap-4">
               <p className={`text-lg font-semibold text-foreground ${currentLanguage === 'hi' ? 'font-hindi' : ''}`}>
                 <span className="text-primary">
-                  {isLoading ? '...' : filteredProducts.length}
+                  {isLoading ? '…' : displayTotal}
                 </span>{' '}
                 {t.results}
+                {!isLoading && hasMore && products.length < displayTotal && (
+                  <span className="text-sm font-normal text-muted-foreground ml-2">
+                    ({products.length} {currentLanguage === 'en' ? 'loaded' : 'लोड'})
+                  </span>
+                )}
               </p>
-              {filteredProducts.length > 0 && (
+              {products.length > 0 && (
                 <div className="hidden md:flex items-center gap-2 text-sm text-muted-foreground">
                   <span>•</span>
                   <span>
@@ -388,7 +583,13 @@ const Marketplace = () => {
                   {organicOnly && (
                     <>
                       <span>•</span>
-                      <span>🌿 Organic Only</span>
+                      <span>🌿 {currentLanguage === 'en' ? 'Organic' : 'जैविक'}</span>
+                    </>
+                  )}
+                  {negotiableOnly && (
+                    <>
+                      <span>•</span>
+                      <span>{t.negotiableOnly}</span>
                     </>
                   )}
                 </div>
@@ -403,17 +604,31 @@ const Marketplace = () => {
                 {currentLanguage === 'en' ? 'Loading products...' : 'उत्पाद लोड हो रहे हैं...'}
               </p>
             </div>
-          ) : filteredProducts.length > 0 ? (
-            <StaggerContainer 
-              staggerDelay={0.05} 
-              animation="slide-up" 
-              className={viewMode === 'grid' 
-                ? "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6"
-                : "flex flex-col gap-4"
-              }
+          ) : isError ? (
+            <div className="text-center py-16 space-y-4">
+              <p className="text-muted-foreground">
+                {currentLanguage === 'en'
+                  ? 'Could not load products. Check your connection and try again.'
+                  : 'उत्पाद लोड नहीं हो सके। कनेक्शन जाँचकर दोबारा कोशिश करें।'}
+              </p>
+              <Button variant="outline" onClick={() => void refetch()}>
+                {currentLanguage === 'en' ? 'Retry' : 'फिर कोशिश करें'}
+              </Button>
+            </div>
+          ) : products.length > 0 ? (
+            <StaggerContainer
+              staggerDelay={0.05}
+              animation="slide-up"
+              className={`${viewMode === 'grid'
+                ? 'grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6'
+                : 'flex flex-col gap-4'} ${isFetching && !isFetchingNextPage ? 'opacity-80 transition-opacity' : ''}`}
             >
-              {filteredProducts.map((product) => (
-                <ProductCard key={product.id} product={product} />
+              {products.map((product, idx) => (
+                <ProductCard
+                  key={product.id}
+                  product={product}
+                  imagePriority={viewMode === 'grid' && idx < 6 ? 'high' : 'low'}
+                />
               ))}
             </StaggerContainer>
           ) : (
@@ -431,10 +646,11 @@ const Marketplace = () => {
                 <Button
                   variant="outline"
                   onClick={() => {
-                    setSelectedCategory('all');
+                    setMarketplaceCategory('all');
                     setSortBy('newest');
                     setPriceRange({ min: '', max: '' });
                     setOrganicOnly(false);
+                    setNegotiableOnly(false);
                     setSearchQuery('');
                     setShowFilters(false);
                   }}
@@ -445,6 +661,20 @@ const Marketplace = () => {
                 </Button>
               </div>
             </AnimateOnScroll>
+          )}
+
+          {!isLoading && hasMore && products.length > 0 && (
+            <div className="flex justify-center mt-10 pb-4">
+              <Button
+                variant="outline"
+                size="lg"
+                className="min-w-[200px] border-2"
+                onClick={loadMoreProducts}
+                disabled={isLoadingMore}
+              >
+                {isLoadingMore ? t.loadingMore : t.loadMore}
+              </Button>
+            </div>
           )}
         </div>
       </div>

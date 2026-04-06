@@ -4,7 +4,7 @@ import { LucideIcon } from 'lucide-react';
 interface StatCardProps {
   title: string;
   value: string | number;
-  subtitle?: string;
+  subtitle?: ReactNode;
   icon: LucideIcon;
   trend?: {
     value: number;
@@ -65,8 +65,8 @@ const StatCard = ({ title, value, subtitle, icon: Icon, trend, variant = 'defaul
         <div className="animate-fade-in">
           <p className="text-sm text-muted-foreground mb-1">{title}</p>
           <h3 className="text-2xl font-bold text-foreground group-hover:scale-105 transition-transform duration-300">{formatValue(value)}</h3>
-          {subtitle && (
-            <p className="text-sm text-muted-foreground mt-1">{subtitle}</p>
+          {subtitle != null && subtitle !== '' && (
+            <div className="text-sm text-muted-foreground mt-1">{subtitle}</div>
           )}
           {trend && (
             <p className={`text-sm mt-2 animate-slide-fade ${trend.isPositive ? 'text-success' : 'text-destructive'}`}>

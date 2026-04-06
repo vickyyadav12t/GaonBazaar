@@ -1,5 +1,10 @@
+const mongoose = require("mongoose");
 const Review = require("../models/Review");
 const Order = require("../models/Order");
+const Product = require("../models/Product");
+const User = require("../models/User");
+const Notification = require("../models/Notification");
+const { createNotificationIfAllowed } = require("../utils/notificationDispatch");
 
 const buildReviewResponse = (review) => {
   if (!review) return null;
@@ -8,17 +13,30 @@ const buildReviewResponse = (review) => {
 };
 
 // GET /api/reviews
-// Buyer: reviews they wrote; Farmer: reviews about them; Admin: all
+// Buyer: reviews they wrote; Farmer: reviews about them (approved only); Admin: all
 exports.getReviews = async (req, res) => {
   try {
     const userId = req.user?.id;
     const role = req.user?.role;
 
-    const filter = {};
+    let filter;
     if (role === "buyer") {
-      filter.reviewer = userId;
+      filter = { reviewer: userId };
     } else if (role === "farmer") {
-      filter.target = userId;
+      if (!mongoose.isValidObjectId(userId)) {
+        return res.status(400).json({ message: "Invalid user id" });
+      }
+      filter = {
+        target: userId,
+        // Published only; $ne:false keeps legacy docs without the field visible
+        isApproved: { $ne: false },
+      };
+    } else if (role === "admin") {
+      filter = {};
+    } else {
+      return res.status(403).json({
+        message: "You are not allowed to list reviews for this account.",
+      });
     }
 
     const reviews = await Review.find(filter)
@@ -91,9 +109,34 @@ exports.createReview = async (req, res) => {
       target: order.farmer,
       rating,
       comment,
+      isApproved: false,
     });
 
     await review.save();
+
+    try {
+      const [productDoc, buyerDoc, admins] = await Promise.all([
+        Product.findById(firstItem.product).select("name").lean(),
+        User.findById(userId).select("name").lean(),
+        User.find({ role: "admin" }).select("_id").lean(),
+      ]);
+      const buyerName = buyerDoc?.name || "A buyer";
+      const productName = productDoc?.name || "a product";
+      const r = Math.min(5, Math.max(1, Number(rating)));
+      await Promise.all(
+        admins.map((admin) =>
+          Notification.create({
+            user: admin._id,
+            type: "review",
+            title: "Review pending moderation",
+            message: `${buyerName} submitted a ${r}/5 review for ${productName}. Approve it in Admin → Reviews.`,
+            link: "/admin/reviews",
+          })
+        )
+      );
+    } catch {
+      // ignore notification errors
+    }
 
     return res.status(201).json({ review: buildReviewResponse(review) });
   } catch (err) {
@@ -134,9 +177,28 @@ exports.replyToReview = async (req, res) => {
         .json({ message: "You cannot reply to this review" });
     }
 
+    if (role === "farmer" && !review.isApproved) {
+      return res.status(400).json({
+        message: "You can only reply after the review is approved by a moderator",
+      });
+    }
+
     review.reply = reply;
     review.replyDate = new Date();
     await review.save();
+
+    // Notify reviewer (buyer) about reply
+    try {
+      await createNotificationIfAllowed(Notification, {
+        userId: review.reviewer,
+        type: "review",
+        title: "Response to your review",
+        message: "The farmer has replied to your review.",
+        link: "/buyer/reviews",
+      });
+    } catch {
+      // ignore notification errors
+    }
 
     return res.json({ review: buildReviewResponse(review) });
   } catch (err) {

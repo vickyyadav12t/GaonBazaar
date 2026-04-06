@@ -1,0 +1,26 @@
+# Dependencies (never commit)
+node_modules/
+Farm-back/node_modules/
+Farm-front/node_modules/
+
+# Secrets
+.env
+.env.local
+.env.*.local
+*.pem
+
+# Build output
+Farm-front/dist/
+Farm-front/dist-ssr/
+
+# Backend uploads (see Farm-back/uploads/.gitkeep)
+Farm-back/uploads/*
+!Farm-back/uploads/.gitkeep
+
+# Logs & OS
+*.log
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/*
+!.vscode/extensions.json

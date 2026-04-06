@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ArrowLeft, CreditCard, Smartphone, Building, Truck, MapPin, Check, Shield } from 'lucide-react';
 import Layout from '@/components/layout/Layout';
@@ -11,6 +11,7 @@ import { useAppSelector, useAppDispatch } from '@/hooks/useRedux';
 import { clearCart } from '@/store/slices/cartSlice';
 import { useToast } from '@/hooks/use-toast';
 import { apiService } from '@/services/api';
+import { payAppOrderWithRazorpay } from '@/lib/razorpay';
 
 const Checkout = () => {
   const navigate = useNavigate();
@@ -18,10 +19,13 @@ const Checkout = () => {
   const { toast } = useToast();
   const { items, totalAmount } = useAppSelector((state) => state.cart);
   const { currentLanguage } = useAppSelector((state) => state.language);
+  const { user } = useAppSelector((state) => state.auth);
 
   const [paymentMethod, setPaymentMethod] = useState('razorpay');
   const [isProcessing, setIsProcessing] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
+  const [placedOrderId, setPlacedOrderId] = useState('');
+  const [placedPaymentStatus, setPlacedPaymentStatus] = useState<string>('pending');
   const [formData, setFormData] = useState({
     name: '',
     phone: '',
@@ -46,6 +50,17 @@ const Checkout = () => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
+  useEffect(() => {
+    if (!user || user.role !== 'buyer') return;
+    setFormData((prev) => ({
+      ...prev,
+      name: prev.name.trim() ? prev.name : user.name || '',
+      phone: prev.phone.trim() ? prev.phone : user.phone || '',
+      state: prev.state.trim() ? prev.state : user.location?.state || '',
+      address: prev.address.trim() ? prev.address : user.businessAddress || prev.address,
+    }));
+  }, [user]);
+
   const handlePayment = async () => {
     if (!isFormValid) {
       toast({
@@ -62,6 +77,22 @@ const Checkout = () => {
     try {
       setIsProcessing(true);
 
+      const farmerIds = new Set(
+        items.map((i) => i.product.farmerId).filter((id): id is string => Boolean(id))
+      );
+      if (farmerIds.size > 1) {
+        toast({
+          title: currentLanguage === 'en' ? 'One farmer per order' : 'प्रति ऑर्डर एक किसान',
+          description:
+            currentLanguage === 'en'
+              ? 'Your cart has products from different farmers. Remove items from other farmers or place separate orders.'
+              : 'आपकी कार्ट में अलग-अलग किसानों के उत्पाद हैं। अन्य किसानों की वस्तुएँ हटाएँ या अलग ऑर्डर दें।',
+          variant: 'destructive',
+        });
+        setIsProcessing(false);
+        return;
+      }
+
       const shippingAddress = `${formData.name}, ${formData.phone}, ${formData.address}, ${formData.city}, ${formData.state} - ${formData.pincode}`;
 
       const orderItems = items.map((item) => ({
@@ -69,25 +100,101 @@ const Checkout = () => {
         quantity: item.quantity,
       }));
 
+      const apiPaymentMethod =
+        paymentMethod === 'bank' ? 'bank_transfer' : paymentMethod;
+
+      const negotiatedCandidates = Array.from(
+        new Set(
+          items
+            .map((i) => i.negotiatedPrice)
+            .filter((p): p is number => p != null && Number.isFinite(Number(p)) && Number(p) > 0)
+            .map((p) => Number(p))
+        )
+      );
+      const negotiatedPrice =
+        negotiatedCandidates.length === 1 ? negotiatedCandidates[0] : undefined;
+
       const response = await apiService.orders.create({
         items: orderItems,
         shippingAddress,
+        paymentMethod: apiPaymentMethod,
+        ...(negotiatedPrice != null ? { negotiatedPrice } : {}),
       });
 
       if (!response.data?.order) {
         throw new Error('Order was not created');
       }
 
-      setShowSuccess(true);
+      const created = response.data.order as { _id?: string; id?: string; paymentStatus?: string };
+      const oid = String(created._id || created.id || '');
+
+      if (paymentMethod === 'razorpay') {
+        const desc = `Order ${oid.slice(-8)} · ${items.length} item(s)`;
+        const payResult = await payAppOrderWithRazorpay(oid, {
+          name: formData.name,
+          email: user?.email,
+          phone: formData.phone,
+        }, desc);
+
+        if (payResult === 'aborted') {
+          toast({
+            title: currentLanguage === 'en' ? 'Payment cancelled' : 'भुगतान रद्द',
+            description:
+              currentLanguage === 'en'
+                ? 'Your order is saved. You can complete payment from order details.'
+                : 'आपका ऑर्डर सहेजा गया है। ऑर्डर विवरण से भुगतान पूरा कर सकते हैं।',
+          });
+          dispatch(clearCart());
+          navigate(`/buyer/orders/${oid}`);
+          setIsProcessing(false);
+          return;
+        }
+
+        if (payResult === 'failed') {
+          toast({
+            title: currentLanguage === 'en' ? 'Payment failed' : 'भुगतान विफल',
+            description:
+              currentLanguage === 'en'
+                ? 'Could not confirm payment. If money was debited, contact support with your order ID.'
+                : 'भुगतान पुष्टि नहीं हो सकी। राशि कट गई हो तो ऑर्डर आईडी के साथ सहायता से संपर्क करें।',
+            variant: 'destructive',
+          });
+          dispatch(clearCart());
+          navigate(`/buyer/orders/${oid}`);
+          setIsProcessing(false);
+          return;
+        }
+
+        if (payResult === 'skipped') {
+          toast({
+            title: currentLanguage === 'en' ? 'Online pay unavailable' : 'ऑनलाइन भुगतान उपलब्ध नहीं',
+            description:
+              currentLanguage === 'en'
+                ? 'Razorpay is not configured on the server. Your order is placed; pay via COD or from order details when online pay is enabled.'
+                : 'सर्वर पर Razorpay सेट नहीं है। ऑर्डर दर्ज है; COD से भुगतान करें या बाद में ऑर्डर से।',
+            variant: 'destructive',
+          });
+        }
+
+        setPlacedOrderId(oid);
+        setPlacedPaymentStatus(payResult === 'paid' ? 'paid' : created.paymentStatus || 'pending');
+        setShowSuccess(true);
+      } else {
+        setPlacedOrderId(oid);
+        setPlacedPaymentStatus(created.paymentStatus || 'pending');
+        setShowSuccess(true);
+      }
 
       setTimeout(() => {
         dispatch(clearCart());
         navigate('/buyer/orders');
-      }, 3000);
+      }, 3500);
+
+      setIsProcessing(false);
     } catch (error: any) {
       console.error('Checkout error', error);
       toast({
-        title: currentLanguage === 'en' ? 'Payment failed' : 'भुगतान विफल',
+        title: currentLanguage === 'en' ? 'Could not place order' : 'ऑर्डर नहीं हो सका',
         description:
           error?.response?.data?.message ||
           error?.message ||
@@ -101,29 +208,44 @@ const Checkout = () => {
   };
 
   if (showSuccess) {
+    const paid = placedPaymentStatus === 'paid';
     return (
       <Layout>
         <div className="container mx-auto px-4 py-12">
           <div className="max-w-md mx-auto text-center">
-            <div className="w-20 h-20 bg-success/20 rounded-full flex items-center justify-center mx-auto mb-6 animate-scale-in">
-              <Check className="w-10 h-10 text-success" />
+            <div
+              className={`w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-6 animate-scale-in ${
+                paid ? 'bg-success/20' : 'bg-primary/15'
+              }`}
+            >
+              <Check className={`w-10 h-10 ${paid ? 'text-success' : 'text-primary'}`} />
             </div>
-            <h2 className="text-2xl font-bold mb-2 text-success">
-              {currentLanguage === 'en' ? 'Payment Successful!' : 'भुगतान सफल!'}
+            <h2 className={`text-2xl font-bold mb-2 ${paid ? 'text-success' : 'text-foreground'}`}>
+              {paid
+                ? currentLanguage === 'en'
+                  ? 'Payment received'
+                  : 'भुगतान प्राप्त'
+                : currentLanguage === 'en'
+                  ? 'Order placed'
+                  : 'ऑर्डर दर्ज हो गया'}
             </h2>
             <p className="text-muted-foreground mb-4">
-              {currentLanguage === 'en' 
-                ? 'Your order has been placed successfully. You will receive a confirmation shortly.' 
-                : 'आपका ऑर्डर सफलतापूर्वक दे दिया गया है। आपको जल्द ही पुष्टि मिलेगी।'}
+              {paid
+                ? currentLanguage === 'en'
+                  ? 'Your order is confirmed. You will receive updates in My Orders.'
+                  : 'आपका ऑर्डर पुष्टि हो गया। अपडेट «मेरे ऑर्डर» में मिलेंगे।'
+                : currentLanguage === 'en'
+                  ? 'Your order is saved. For cash on delivery or bank transfer, pay the farmer as agreed. You can track status in My Orders.'
+                  : 'आपका ऑर्डर सहेजा गया है। COD या बैंक ट्रांसफर पर किसान से तय अनुसार भुगतान करें। स्थिति «मेरे ऑर्डर» में देखें।'}
             </p>
-            <div className="card-elevated p-4 mb-6">
+            <div className="card-elevated p-4 mb-6 text-left">
               <p className="text-sm text-muted-foreground mb-1">
                 {currentLanguage === 'en' ? 'Order ID' : 'ऑर्डर आईडी'}
               </p>
-              <p className="font-mono font-bold">#ORD-{Date.now().toString().slice(-8)}</p>
+              <p className="font-mono font-bold break-all">{placedOrderId || '—'}</p>
             </div>
             <p className="text-sm text-muted-foreground">
-              {currentLanguage === 'en' ? 'Redirecting to orders...' : 'ऑर्डर पर रीडायरेक्ट हो रहा है...'}
+              {currentLanguage === 'en' ? 'Redirecting to My Orders…' : 'मेरे ऑर्डर पर भेजा जा रहा है…'}
             </p>
           </div>
         </div>
@@ -230,6 +352,11 @@ const Checkout = () => {
                 <CreditCard className="w-5 h-5 text-primary" />
                 {currentLanguage === 'en' ? 'Payment Method' : 'भुगतान विधि'}
               </h2>
+              <p className="text-sm text-muted-foreground mb-4">
+                {currentLanguage === 'en'
+                  ? 'Razorpay: pay now with UPI, cards, or net banking (includes 2% platform fee). COD / bank transfer: order is placed; pay the farmer when you receive goods or per their instructions.'
+                  : 'Razorpay: अभी UPI/कार्ड/नेट बैंकिंग से भुगतान (2% प्लेटफॉर्म शुल्क सहित)। COD/बैंक: ऑर्डर दर्ज; सामान मिलने पर या किसान के निर्देशानुसार भुगतान करें।'}
+              </p>
               <RadioGroup value={paymentMethod} onValueChange={setPaymentMethod}>
                 <div className="space-y-3">
                   <label className={`flex items-center gap-4 p-4 rounded-xl border-2 cursor-pointer transition-all ${paymentMethod === 'razorpay' ? 'border-primary bg-primary/5' : 'border-border hover:border-primary/50'}`}>
@@ -335,7 +462,13 @@ const Checkout = () => {
                 ) : (
                   <>
                     <Shield className="w-4 h-4 mr-2" />
-                    {currentLanguage === 'en' ? `Pay ₹${grandTotal.toLocaleString()}` : `₹${grandTotal.toLocaleString()} भुगतान करें`}
+                    {paymentMethod === 'razorpay'
+                      ? currentLanguage === 'en'
+                        ? `Pay ₹${grandTotal.toLocaleString()}`
+                        : `₹${grandTotal.toLocaleString()} भुगतान करें`
+                      : currentLanguage === 'en'
+                        ? 'Place order'
+                        : 'ऑर्डर दें'}
                   </>
                 )}
               </Button>

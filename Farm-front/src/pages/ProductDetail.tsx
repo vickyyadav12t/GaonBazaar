@@ -10,6 +10,9 @@ import { addToCart, clearCart } from '@/store/slices/cartSlice';
 import { toast } from '@/hooks/use-toast';
 import { apiService } from '@/services/api';
 import { Product } from '@/types';
+import { toggleWishlist } from '@/store/slices/wishlistSlice';
+import { resolveFarmerAvatarUrl } from '@/lib/farmerAvatarUrl';
+import { useCopilot } from '@/context/CopilotContext';
 
 const ProductDetail = () => {
   const { id } = useParams();
@@ -17,6 +20,7 @@ const ProductDetail = () => {
   const dispatch = useAppDispatch();
   const { currentLanguage } = useAppSelector((state) => state.language);
   const { isAuthenticated, user } = useAppSelector((state) => state.auth);
+  const wishlistIds = useAppSelector((state) => state.wishlist.items.map((p) => p.id));
 
   const [product, setProduct] = useState<Product | null>(null);
   const [relatedProducts, setRelatedProducts] = useState<Product[]>([]);
@@ -24,6 +28,7 @@ const ProductDetail = () => {
   const [quantity, setQuantity] = useState(1);
   const [isWishlisted, setIsWishlisted] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const { setCopilotContext } = useCopilot();
 
   useEffect(() => {
     const fetchProduct = async () => {
@@ -36,12 +41,18 @@ const ProductDetail = () => {
           throw new Error('Product not found');
         }
 
+        const fr =
+          backendProduct.farmerAvgRating != null &&
+          Number.isFinite(Number(backendProduct.farmerAvgRating))
+            ? Math.round(Number(backendProduct.farmerAvgRating) * 10) / 10
+            : 0;
+
         const mapped: Product = {
           id: backendProduct._id || backendProduct.id,
           farmerId: backendProduct.farmer?._id || backendProduct.farmer || '',
           farmerName: backendProduct.farmer?.name || 'Farmer',
-          farmerAvatar: undefined,
-          farmerRating: 4.8,
+          farmerAvatar: resolveFarmerAvatarUrl(backendProduct.farmer?.avatar),
+          farmerRating: fr,
           farmerLocation: backendProduct.farmer?.location
             ? `${backendProduct.farmer.location.district}, ${backendProduct.farmer.location.state}`
             : '',
@@ -59,17 +70,26 @@ const ProductDetail = () => {
           harvestDate: backendProduct.harvestDate || new Date().toISOString(),
           isOrganic: !!backendProduct.isOrganic,
           isNegotiable: !!backendProduct.isNegotiable,
-          status: 'active',
+          status: (backendProduct.status as Product['status']) || 'active',
           createdAt: backendProduct.createdAt || new Date().toISOString(),
           views: backendProduct.views || 0,
           inquiries: 0,
+          successfulSalesCount:
+            typeof backendProduct.successfulSalesCount === 'number'
+              ? backendProduct.successfulSalesCount
+              : 0,
         };
 
         setProduct(mapped);
         setQuantity(mapped.minOrderQuantity || 1);
+        setIsWishlisted(wishlistIds.includes(mapped.id));
 
         // Load simple related products: same category, excluding this product
-        const listResponse = await apiService.products.getAll({ category: mapped.category });
+        const listResponse = await apiService.products.getAll({
+          category: mapped.category,
+          limit: 12,
+          skip: 0,
+        });
         const all = listResponse.data?.products || [];
         const mappedRelated: Product[] = all
           .filter((p: any) => (p._id || p.id) !== mapped.id)
@@ -78,8 +98,11 @@ const ProductDetail = () => {
             id: p._id || p.id,
             farmerId: p.farmer?._id || p.farmer || '',
             farmerName: p.farmer?.name || 'Farmer',
-            farmerAvatar: undefined,
-            farmerRating: 4.8,
+            farmerAvatar: resolveFarmerAvatarUrl(p.farmer?.avatar),
+            farmerRating:
+              p.farmerAvgRating != null && Number.isFinite(Number(p.farmerAvgRating))
+                ? Math.round(Number(p.farmerAvgRating) * 10) / 10
+                : 0,
             farmerLocation: p.farmer?.location
               ? `${p.farmer.location.district}, ${p.farmer.location.state}`
               : '',
@@ -97,7 +120,7 @@ const ProductDetail = () => {
             harvestDate: p.harvestDate || new Date().toISOString(),
             isOrganic: !!p.isOrganic,
             isNegotiable: !!p.isNegotiable,
-            status: 'active',
+            status: (p.status as Product['status']) || 'active',
             createdAt: p.createdAt || new Date().toISOString(),
             views: p.views || 0,
             inquiries: 0,
@@ -122,6 +145,26 @@ const ProductDetail = () => {
 
     fetchProduct();
   }, [id, navigate, toast]);
+
+  useEffect(() => {
+    if (!product) {
+      setCopilotContext(null);
+      return;
+    }
+    setCopilotContext({
+      page: 'product',
+      product: {
+        name: product.name,
+        category: product.category,
+        unit: product.unit,
+        price: product.price,
+        organic: product.isOrganic,
+        negotiable: product.isNegotiable,
+        description: product.description,
+      },
+    });
+    return () => setCopilotContext(null);
+  }, [product, setCopilotContext]);
 
   if (isLoading || !product) {
     return (
@@ -156,6 +199,27 @@ const ProductDetail = () => {
         variant: 'destructive',
       });
       navigate('/login');
+      return;
+    }
+
+    if (user?.role !== 'buyer') {
+      toast({
+        title: 'Access Denied',
+        description: 'Only buyers can add items to the cart.',
+        variant: 'destructive',
+      });
+      return;
+    }
+
+    if (product.availableQuantity != null && product.availableQuantity <= 0) {
+      toast({
+        title: currentLanguage === 'en' ? 'Out of stock' : 'स्टॉक में नहीं',
+        description:
+          currentLanguage === 'en'
+            ? 'This product is currently unavailable.'
+            : 'यह उत्पाद अभी उपलब्ध नहीं है।',
+        variant: 'destructive',
+      });
       return;
     }
 
@@ -227,6 +291,50 @@ const ProductDetail = () => {
     }
 
     navigate(`/chat/new?product=${product.id}`);
+  };
+
+  const handleToggleWishlist = () => {
+    if (!isAuthenticated) {
+      toast({
+        title: 'Please Login',
+        description: 'You need to login to wishlist products.',
+        variant: 'destructive',
+      });
+      navigate('/login');
+      return;
+    }
+    if (user?.role !== 'buyer') {
+      toast({
+        title: 'Access Denied',
+        description: 'Only buyers can wishlist products.',
+        variant: 'destructive',
+      });
+      return;
+    }
+    if (!product) return;
+    dispatch(toggleWishlist(product));
+    const next = !isWishlisted;
+    setIsWishlisted(next);
+    toast({
+      title: next ? 'Saved to Wishlist' : 'Removed from Wishlist',
+      description: next ? 'You can view it in Buyer → Wishlist.' : undefined,
+    });
+  };
+
+  const handleShare = async () => {
+    try {
+      const url = window.location.href;
+      const title = product.name;
+      const text = `Check out ${product.name} on GaonBazaar`;
+      if (navigator.share) {
+        await navigator.share({ title, text, url });
+        return;
+      }
+      await navigator.clipboard.writeText(url);
+      toast({ title: 'Link copied', description: 'Share it with anyone.' });
+    } catch {
+      toast({ title: 'Could not share', description: 'Please copy the link from the address bar.', variant: 'destructive' });
+    }
   };
 
   const content = {
@@ -329,14 +437,19 @@ const ProductDetail = () => {
               {/* Wishlist & Share */}
               <div className="absolute top-4 right-4 flex gap-2">
                 <button
-                  onClick={() => setIsWishlisted(!isWishlisted)}
+                  onClick={handleToggleWishlist}
                   className={`w-10 h-10 rounded-full flex items-center justify-center transition-colors ${
                     isWishlisted ? 'bg-destructive text-destructive-foreground' : 'bg-background/80 backdrop-blur-sm'
                   }`}
                 >
                   <Heart className={`w-5 h-5 ${isWishlisted ? 'fill-current' : ''}`} />
                 </button>
-                <button className="w-10 h-10 bg-background/80 backdrop-blur-sm rounded-full flex items-center justify-center">
+                <button
+                  type="button"
+                  onClick={() => void handleShare()}
+                  className="w-10 h-10 bg-background/80 backdrop-blur-sm rounded-full flex items-center justify-center"
+                  aria-label="Share"
+                >
                   <Share2 className="w-5 h-5" />
                 </button>
               </div>
@@ -501,12 +614,18 @@ const ProductDetail = () => {
                   <p className="text-sm text-muted-foreground">{t.rating}</p>
                   <div className="flex items-center gap-1">
                     <Star className="w-5 h-5 text-secondary fill-secondary" />
-                    <span className="font-semibold">{product.farmerRating}</span>
+                    <span className="font-semibold">
+                      {product.farmerRating > 0 ? product.farmerRating : '—'}
+                    </span>
                   </div>
                 </div>
                 <div>
                   <p className="text-sm text-muted-foreground">{t.sales}</p>
-                  <p className="font-semibold">150+</p>
+                  <p className="font-semibold">
+                    {(product.successfulSalesCount ?? 0) > 0
+                      ? String(product.successfulSalesCount)
+                      : '—'}
+                  </p>
                 </div>
               </div>
             </div>

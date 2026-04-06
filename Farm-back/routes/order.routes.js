@@ -6,11 +6,13 @@ const {
   createOrder,
   updateOrder,
   cancelOrder,
+  exportOrdersCsv,
 } = require("../controllers/order.controller");
 
 const router = express.Router();
 
 // All order routes are protected
+router.get("/export.csv", auth, exportOrdersCsv);
 router.get("/", auth, getOrders);
 router.get("/:id", auth, getOrderById);
 router.post("/", auth, createOrder);

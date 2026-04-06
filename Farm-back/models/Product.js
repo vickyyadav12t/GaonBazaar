@@ -15,6 +15,11 @@ const productSchema = new mongoose.Schema(
     isOrganic: { type: Boolean, default: false },
     isNegotiable: { type: Boolean, default: false },
     views: { type: Number, default: 0 },
+    status: {
+      type: String,
+      enum: ["active", "hidden", "sold_out"],
+      default: "active",
+    },
 
     // Farmer reference
     farmer: {

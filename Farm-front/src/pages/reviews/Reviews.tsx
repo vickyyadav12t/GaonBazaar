@@ -9,6 +9,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useAppSelector } from '@/hooks/useRedux';
 import { useToast } from '@/hooks/use-toast';
 import { apiService } from '@/services/api';
+import { fetchAllOrdersForCurrentUser } from '@/lib/fetchAllPaginated';
+import { mapApiOrderToOrder } from '@/lib/mapOrderFromApi';
 import { Order } from '@/types';
 
 const Reviews = () => {
@@ -28,6 +30,7 @@ const Reviews = () => {
 
   // Determine if user is farmer or buyer based on route or user role
   const isFarmer = user?.role === 'farmer';
+  const reviewRowId = (r: { _id?: string; id?: string }) => String(r._id || r.id || '');
   const userReviews = isFarmer 
     ? reviews.filter((r) => r.target?._id === user?.id || r.target === user?.id)
     : reviews.filter((r) => r.reviewer?._id === user?.id || r.reviewer === user?.id);
@@ -45,30 +48,13 @@ const Reviews = () => {
 
         // For buyers, load delivered orders without reviews
         if (!isFarmer) {
-          const ordersRes = await apiService.orders.getAll();
-          const backendOrders = ordersRes.data?.orders || [];
+          const backendOrders = await fetchAllOrdersForCurrentUser({
+            status: 'delivered',
+          });
 
-          const mappedOrders: Order[] = backendOrders.map((o: any) => ({
-            id: o._id || o.id,
-            buyerId: o.buyer?._id || o.buyer,
-            buyerName: o.buyer?.name || 'Buyer',
-            farmerId: o.farmer?._id || o.farmer,
-            farmerName: o.farmer?.name || 'Farmer',
-            productId: o.items?.[0]?.product || '',
-            productName: o.items?.[0]?.name || 'Product',
-            productImage:
-              o.items?.[0]?.image ||
-              'https://images.unsplash.com/photo-1574323347407-f5e1ad6d020b?w=600',
-            quantity: o.items?.[0]?.quantity || 1,
-            unit: o.items?.[0]?.unit || 'kg',
-            pricePerUnit: o.items?.[0]?.price || 0,
-            totalAmount: o.totalAmount || 0,
-            status: o.status,
-            paymentStatus: o.paymentStatus || 'pending',
-            deliveryAddress: o.shippingAddress || '',
-            createdAt: o.createdAt || new Date().toISOString(),
-            expectedDelivery: undefined,
-          }));
+          const mappedOrders: Order[] = backendOrders.map((o: any) =>
+            mapApiOrderToOrder(o)
+          );
 
           const deliveredOrders = mappedOrders.filter(
             (o) => o.status === 'delivered'
@@ -78,8 +64,8 @@ const Reviews = () => {
             (o) =>
               !backendReviews.find(
                 (r: any) =>
-                  (r.order?._id || r.order) === o.id &&
-                  (r.reviewer?._id || r.reviewer) === user.id
+                  String(r.order?._id || r.order) === o.id &&
+                  String(r.reviewer?._id || r.reviewer) === user.id
               )
           );
 
@@ -104,6 +90,15 @@ const Reviews = () => {
 
     fetchData();
   }, [user, isFarmer, currentLanguage, toast]);
+
+  // Convenience: if there's exactly one pending order, preselect it.
+  useEffect(() => {
+    if (isFarmer) return;
+    if (selectedOrder) return;
+    if (pendingReviewOrders.length === 1) {
+      setSelectedOrder(pendingReviewOrders[0].id);
+    }
+  }, [isFarmer, pendingReviewOrders, selectedOrder]);
 
   const handleReply = async (reviewId: string) => {
     const reply = replyText[reviewId];
@@ -138,7 +133,13 @@ const Reviews = () => {
   };
 
   const handleSubmitReview = async () => {
-    if (!selectedOrder || newReviewRating === 0 || !newReviewComment.trim()) {
+    const orderId =
+      selectedOrder ||
+      (pendingReviewOrders.length === 1 ? pendingReviewOrders[0].id : '');
+    const rating = Number(newReviewRating) || 0;
+    const comment = String(newReviewComment || '').trim();
+
+    if (!orderId || rating <= 0 || !comment) {
       toast({
         title: currentLanguage === 'en' ? 'Please fill all fields' : 'कृपया सभी फ़ील्ड भरें',
         variant: 'destructive',
@@ -146,14 +147,14 @@ const Reviews = () => {
       return;
     }
 
-    const order = pendingReviewOrders.find((o) => o.id === selectedOrder);
+    const order = pendingReviewOrders.find((o) => o.id === orderId);
     if (!order) return;
 
     try {
       const res = await apiService.reviews.create({
         orderId: order.id,
-        rating: newReviewRating,
-        comment: newReviewComment,
+        rating,
+        comment,
       });
       const created = res.data?.review;
 
@@ -171,8 +172,8 @@ const Reviews = () => {
             : 'समीक्षा सबमिट!',
         description:
           currentLanguage === 'en'
-            ? 'Thank you for your feedback.'
-            : 'आपकी प्रतिक्रिया के लिए धन्यवाद।',
+            ? 'It will appear publicly after a moderator approves it.'
+            : 'मॉडरेटर के अनुमोदन के बाद यह सार्वजनिक रूप से दिखाई देगी।',
       });
     } catch (error: any) {
       toast({
@@ -287,11 +288,11 @@ const Reviews = () => {
                 </p>
               </div>
             ) : userReviews.map((review: any) => (
-              <div key={review._id || review.id} className="card-elevated p-4">
+              <div key={reviewRowId(review)} className="card-elevated p-4">
                 <div className="flex items-start gap-4">
                   <div className="w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center">
                     <span className="text-lg font-bold text-primary">
-                      {review.reviewerName.charAt(0)}
+                      {(review.reviewer?.name || review.reviewerName || '?').charAt(0)}
                     </span>
                   </div>
                   <div className="flex-1">
@@ -305,7 +306,14 @@ const Reviews = () => {
                         </p>
                       </div>
                       <div className="text-right">
-                        {renderStars(review.rating)}
+                        <div className="flex flex-col items-end gap-1">
+                          {renderStars(review.rating)}
+                          {!isFarmer && review.isApproved === false && (
+                            <Badge variant="outline" className="text-warning border-warning/50">
+                              {currentLanguage === 'en' ? 'Pending moderation' : 'मॉडरेशन लंबित'}
+                            </Badge>
+                          )}
+                        </div>
                         <p className="text-xs text-muted-foreground mt-1">
                           {new Date(review.createdAt).toLocaleDateString()}
                         </p>
@@ -331,23 +339,23 @@ const Reviews = () => {
                     {/* Reply Input (for farmers) */}
                     {isFarmer && !review.reply && (
                       <div className="mt-4">
-                        {showReplyInput[review.id] ? (
+                        {showReplyInput[reviewRowId(review)] ? (
                           <div className="space-y-2">
                             <Textarea
                               placeholder={currentLanguage === 'en' ? 'Write your reply...' : 'अपना जवाब लिखें...'}
-                              value={replyText[review.id] || ''}
-                              onChange={(e) => setReplyText(prev => ({ ...prev, [review.id]: e.target.value }))}
+                              value={replyText[reviewRowId(review)] || ''}
+                              onChange={(e) => setReplyText(prev => ({ ...prev, [reviewRowId(review)]: e.target.value }))}
                               rows={2}
                             />
                             <div className="flex gap-2">
-                              <Button size="sm" onClick={() => handleReply(review.id)}>
+                              <Button size="sm" onClick={() => handleReply(reviewRowId(review))}>
                                 <Send className="w-4 h-4 mr-1" />
                                 {currentLanguage === 'en' ? 'Send' : 'भेजें'}
                               </Button>
                               <Button 
                                 size="sm" 
                                 variant="outline"
-                                onClick={() => setShowReplyInput(prev => ({ ...prev, [review.id]: false }))}
+                                onClick={() => setShowReplyInput(prev => ({ ...prev, [reviewRowId(review)]: false }))}
                               >
                                 {currentLanguage === 'en' ? 'Cancel' : 'रद्द'}
                               </Button>
@@ -357,7 +365,7 @@ const Reviews = () => {
                           <Button
                             size="sm"
                             variant="outline"
-                            onClick={() => setShowReplyInput(prev => ({ ...prev, [review.id]: true }))}
+                            onClick={() => setShowReplyInput(prev => ({ ...prev, [reviewRowId(review)]: true }))}
                           >
                             <MessageCircle className="w-4 h-4 mr-1" />
                             {currentLanguage === 'en' ? 'Reply' : 'जवाब दें'}
@@ -397,6 +405,7 @@ const Reviews = () => {
                         {pendingReviewOrders.map((order) => (
                           <button
                             key={order.id}
+                            type="button"
                             onClick={() => setSelectedOrder(order.id)}
                             className={`w-full flex items-center gap-3 p-3 rounded-xl border-2 transition-all ${selectedOrder === order.id ? 'border-primary bg-primary/5' : 'border-border hover:border-primary/50'}`}
                           >
@@ -457,7 +466,7 @@ const Reviews = () => {
           {isFarmer && (
             <TabsContent value="pending" className="space-y-4">
               {userReviews.filter(r => !r.reply).map((review) => (
-                <div key={review.id} className="card-elevated p-4 border-l-4 border-warning">
+                <div key={reviewRowId(review)} className="card-elevated p-4 border-l-4 border-warning">
                   <div className="flex items-start gap-4">
                     <div className="flex-1">
                       <div className="flex items-center justify-between mb-2">
@@ -469,11 +478,11 @@ const Reviews = () => {
                       <div className="mt-3">
                         <Textarea
                           placeholder={currentLanguage === 'en' ? 'Write your reply...' : 'अपना जवाब लिखें...'}
-                          value={replyText[review.id] || ''}
-                          onChange={(e) => setReplyText(prev => ({ ...prev, [review.id]: e.target.value }))}
+                          value={replyText[reviewRowId(review)] || ''}
+                          onChange={(e) => setReplyText(prev => ({ ...prev, [reviewRowId(review)]: e.target.value }))}
                           rows={2}
                         />
-                        <Button size="sm" className="mt-2" onClick={() => handleReply(review.id)}>
+                        <Button size="sm" className="mt-2" onClick={() => handleReply(reviewRowId(review))}>
                           <Send className="w-4 h-4 mr-1" />
                           {currentLanguage === 'en' ? 'Reply' : 'जवाब दें'}
                         </Button>

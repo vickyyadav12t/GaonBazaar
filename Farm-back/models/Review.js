@@ -10,7 +10,7 @@ const reviewSchema = new mongoose.Schema(
     comment: { type: String, required: true },
     reply: { type: String },
     replyDate: { type: Date },
-    isApproved: { type: Boolean, default: true },
+    isApproved: { type: Boolean, default: false },
   },
   {
     timestamps: true,

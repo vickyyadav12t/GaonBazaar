@@ -1,3 +1,4 @@
+import { Link } from 'react-router-dom';
 import { Order } from '@/types';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -13,7 +14,6 @@ interface OrderCardProps {
 
 const statusConfig = {
   pending: { label: 'Pending', color: 'bg-warning/10 text-warning', icon: Clock },
-  confirmed: { label: 'Confirmed', color: 'bg-info/10 text-info', icon: CheckCircle },
   processing: { label: 'Processing', color: 'bg-secondary/10 text-secondary', icon: Package },
   shipped: { label: 'Shipped', color: 'bg-primary/10 text-primary', icon: Truck },
   delivered: { label: 'Delivered', color: 'bg-success/10 text-success', icon: CheckCircle },
@@ -21,7 +21,8 @@ const statusConfig = {
 };
 
 const OrderCard = ({ order, userRole, onAccept, onReject, onViewDetails }: OrderCardProps) => {
-  const config = statusConfig[order.status];
+  const config =
+    statusConfig[order.status as keyof typeof statusConfig] ?? statusConfig.pending;
   const StatusIcon = config.icon;
 
   const formatPrice = (price: number) => {
@@ -69,7 +70,7 @@ const OrderCard = ({ order, userRole, onAccept, onReject, onViewDetails }: Order
           </div>
 
           {/* Actions */}
-          {order.status === 'pending' && userRole === 'farmer' && (
+          {order.status === 'pending' && userRole === 'farmer' && onAccept && onReject && (
             <div className="flex gap-2 mt-3">
               <Button size="sm" onClick={onAccept} className="bg-success hover:bg-success/90">
                 Accept
@@ -80,11 +81,11 @@ const OrderCard = ({ order, userRole, onAccept, onReject, onViewDetails }: Order
             </div>
           )}
 
-          {order.status !== 'pending' && (
-            <Button size="sm" variant="ghost" onClick={onViewDetails} className="mt-2 text-primary">
-              View Details →
-            </Button>
-          )}
+          <Button size="sm" variant="ghost" asChild className="mt-2 text-primary px-0">
+            <Link to={`/${userRole}/orders/${order.id}`}>
+              View order →
+            </Link>
+          </Button>
         </div>
       </div>
 

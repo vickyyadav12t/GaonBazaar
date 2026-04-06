@@ -1,0 +1,662 @@
+import { useCallback, useEffect, useState } from 'react';
+import { Link, useNavigate, useParams } from 'react-router-dom';
+import {
+  ArrowLeft,
+  MapPin,
+  MessageCircle,
+  Star,
+  Check,
+  X,
+  Truck,
+  Loader2,
+} from 'lucide-react';
+import Layout from '@/components/layout/Layout';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { Label } from '@/components/ui/label';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import { useAppSelector } from '@/hooks/useRedux';
+import { apiService } from '@/services/api';
+import { useToast } from '@/hooks/use-toast';
+import type { OrderDetail } from '@/types';
+import { mapApiOrderToDetail } from '@/lib/mapOrderFromApi';
+import { OrderStatusTimeline } from '@/components/orders/OrderStatusTimeline';
+import { payAppOrderWithRazorpay } from '@/lib/razorpay';
+import {
+  paymentLineLabel,
+  paymentMethodLabel,
+  paymentStatusLabel,
+} from '@/lib/orderPaymentCopy';
+import { useCopilot } from '@/context/CopilotContext';
+
+const formatInr = (n: number) =>
+  new Intl.NumberFormat('en-IN', {
+    style: 'currency',
+    currency: 'INR',
+    maximumFractionDigits: 0,
+  }).format(n);
+
+const OrderDetailPage = () => {
+  const { orderId } = useParams<{ orderId: string }>();
+  const navigate = useNavigate();
+  const { toast } = useToast();
+  const { user } = useAppSelector((s) => s.auth);
+  const { currentLanguage } = useAppSelector((s) => s.language);
+  const en = currentLanguage === 'en';
+
+  const [order, setOrder] = useState<OrderDetail | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [acting, setActing] = useState(false);
+  const [payingOnline, setPayingOnline] = useState(false);
+  const [adminOrderStatus, setAdminOrderStatus] = useState<string>('');
+  const [adminPaymentStatus, setAdminPaymentStatus] = useState<string>('');
+  const { setCopilotContext } = useCopilot();
+
+  const listPath =
+    user?.role === 'admin'
+      ? '/admin?tab=orders'
+      : user?.role === 'farmer'
+        ? '/farmer/orders'
+        : '/buyer/orders';
+
+  const loadOrder = useCallback(async () => {
+    if (!orderId) return;
+    try {
+      setLoading(true);
+      const res = await apiService.orders.getById(orderId);
+      const raw = res.data?.order;
+      if (!raw) {
+        setOrder(null);
+        return;
+      }
+      setOrder(mapApiOrderToDetail(raw));
+    } catch (error: any) {
+      console.error('Order detail load failed', error);
+      setOrder(null);
+      toast({
+        title: en ? 'Error' : 'त्रुटि',
+        description:
+          error?.response?.data?.message ||
+          error?.message ||
+          (en ? 'Could not load this order.' : 'ऑर्डर लोड नहीं हो सका।'),
+        variant: 'destructive',
+      });
+    } finally {
+      setLoading(false);
+    }
+  }, [orderId, en, toast]);
+
+  useEffect(() => {
+    if (user && orderId) {
+      void loadOrder();
+    }
+  }, [user, orderId, loadOrder]);
+
+  useEffect(() => {
+    if (order && user?.role === 'admin') {
+      setAdminOrderStatus(order.status);
+      setAdminPaymentStatus(order.paymentStatus);
+    }
+  }, [order?.id, order?.status, order?.paymentStatus, user?.role]);
+
+  useEffect(() => {
+    if (!order || (user?.role !== 'farmer' && user?.role !== 'buyer')) {
+      setCopilotContext(null);
+      return;
+    }
+    const itemsSummary =
+      order.items?.length > 0
+        ? order.items.map((i) => `${i.name} × ${i.quantity} ${i.unit}`).join('; ')
+        : `${order.productName} × ${order.quantity} ${order.unit}`;
+    const fee = order.platformFee ?? 0;
+    const totalText =
+      fee > 0
+        ? `${formatInr(order.totalAmount)} + fee ${formatInr(fee)}`
+        : formatInr(order.totalAmount);
+    setCopilotContext({
+      page: 'order',
+      order: {
+        status: order.status,
+        paymentStatus: order.paymentStatus,
+        paymentMethod: order.paymentMethod,
+        totalText,
+        itemsSummary,
+        roleView: user.role,
+      },
+    });
+    return () => setCopilotContext(null);
+  }, [order, user?.role, setCopilotContext]);
+
+  const refreshAfterAction = async () => {
+    await loadOrder();
+  };
+
+  const handleFarmerAccept = async () => {
+    if (!order) return;
+    try {
+      setActing(true);
+      await apiService.orders.update(order.id, { status: 'processing' });
+      toast({ title: en ? 'Order accepted' : 'ऑर्डर स्वीकृत' });
+      await refreshAfterAction();
+    } catch (error: any) {
+      toast({
+        title: en ? 'Error' : 'त्रुटि',
+        description: error?.response?.data?.message || error?.message,
+        variant: 'destructive',
+      });
+    } finally {
+      setActing(false);
+    }
+  };
+
+  const handleFarmerReject = async () => {
+    if (!order) return;
+    try {
+      setActing(true);
+      await apiService.orders.cancel(order.id);
+      toast({
+        title: en ? 'Order cancelled' : 'ऑर्डर रद्द',
+        variant: 'destructive',
+      });
+      await refreshAfterAction();
+    } catch (error: any) {
+      toast({
+        title: en ? 'Error' : 'त्रुटि',
+        description: error?.response?.data?.message || error?.message,
+        variant: 'destructive',
+      });
+    } finally {
+      setActing(false);
+    }
+  };
+
+  const handleStatus = async (status: string) => {
+    if (!order) return;
+    try {
+      setActing(true);
+      await apiService.orders.update(order.id, { status });
+      toast({ title: en ? 'Updated' : 'अपडेट' });
+      await refreshAfterAction();
+    } catch (error: any) {
+      toast({
+        title: en ? 'Error' : 'त्रुटि',
+        description: error?.response?.data?.message || error?.message,
+        variant: 'destructive',
+      });
+    } finally {
+      setActing(false);
+    }
+  };
+
+  const handlePayOnline = async () => {
+    if (!order || !user) return;
+    try {
+      setPayingOnline(true);
+      const r = await payAppOrderWithRazorpay(
+        order.id,
+        { name: user.name, email: user.email, phone: user.phone },
+        en ? `Order #${order.id.slice(-8)}` : `ऑर्डर #${order.id.slice(-8)}`
+      );
+      if (r === 'paid') {
+        toast({
+          title: en ? 'Payment received' : 'भुगतान प्राप्त',
+          description: en ? 'The farmer has been notified.' : 'किसान को सूचित किया गया।',
+        });
+        await refreshAfterAction();
+      } else if (r === 'skipped') {
+        toast({
+          title: en ? 'Online payment unavailable' : 'ऑनलाइन भुगतान उपलब्ध नहीं',
+          description: en
+            ? 'Razorpay keys are not set on the server.'
+            : 'सर्वर पर Razorpay कुंजी सेट नहीं हैं।',
+          variant: 'destructive',
+        });
+      } else if (r === 'aborted') {
+        toast({ title: en ? 'Payment window closed' : 'भुगतान विंडो बंद' });
+      } else {
+        toast({
+          title: en ? 'Could not verify payment' : 'भुगतान पुष्टि नहीं हो सकी',
+          variant: 'destructive',
+        });
+      }
+    } catch (error: any) {
+      toast({
+        title: en ? 'Error' : 'त्रुटि',
+        description: error?.response?.data?.message || error?.message,
+        variant: 'destructive',
+      });
+    } finally {
+      setPayingOnline(false);
+    }
+  };
+
+  const handleFarmerMarkPaid = async () => {
+    if (!order) return;
+    try {
+      setActing(true);
+      await apiService.orders.update(order.id, { paymentStatus: 'paid' });
+      toast({
+        title: en ? 'Marked as paid' : 'भुगतान दर्ज किया',
+        description: en
+          ? 'The buyer has been notified.'
+          : 'खरीदार को सूचित किया गया।',
+      });
+      await refreshAfterAction();
+    } catch (error: any) {
+      toast({
+        title: en ? 'Error' : 'त्रुटि',
+        description: error?.response?.data?.message || error?.message,
+        variant: 'destructive',
+      });
+    } finally {
+      setActing(false);
+    }
+  };
+
+  const handleAdminSaveOrder = async () => {
+    if (!order || user?.role !== 'admin') return;
+    const nextStatus = adminOrderStatus || order.status;
+    const nextPay = adminPaymentStatus || order.paymentStatus;
+    const payload: { status?: string; paymentStatus?: string } = {};
+    if (nextStatus !== order.status) payload.status = nextStatus;
+    if (nextPay !== order.paymentStatus) payload.paymentStatus = nextPay;
+    if (Object.keys(payload).length === 0) return;
+    try {
+      setActing(true);
+      await apiService.orders.update(order.id, payload);
+      toast({
+        title: en ? 'Order updated' : 'अपडेट',
+        description: en ? 'Changes saved.' : 'परिवर्तन सहेजे गए।',
+      });
+      await refreshAfterAction();
+    } catch (error: any) {
+      toast({
+        title: en ? 'Error' : 'त्रुटि',
+        description: error?.response?.data?.message || error?.message,
+        variant: 'destructive',
+      });
+    } finally {
+      setActing(false);
+    }
+  };
+
+  const handleBuyerCancel = async () => {
+    if (!order) return;
+    try {
+      setActing(true);
+      await apiService.orders.cancel(order.id);
+      toast({
+        title: en ? 'Order cancelled' : 'ऑर्डर रद्द',
+        variant: 'destructive',
+      });
+      await refreshAfterAction();
+    } catch (error: any) {
+      toast({
+        title: en ? 'Error' : 'त्रुटि',
+        description: error?.response?.data?.message || error?.message,
+        variant: 'destructive',
+      });
+    } finally {
+      setActing(false);
+    }
+  };
+
+  const statusBadgeClass = (status: string) => {
+    switch (status) {
+      case 'delivered':
+        return 'text-success bg-success/10';
+      case 'shipped':
+        return 'text-primary bg-primary/10';
+      case 'cancelled':
+        return 'text-destructive bg-destructive/10';
+      default:
+        return 'text-warning bg-warning/10';
+    }
+  };
+
+  if (!user || !orderId) {
+    return null;
+  }
+
+  return (
+    <Layout>
+      <div className="container mx-auto px-4 py-6 max-w-4xl">
+        <div className="flex items-center gap-4 mb-6">
+          <button
+            type="button"
+            onClick={() => navigate(listPath)}
+            className="p-2 hover:bg-muted rounded-lg"
+          >
+            <ArrowLeft className="w-5 h-5" />
+          </button>
+          <div>
+            <h1 className="text-2xl font-bold">
+              {en ? 'Order details' : 'ऑर्डर विवरण'}
+            </h1>
+            <p className="text-sm text-muted-foreground font-mono">#{orderId.slice(-8)}</p>
+          </div>
+        </div>
+
+        {loading ? (
+          <div className="flex justify-center py-20 text-muted-foreground gap-2">
+            <Loader2 className="w-6 h-6 animate-spin" />
+            {en ? 'Loading…' : 'लोड हो रहा है…'}
+          </div>
+        ) : !order ? (
+          <div className="card-elevated p-8 text-center text-muted-foreground">
+            {en ? 'Order not found or you do not have access.' : 'ऑर्डर नहीं मिला या पहुंच नहीं है।'}
+            <div className="mt-4">
+              <Button variant="outline" onClick={() => navigate(listPath)}>
+                {en ? 'Back to orders' : 'ऑर्डर पर वापस'}
+              </Button>
+            </div>
+          </div>
+        ) : (
+          <div className="space-y-6">
+            <div className="card-elevated p-6 flex flex-wrap items-start justify-between gap-4">
+              <div>
+                <p className="text-sm text-muted-foreground">
+                  {en ? 'Placed on' : 'दिनांक'}
+                </p>
+                <p className="font-medium">
+                  {new Date(order.createdAt).toLocaleString(
+                    en ? 'en-IN' : 'hi-IN',
+                    { dateStyle: 'medium', timeStyle: 'short' }
+                  )}
+                </p>
+                {order.updatedAt !== order.createdAt && (
+                  <p className="text-xs text-muted-foreground mt-1">
+                    {en ? 'Updated' : 'अपडेट'}:{' '}
+                    {new Date(order.updatedAt).toLocaleString(en ? 'en-IN' : 'hi-IN', {
+                      dateStyle: 'short',
+                      timeStyle: 'short',
+                    })}
+                  </p>
+                )}
+              </div>
+              <div className="flex flex-wrap gap-2">
+                <span
+                  className={`px-3 py-1 rounded-full text-sm font-medium capitalize ${statusBadgeClass(order.status)}`}
+                >
+                  {order.status}
+                </span>
+                <span className="px-3 py-1 rounded-full text-sm font-medium bg-muted text-muted-foreground">
+                  {paymentLineLabel(order.paymentStatus, order.paymentMethod, en)}
+                </span>
+                <span className="px-3 py-1 rounded-full text-sm font-medium bg-muted/80 text-muted-foreground">
+                  {paymentMethodLabel(order.paymentMethod, en)} ·{' '}
+                  {paymentStatusLabel(order.paymentStatus, en)}
+                </span>
+              </div>
+            </div>
+
+            <div className="card-elevated p-6">
+              <h2 className="text-lg font-semibold mb-4">
+                {en ? 'Items' : 'वस्तुएँ'} ({order.items.length})
+              </h2>
+              {order.negotiatedPricePerUnit != null && (
+                <p className="text-sm text-muted-foreground mb-4">
+                  {en ? 'Negotiated price per unit' : 'प्रति इकाई सौदा मूल्य'}:{' '}
+                  {formatInr(order.negotiatedPricePerUnit)}
+                </p>
+              )}
+              <ul className="space-y-4">
+                {order.items.map((line, i) => (
+                  <li
+                    key={`${line.productId}-${i}`}
+                    className="flex gap-4 p-4 rounded-xl border border-border bg-muted/20"
+                  >
+                    <img
+                      src={line.image}
+                      alt=""
+                      className="w-20 h-20 rounded-lg object-cover shrink-0"
+                    />
+                    <div className="flex-1 min-w-0">
+                      <p className="font-semibold">{line.name}</p>
+                      <p className="text-sm text-muted-foreground">
+                        {line.quantity} {line.unit} × {formatInr(line.pricePerUnit)}
+                      </p>
+                    </div>
+                    <p className="font-bold text-primary shrink-0">{formatInr(line.lineTotal)}</p>
+                  </li>
+                ))}
+              </ul>
+              <div className="mt-6 pt-4 border-t border-border space-y-2 text-sm">
+                <div className="flex justify-between text-muted-foreground">
+                  <span>{en ? 'Items subtotal' : 'वस्तुओं का योग'}</span>
+                  <span>{formatInr(order.totalAmount)}</span>
+                </div>
+                {(order.platformFee ?? 0) > 0 && (
+                  <div className="flex justify-between text-muted-foreground">
+                    <span>{en ? 'Platform fee (2%)' : 'प्लेटफॉर्म शुल्क (2%)'}</span>
+                    <span>{formatInr(order.platformFee ?? 0)}</span>
+                  </div>
+                )}
+                <div className="flex justify-between items-center pt-2 border-t border-border">
+                  <span className="text-lg font-semibold">
+                    {en ? 'Buyer pays' : 'खरीदार कुल'}
+                  </span>
+                  <span className="text-xl font-bold text-primary">
+                    {formatInr(order.totalAmount + (order.platformFee ?? 0))}
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            <OrderStatusTimeline
+              status={order.status}
+              currentLanguage={currentLanguage}
+              paymentPendingNote={order.paymentStatus === 'pending'}
+              paymentMethod={order.paymentMethod}
+              paymentStatus={order.paymentStatus}
+            />
+
+            <div className="card-elevated p-6">
+              <h2 className="text-lg font-semibold mb-4 flex items-center gap-2">
+                <MapPin className="w-5 h-5 text-muted-foreground" />
+                {en ? 'Delivery' : 'डिलीवरी'}
+              </h2>
+              <p className="text-foreground whitespace-pre-wrap">
+                {order.deliveryAddress || (en ? 'No address on file.' : 'पता उपलब्ध नहीं।')}
+              </p>
+              <div className="mt-4 text-sm text-muted-foreground space-y-1">
+                {user.role === 'admin' ? (
+                  <>
+                    <div>
+                      <span className="font-medium text-foreground">{en ? 'Buyer' : 'खरीदार'}: </span>
+                      {order.buyerName}
+                    </div>
+                    <div>
+                      <span className="font-medium text-foreground">{en ? 'Farmer' : 'किसान'}: </span>
+                      {order.farmerName}
+                    </div>
+                  </>
+                ) : user.role === 'buyer' ? (
+                  <>
+                    <span className="font-medium text-foreground">{en ? 'Seller' : 'विक्रेता'}: </span>
+                    {order.farmerName}
+                  </>
+                ) : (
+                  <>
+                    <span className="font-medium text-foreground">{en ? 'Buyer' : 'खरीदार'}: </span>
+                    {order.buyerName}
+                  </>
+                )}
+              </div>
+            </div>
+
+            {user.role === 'admin' && order && (
+              <div className="card-elevated p-6 border-2 border-primary/20">
+                <h2 className="text-lg font-semibold mb-4">
+                  {en ? 'Admin actions' : 'एडमिन कार्रवाई'}
+                </h2>
+                <p className="text-sm text-muted-foreground mb-4">
+                  {en
+                    ? 'Update fulfilment or payment status. Buyers and farmers are notified when status changes.'
+                    : 'पूर्ति या भुगतान स्थिति अपडेट करें।'}
+                </p>
+                <div className="grid gap-4 sm:grid-cols-2">
+                  <div className="space-y-2">
+                    <Label>{en ? 'Order status' : 'ऑर्डर स्थिति'}</Label>
+                    <Select value={adminOrderStatus || order.status} onValueChange={setAdminOrderStatus}>
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="pending">Pending</SelectItem>
+                        <SelectItem value="processing">Processing</SelectItem>
+                        <SelectItem value="shipped">Shipped</SelectItem>
+                        <SelectItem value="delivered">Delivered</SelectItem>
+                        <SelectItem value="cancelled">Cancelled</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="space-y-2">
+                    <Label>{en ? 'Payment status' : 'भुगतान स्थिति'}</Label>
+                    <Select
+                      value={adminPaymentStatus || order.paymentStatus}
+                      onValueChange={setAdminPaymentStatus}
+                    >
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="pending">Pending</SelectItem>
+                        <SelectItem value="paid">Paid</SelectItem>
+                        <SelectItem value="failed">Failed</SelectItem>
+                        <SelectItem value="refunded">Refunded</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+                <Button
+                  className="mt-4"
+                  disabled={
+                    acting ||
+                    (adminOrderStatus || order.status) === order.status &&
+                      (adminPaymentStatus || order.paymentStatus) === order.paymentStatus
+                  }
+                  onClick={() => void handleAdminSaveOrder()}
+                >
+                  {acting ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : null}
+                  {en ? 'Save changes' : 'सहेजें'}
+                </Button>
+              </div>
+            )}
+
+            {user.role === 'buyer' &&
+              order.paymentMethod === 'razorpay' &&
+              order.paymentStatus === 'pending' &&
+              order.status !== 'cancelled' && (
+                <Button
+                  className="btn-primary-gradient"
+                  disabled={payingOnline}
+                  onClick={() => void handlePayOnline()}
+                >
+                  {payingOnline ? (
+                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                  ) : null}
+                  {en ? 'Pay now (Razorpay)' : 'अभी भुगतान करें (Razorpay)'}
+                </Button>
+              )}
+
+            {user.role === 'farmer' &&
+              (order.paymentMethod === 'cod' || order.paymentMethod === 'bank_transfer') &&
+              order.paymentStatus === 'pending' &&
+              order.status !== 'cancelled' && (
+                <Button
+                  variant="secondary"
+                  disabled={acting}
+                  onClick={() => void handleFarmerMarkPaid()}
+                >
+                  {en ? 'Mark cash / transfer received' : 'नकद/ट्रांसफर प्राप्त दर्ज करें'}
+                </Button>
+              )}
+
+            {user.role === 'farmer' && order.status === 'pending' && (
+              <div className="flex flex-wrap gap-2">
+                <Button
+                  className="bg-success hover:bg-success/90"
+                  disabled={acting}
+                  onClick={() => void handleFarmerAccept()}
+                >
+                  <Check className="w-4 h-4 mr-1" />
+                  {en ? 'Accept order' : 'ऑर्डर स्वीकारें'}
+                </Button>
+                <Button
+                  variant="outline"
+                  className="text-destructive border-destructive"
+                  disabled={acting}
+                  onClick={() => void handleFarmerReject()}
+                >
+                  <X className="w-4 h-4 mr-1" />
+                  {en ? 'Reject' : 'अस्वीकार'}
+                </Button>
+              </div>
+            )}
+
+            {user.role === 'farmer' && order.status === 'processing' && (
+              <Button
+                className="btn-primary-gradient"
+                disabled={acting}
+                onClick={() => void handleStatus('shipped')}
+              >
+                <Truck className="w-4 h-4 mr-1" />
+                {en ? 'Mark shipped' : 'भेजा गया'}
+              </Button>
+            )}
+
+            {user.role === 'farmer' && order.status === 'shipped' && (
+              <Button
+                className="bg-success hover:bg-success/90"
+                disabled={acting}
+                onClick={() => void handleStatus('delivered')}
+              >
+                <Check className="w-4 h-4 mr-1" />
+                {en ? 'Mark delivered' : 'पहुंचा दिया'}
+              </Button>
+            )}
+
+            {user.role === 'buyer' &&
+              order.status === 'pending' &&
+              order.paymentStatus === 'pending' && (
+                <Button variant="destructive" disabled={acting} onClick={() => void handleBuyerCancel()}>
+                  {en ? 'Cancel order' : 'ऑर्डर रद्द करें'}
+                </Button>
+              )}
+
+            {user.role !== 'admin' && (
+              <div className="flex flex-wrap gap-3">
+                <Link
+                  to={user.role === 'farmer' ? '/farmer/chats' : '/buyer/chats'}
+                  className="flex-1 min-w-[140px]"
+                >
+                  <Button variant="outline" className="w-full">
+                    <MessageCircle className="w-4 h-4 mr-2" />
+                    {en ? 'Chats' : 'चैट'}
+                  </Button>
+                </Link>
+                {user.role === 'buyer' && order.status === 'delivered' && (
+                  <Link to="/buyer/reviews" className="flex-1 min-w-[140px]">
+                    <Button className="w-full btn-primary-gradient">
+                      <Star className="w-4 h-4 mr-2" />
+                      {en ? 'Reviews' : 'समीक्षा'}
+                    </Button>
+                  </Link>
+                )}
+              </div>
+            )}
+          </div>
+        )}
+      </div>
+    </Layout>
+  );
+};
+
+export default OrderDetailPage;

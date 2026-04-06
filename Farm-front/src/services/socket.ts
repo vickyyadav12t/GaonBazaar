@@ -27,7 +27,7 @@ class SocketService {
       return;
     }
 
-    const serverUrl = import.meta.env.VITE_SOCKET_URL || 'http://localhost:3001';
+    const serverUrl = import.meta.env.VITE_SOCKET_URL || 'http://localhost:5000';
     
     this.socket = io(serverUrl, {
       auth: {

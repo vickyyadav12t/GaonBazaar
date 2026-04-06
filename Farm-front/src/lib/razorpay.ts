@@ -1,134 +1,30 @@
 /**
- * FRONTEND-ONLY: Razorpay Payment Client Integration
- * 
- * This is a frontend Razorpay payment client.
- * It provides the UI structure for Razorpay checkout.
- * 
- * No backend code is included - this is purely the client-side payment integration.
- * Payment verification should be done on your backend server (not included here).
- * 
- * For frontend-only demo, this provides the payment UI with mock fallback.
+ * Razorpay Checkout — amounts are in paise from the API; signature verification is server-side.
  */
+
+import { apiService } from '@/services/api';
 
 declare global {
   interface Window {
-    Razorpay: any;
+    Razorpay: new (options: Record<string, unknown>) => {
+      open: () => void;
+      on: (event: string, handler: (payload: unknown) => void) => void;
+    };
   }
 }
 
-interface RazorpayOptions {
-  key: string;
-  amount: number; // in paise
-  currency: string;
-  name: string;
-  description: string;
-  order_id?: string;
-  handler: (response: RazorpayResponse) => void;
-  prefill?: {
-    name?: string;
-    email?: string;
-    contact?: string;
-  };
-  theme?: {
-    color?: string;
-  };
-  modal?: {
-    ondismiss?: () => void;
-  };
-}
-
-interface RazorpayResponse {
+export interface RazorpaySuccessPayload {
   razorpay_payment_id: string;
   razorpay_order_id: string;
   razorpay_signature: string;
 }
 
-/**
- * Initialize Razorpay payment
- * In production, replace with actual Razorpay key from environment
- */
-export const initializeRazorpay = (options: {
-  amount: number;
-  orderId: string;
-  description: string;
-  user: { name?: string; email?: string; phone?: string };
-  onSuccess: (response: RazorpayResponse) => void;
-  onError: (error: any) => void;
-}): void => {
-  // Check if Razorpay script is loaded
-  if (typeof window.Razorpay === 'undefined') {
-    console.warn('Razorpay SDK not loaded. This is expected in frontend-only mode.');
-    // In demo mode, simulate success after delay
-    setTimeout(() => {
-      options.onSuccess({
-        razorpay_payment_id: `pay_demo_${Date.now()}`,
-        razorpay_order_id: options.orderId,
-        razorpay_signature: `sig_demo_${Date.now()}`,
-      });
-    }, 2000);
-    return;
-  }
-
-  const razorpayOptions: RazorpayOptions = {
-    key: import.meta.env.VITE_RAZORPAY_KEY || 'rzp_test_demo', // Replace with actual key
-    amount: options.amount * 100, // Convert to paise
-    currency: 'INR',
-    name: 'Direct Access for Farmers',
-    description: options.description,
-    order_id: options.orderId,
-    prefill: {
-      name: options.user.name,
-      email: options.user.email,
-      contact: options.user.phone,
-    },
-    theme: {
-      color: '#22c55e', // Primary green color
-    },
-    handler: options.onSuccess,
-    modal: {
-      ondismiss: () => options.onError(new Error('Payment cancelled')),
-    },
-  };
-
-  const razorpay = new window.Razorpay(razorpayOptions);
-  razorpay.on('payment.failed', (response: any) => {
-    options.onError(response.error);
-  });
-
-  razorpay.open();
-};
-
-/**
- * Verify Razorpay payment signature
- * This should be done on the backend for security
- */
-export const verifyPayment = async (
-  orderId: string,
-  paymentId: string,
-  signature: string
-): Promise<boolean> => {
-  // In production, this should call your backend API
-  // const response = await apiService.payments.verifyPayment({
-  //   orderId,
-  //   paymentId,
-  //   signature,
-  // });
-  // return response.data.success;
-
-  // For demo purposes
-  return true;
-};
-
-/**
- * Load Razorpay script dynamically
- */
-export const loadRazorpayScript = (): Promise<void> => {
+export function loadRazorpayScript(): Promise<void> {
   return new Promise((resolve, reject) => {
     if (typeof window.Razorpay !== 'undefined') {
       resolve();
       return;
     }
-
     const script = document.createElement('script');
     script.src = 'https://checkout.razorpay.com/v1/checkout.js';
     script.async = true;
@@ -136,5 +32,104 @@ export const loadRazorpayScript = (): Promise<void> => {
     script.onerror = () => reject(new Error('Failed to load Razorpay script'));
     document.body.appendChild(script);
   });
-};
+}
 
+function openRazorpayModal(opts: {
+  keyId: string;
+  amountPaise: number;
+  razorpayOrderId: string;
+  description: string;
+  user: { name?: string; email?: string; phone?: string };
+  onSuccess: (response: RazorpaySuccessPayload) => void;
+  onDismiss: () => void;
+  onPaymentFailed: (err: unknown) => void;
+}): void {
+  const rzp = new window.Razorpay({
+    key: opts.keyId,
+    amount: opts.amountPaise,
+    currency: 'INR',
+    order_id: opts.razorpayOrderId,
+    name: 'GaonBazaar',
+    description: opts.description,
+    prefill: {
+      name: opts.user.name,
+      email: opts.user.email,
+      contact: opts.user.phone,
+    },
+    theme: { color: '#22c55e' },
+    handler: (response: RazorpaySuccessPayload) => opts.onSuccess(response),
+    modal: {
+      ondismiss: () => opts.onDismiss(),
+    },
+  });
+
+  rzp.on('payment.failed', (response: { error?: unknown }) => {
+    opts.onPaymentFailed(response?.error ?? response);
+  });
+
+  rzp.open();
+}
+
+/** Start Razorpay for an existing app order (buyer JWT). */
+export async function payAppOrderWithRazorpay(
+  orderId: string,
+  user: { name?: string; email?: string; phone?: string },
+  description: string
+): Promise<'paid' | 'aborted' | 'failed' | 'skipped'> {
+  let keyId: string;
+  let rzOrderId: string;
+  let amountPaise: number;
+
+  try {
+    const res = await apiService.payments.createOrder({ orderId });
+    const data = res.data as {
+      keyId?: string;
+      orderId?: string;
+      amount?: number;
+    };
+    keyId = data.keyId || '';
+    rzOrderId = data.orderId || '';
+    amountPaise = Number(data.amount) || 0;
+    if (!keyId || !rzOrderId || !amountPaise) {
+      return 'skipped';
+    }
+  } catch (err: unknown) {
+    const status = (err as { response?: { status?: number } })?.response?.status;
+    if (status === 503) return 'skipped';
+    throw err;
+  }
+
+  await loadRazorpayScript();
+
+  return new Promise((resolve) => {
+    let settled = false;
+    const done = (v: 'paid' | 'aborted' | 'failed') => {
+      if (settled) return;
+      settled = true;
+      resolve(v);
+    };
+
+    openRazorpayModal({
+      keyId,
+      amountPaise,
+      razorpayOrderId: rzOrderId,
+      description,
+      user,
+      onSuccess: async (response) => {
+        try {
+          await apiService.payments.verifyPayment({
+            orderId,
+            razorpay_order_id: response.razorpay_order_id,
+            razorpay_payment_id: response.razorpay_payment_id,
+            razorpay_signature: response.razorpay_signature,
+          });
+          done('paid');
+        } catch {
+          done('failed');
+        }
+      },
+      onDismiss: () => done('aborted'),
+      onPaymentFailed: () => done('failed'),
+    });
+  });
+}
