@@ -3,8 +3,10 @@ node_modules/
 Farm-back/node_modules/
 Farm-front/node_modules/
 
-# Secrets
+# Secrets (never commit — GitHub blocks repos with leaked DB/API keys)
 .env
+Farm-back/.env
+Farm-front/.env
 .env.local
 .env.*.local
 *.pem
