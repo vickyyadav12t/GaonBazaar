@@ -6,11 +6,13 @@
  * No backend code is included - this is purely the client-side integration layer.
  * 
  * When you connect a backend, set VITE_API_BASE_URL in .env
+ * (with or without trailing `/api` — see getApiBaseUrl).
  */
 
 import axios from 'axios';
 import { store } from '@/store';
 import type { CopilotContextPayload } from '@/types';
+import { getApiBaseUrl } from '@/lib/resolveApiBaseUrl';
 
 export const getAuthToken = () => {
   if (typeof window === 'undefined') return null;
@@ -44,7 +46,7 @@ export const clearAuthToken = () => {
 // Create axios instance with base configuration
 // This connects to your backend API (backend not included in this project)
 const api = axios.create({
-  baseURL: import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000/api',
+  baseURL: getApiBaseUrl(),
   timeout: 20000,
   headers: {
     'Content-Type': 'application/json',

@@ -15,6 +15,7 @@ import { resolveFarmerAvatarUrl } from '@/lib/farmerAvatarUrl';
 import { FairDealHelperPanel } from '@/components/chat/FairDealHelperPanel';
 import { Sheet, SheetContent } from '@/components/ui/sheet';
 import { useCopilot } from '@/context/CopilotContext';
+import { getSocketOrigin } from '@/lib/resolveApiBaseUrl';
 
 const NegotiationChat = () => {
   const { id } = useParams();
@@ -274,8 +275,7 @@ const NegotiationChat = () => {
     const token = getAuthToken();
     if (!token) return;
 
-    const apiBase = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000/api';
-    const socketBase = apiBase.replace(/\/api\/?$/, '');
+    const socketBase = getSocketOrigin();
 
     const socket: Socket = io(socketBase, {
       auth: { token },

@@ -13,6 +13,7 @@ import {
   FARM_NOTIFICATION_UNREAD_CHANGED_EVENT,
   ROUTES,
 } from '@/constants';
+import { getSocketOrigin } from '@/lib/resolveApiBaseUrl';
 
 const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -80,8 +81,7 @@ const Header = () => {
     const token = getAuthToken();
     if (!token) return;
 
-    const apiBase = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000/api';
-    const socketBase = apiBase.replace(/\/api\/?$/, '');
+    const socketBase = getSocketOrigin();
 
     const socket = io(socketBase, { auth: { token } });
 
