@@ -477,36 +477,38 @@ const Login = () => {
                 >
                   {t.orContinue}
                 </p>
-                <div className="flex flex-col items-stretch min-h-[44px]">
+                <div className="flex min-h-[44px] w-full flex-col items-center justify-center">
                   {googleLoading ? (
                     <div className="flex items-center justify-center gap-2 py-3 text-muted-foreground text-sm">
                       <div className="w-5 h-5 border-2 border-primary/30 border-t-primary rounded-full animate-spin" />
                       {currentLanguage === 'en' ? 'Signing in…' : 'साइन इन…'}
                     </div>
                   ) : googleEnabled ? (
-                    <GoogleLogin
-                      onSuccess={(res) => void handleGoogleSuccess(res.credential)}
-                      onError={() =>
-                        toast({
-                          title: t.googleFailed,
-                          description:
-                            currentLanguage === 'en'
-                              ? 'Try again or use email or phone.'
-                              : 'पुनः प्रयास करें या ईमेल/फोन से लॉगिन करें।',
-                          variant: 'destructive',
-                        })
-                      }
-                      text="continue_with"
-                      shape="rectangular"
-                      size="large"
-                      width="100%"
-                      locale={currentLanguage === 'hi' ? 'hi' : 'en'}
-                    />
+                    <div className="mx-auto w-full max-w-[384px]">
+                      <GoogleLogin
+                        onSuccess={(res) => void handleGoogleSuccess(res.credential)}
+                        onError={() =>
+                          toast({
+                            title: t.googleFailed,
+                            description:
+                              currentLanguage === 'en'
+                                ? 'Try again or use email or phone.'
+                                : 'पुनः प्रयास करें या ईमेल/फोन से लॉगिन करें।',
+                            variant: 'destructive',
+                          })
+                        }
+                        text="continue_with"
+                        shape="rectangular"
+                        size="large"
+                        width={384}
+                        locale={currentLanguage === 'hi' ? 'hi' : 'en'}
+                      />
+                    </div>
                   ) : (
                     <Button
                       type="button"
                       variant="outline"
-                      className="w-full h-12 text-base font-medium border-2 bg-card hover:bg-muted/60"
+                      className="h-12 w-full max-w-sm text-base font-medium border-2 bg-card hover:bg-muted/60 sm:max-w-md"
                       onClick={() =>
                         toast({
                           title: t.googleNotConfiguredTitle,
