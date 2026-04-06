@@ -686,6 +686,9 @@ const ListingManagement = () => {
         uploadedUrls = (uploadRes.data?.urls || []).filter(Boolean);
       }
 
+      // Let React flush any pending state updates from edits during upload before reading the ref.
+      await new Promise<void>((resolve) => queueMicrotask(() => resolve()));
+
       const latest = newProductRef.current;
       const postUploadErrors = getListingFormErrors(latest);
       if (Object.keys(postUploadErrors).length > 0) {
@@ -981,7 +984,9 @@ const ListingManagement = () => {
                     <Label>{currentLanguage === 'en' ? 'Product Name (English)' : 'उत्पाद नाम (अंग्रेज़ी)'}</Label>
                     <Input
                       value={newProduct.name}
-                      onChange={(e) => setNewProduct({ ...newProduct, name: e.target.value })}
+                      onChange={(e) =>
+                        setNewProduct((prev) => ({ ...prev, name: e.target.value }))
+                      }
                       placeholder="e.g., Fresh Tomatoes"
                     />
                     {formErrors.name && (
@@ -992,7 +997,9 @@ const ListingManagement = () => {
                     <Label>{currentLanguage === 'en' ? 'Product Name (Hindi)' : 'उत्पाद नाम (हिंदी)'}</Label>
                     <Input
                       value={newProduct.nameHindi}
-                      onChange={(e) => setNewProduct({ ...newProduct, nameHindi: e.target.value })}
+                      onChange={(e) =>
+                        setNewProduct((prev) => ({ ...prev, nameHindi: e.target.value }))
+                      }
                       placeholder="जैसे, ताज़ा टमाटर"
                     />
                   </div>
@@ -1002,7 +1009,9 @@ const ListingManagement = () => {
                   <Label>{currentLanguage === 'en' ? 'Category' : 'श्रेणी'}</Label>
                   <Select
                     value={newProduct.category}
-                    onValueChange={(value) => setNewProduct({ ...newProduct, category: value as CropCategory })}
+                    onValueChange={(value) =>
+                      setNewProduct((prev) => ({ ...prev, category: value as CropCategory }))
+                    }
                   >
                     <SelectTrigger>
                       <SelectValue />
@@ -1023,7 +1032,9 @@ const ListingManagement = () => {
                   <Label>{currentLanguage === 'en' ? 'Description' : 'विवरण'}</Label>
                   <Textarea
                     value={newProduct.description}
-                    onChange={(e) => setNewProduct({ ...newProduct, description: e.target.value })}
+                    onChange={(e) =>
+                      setNewProduct((prev) => ({ ...prev, description: e.target.value }))
+                    }
                     placeholder={currentLanguage === 'en' ? 'Describe your product...' : 'अपने उत्पाद का वर्णन करें...'}
                     rows={3}
                   />
@@ -1043,7 +1054,9 @@ const ListingManagement = () => {
                     <div className="flex gap-2">
                       <Input
                         value={newProduct.imageUrlInput}
-                        onChange={(e) => setNewProduct({ ...newProduct, imageUrlInput: e.target.value })}
+                        onChange={(e) =>
+                          setNewProduct((prev) => ({ ...prev, imageUrlInput: e.target.value }))
+                        }
                         placeholder={currentLanguage === 'en' ? 'Or paste image URL' : 'या छवि URL पेस्ट करें'}
                       />
                       <Button type="button" variant="outline" onClick={addImageUrl}>
@@ -1093,7 +1106,9 @@ const ListingManagement = () => {
                     <Input
                       type="number"
                       value={newProduct.price}
-                      onChange={(e) => setNewProduct({ ...newProduct, price: e.target.value })}
+                      onChange={(e) =>
+                        setNewProduct((prev) => ({ ...prev, price: e.target.value }))
+                      }
                       placeholder="100"
                     />
                     {formErrors.price && (
@@ -1104,7 +1119,9 @@ const ListingManagement = () => {
                     <Label>{currentLanguage === 'en' ? 'Unit' : 'इकाई'}</Label>
                     <Select
                       value={newProduct.unit}
-                      onValueChange={(value) => setNewProduct({ ...newProduct, unit: value })}
+                      onValueChange={(value) =>
+                        setNewProduct((prev) => ({ ...prev, unit: value }))
+                      }
                     >
                       <SelectTrigger>
                         <SelectValue />
@@ -1126,7 +1143,9 @@ const ListingManagement = () => {
                       min={1}
                       step={1}
                       value={newProduct.minOrderQuantity}
-                      onChange={(e) => setNewProduct({ ...newProduct, minOrderQuantity: e.target.value })}
+                      onChange={(e) =>
+                        setNewProduct((prev) => ({ ...prev, minOrderQuantity: e.target.value }))
+                      }
                       placeholder="10"
                     />
                     {formErrors.minOrderQuantity && (
@@ -1144,7 +1163,9 @@ const ListingManagement = () => {
                       min={1}
                       step={1}
                       value={newProduct.availableQuantity}
-                      onChange={(e) => setNewProduct({ ...newProduct, availableQuantity: e.target.value })}
+                      onChange={(e) =>
+                        setNewProduct((prev) => ({ ...prev, availableQuantity: e.target.value }))
+                      }
                       placeholder="500"
                     />
                     {formErrors.availableQuantity && (
@@ -1156,7 +1177,9 @@ const ListingManagement = () => {
                     <Input
                       type="date"
                       value={newProduct.harvestDate}
-                      onChange={(e) => setNewProduct({ ...newProduct, harvestDate: e.target.value })}
+                      onChange={(e) =>
+                        setNewProduct((prev) => ({ ...prev, harvestDate: e.target.value }))
+                      }
                     />
                   </div>
                 </div>
@@ -1165,14 +1188,18 @@ const ListingManagement = () => {
                   <div className="flex items-center gap-2">
                     <Switch
                       checked={newProduct.isOrganic}
-                      onCheckedChange={(checked) => setNewProduct({ ...newProduct, isOrganic: checked })}
+                      onCheckedChange={(checked) =>
+                        setNewProduct((prev) => ({ ...prev, isOrganic: checked }))
+                      }
                     />
                     <Label>{currentLanguage === 'en' ? 'Organic' : 'जैविक'}</Label>
                   </div>
                   <div className="flex items-center gap-2">
                     <Switch
                       checked={newProduct.isNegotiable}
-                      onCheckedChange={(checked) => setNewProduct({ ...newProduct, isNegotiable: checked })}
+                      onCheckedChange={(checked) =>
+                        setNewProduct((prev) => ({ ...prev, isNegotiable: checked }))
+                      }
                     />
                     <Label>{currentLanguage === 'en' ? 'Price Negotiable' : 'कीमत पर बातचीत संभव'}</Label>
                   </div>
