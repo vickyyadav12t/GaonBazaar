@@ -61,9 +61,8 @@ const Login = () => {
       demoAccounts: 'Demo Accounts',
       googleFailed: 'Google sign-in failed',
       googleContinue: 'Continue with Google',
-      googleNotConfiguredTitle: 'Google sign-in not set up',
-      googleNotConfiguredDesc:
-        'Add VITE_GOOGLE_CLIENT_ID to Farm-front/.env (same Web Client ID as GOOGLE_CLIENT_ID on the server), authorize http://localhost:5173 in Google Cloud Console, then restart the dev server.',
+      googleNotConfiguredTitle: 'Google sign-in unavailable',
+      googleNotConfiguredDesc: 'Use email or phone to sign in, or try again later.',
       forgotPassword: 'Forgot password?',
     },
     hi: {
@@ -79,9 +78,8 @@ const Login = () => {
       demoAccounts: 'डेमो खाते',
       googleFailed: 'Google साइन-इन विफल',
       googleContinue: 'Google से जारी रखें',
-      googleNotConfiguredTitle: 'Google साइन-इन कॉन्फ़िगर नहीं है',
-      googleNotConfiguredDesc:
-        'Farm-front/.env में VITE_GOOGLE_CLIENT_ID जोड़ें (सर्वर पर GOOGLE_CLIENT_ID जैसा ही), Google Cloud Console में http://localhost:5173 अधिकृत करें, फिर dev सर्वर रीस्टार्ट करें।',
+      googleNotConfiguredTitle: 'Google साइन-इन उपलब्ध नहीं',
+      googleNotConfiguredDesc: 'ईमेल या फोन से साइन इन करें, या बाद में कोशिश करें।',
       forgotPassword: 'पासवर्ड भूल गए?',
     },
   };
@@ -470,7 +468,7 @@ const Login = () => {
             </Card>
           </AnimateOnScroll>
 
-          {/* Google sign-in — below password login; needs VITE_GOOGLE_CLIENT_ID + App provider for live OAuth */}
+          {/* Google sign-in — below password login */}
           <AnimateOnScroll animation="slide-up" delay={0.35}>
             <Card className="mt-6 border-2 shadow-md">
               <CardContent className="p-4 sm:p-5 space-y-3">
@@ -521,13 +519,6 @@ const Login = () => {
                     </Button>
                   )}
                 </div>
-                {!googleEnabled && (
-                  <p className="text-xs text-center text-muted-foreground leading-relaxed">
-                    {currentLanguage === 'en'
-                      ? 'Set VITE_GOOGLE_CLIENT_ID in Farm-front/.env to enable the Google button.'
-                      : 'Google बटन चालू करने के लिए Farm-front/.env में VITE_GOOGLE_CLIENT_ID सेट करें।'}
-                  </p>
-                )}
               </CardContent>
             </Card>
           </AnimateOnScroll>

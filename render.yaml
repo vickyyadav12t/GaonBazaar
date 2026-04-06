@@ -1,0 +1,21 @@
+# Render Blueprint — GaonBazaar API (Node + Express + Socket.IO)
+# Deploy: Dashboard → New → Blueprint → connect repo, or `render blueprint apply`
+#
+# Set secrets in the Render dashboard (Environment): MONGO_URI, JWT_SECRET, CORS_ORIGINS,
+# FRONTEND_URL, GOOGLE_CLIENT_ID, RAZORPAY_*, GROQ_API_KEY, SMTP_*, etc.
+# See Farm-back/.env.example
+
+services:
+  - type: web
+    name: gaonbazaar-api
+    runtime: node
+    plan: free
+    rootDir: Farm-back
+    buildCommand: npm install
+    startCommand: npm start
+    healthCheckPath: /
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: TRUST_PROXY
+        value: "1"
