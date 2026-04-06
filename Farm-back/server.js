@@ -70,16 +70,35 @@ app.use((req, res, next) => {
 
 app.use(cors(getCorsMiddlewareOptions()));
 
+/** Auth endpoints (login, send-email-code, forgot-password) get their own budget so they are not starved by other /api traffic. */
+const authLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: Number(process.env.RATE_LIMIT_AUTH_MAX) || 200,
+  standardHeaders: true,
+  legacyHeaders: false,
+  skip: () => process.env.RATE_LIMIT_DISABLED === "1",
+  message: {
+    message:
+      "Too many authentication attempts from this network. Please wait a few minutes and try again.",
+  },
+});
+
 const apiLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
   max: Number(process.env.RATE_LIMIT_MAX) || 400,
   standardHeaders: true,
   legacyHeaders: false,
-  skip: () => process.env.RATE_LIMIT_DISABLED === "1",
+  skip: (req) => {
+    if (process.env.RATE_LIMIT_DISABLED === "1") return true;
+    const url = req.originalUrl || req.url || "";
+    return url.startsWith("/api/auth");
+  },
   message: {
     message: "Too many requests from this network. Please wait a few minutes and try again.",
   },
 });
+
+app.use("/api/auth", authLimiter);
 app.use("/api", apiLimiter);
 
 // Increase JSON body size for image data URLs (dev-only approach).

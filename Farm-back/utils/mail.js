@@ -11,6 +11,11 @@ function isMailConfigured() {
 /** @type {import('nodemailer').Transporter | null} */
 let cachedTransporter = null;
 
+/** Drop cached connection after errors so the next send retries with a fresh socket. */
+function resetMailTransporter() {
+  cachedTransporter = null;
+}
+
 function buildTransportOptions() {
   const port = Number(process.env.SMTP_PORT) || 587;
   const secure = process.env.SMTP_SECURE === "true";
@@ -23,13 +28,18 @@ function buildTransportOptions() {
       user: String(process.env.SMTP_USER).trim(),
       pass: String(process.env.SMTP_PASS),
     },
-    connectionTimeout: 20000,
-    greetingTimeout: 20000,
-    socketTimeout: 20000,
+    connectionTimeout: 30000,
+    greetingTimeout: 30000,
+    socketTimeout: 30000,
   };
 
-  // STARTTLS on submission ports (e.g. Gmail/Outlook/SendGrid on 587 or 2525).
-  if (!secure && (port === 587 || port === 2525)) {
+  // Optional: force TLS upgrade (some hosts need it; others reject it — default off).
+  // Nodemailer still negotiates STARTTLS on 587 without this for most providers.
+  if (
+    String(process.env.SMTP_REQUIRE_TLS || "").trim() === "1" &&
+    !secure &&
+    (port === 587 || port === 2525)
+  ) {
     opts.requireTLS = true;
   }
 
@@ -100,6 +110,7 @@ async function sendMail(opts) {
       html: opts.html || opts.text.replace(/\n/g, "<br/>"),
     });
   } catch (err) {
+    resetMailTransporter();
     const code = err.code || err.responseCode;
     console.error(
       `[mail] send failed (to=${String(opts.to).slice(0, 64)}…): ${err.message}${
@@ -110,4 +121,9 @@ async function sendMail(opts) {
   }
 }
 
-module.exports = { sendMail, isMailConfigured, verifyMailConnection };
+module.exports = {
+  sendMail,
+  isMailConfigured,
+  verifyMailConnection,
+  resetMailTransporter,
+};

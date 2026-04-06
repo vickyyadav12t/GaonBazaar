@@ -14,6 +14,7 @@ import { AnimateOnScroll } from '@/components/animations';
 import { apiService, setAuthToken } from '@/services/api';
 import { mapApiUserToAuth } from '@/lib/mapAuthUser';
 import { validateEmail, validatePhone } from '@/lib/validators';
+import { getApiErrorMessage } from '@/lib/apiErrors';
 import { ROUTES } from '@/constants';
 
 const MAX_KYC_BYTES = 5 * 1024 * 1024;
@@ -198,9 +199,12 @@ const Register = () => {
         setEmailVerificationCode('');
         setStep(3);
       } catch (error: unknown) {
-        const message =
-          (error as { response?: { data?: { message?: string } } })?.response?.data?.message ||
-          (currentLanguage === 'en' ? 'Could not send verification email.' : 'सत्यापन ईमेल नहीं भेजा जा सका।');
+        const message = getApiErrorMessage(
+          error,
+          currentLanguage === 'en'
+            ? 'Could not send verification email.'
+            : 'सत्यापन ईमेल नहीं भेजा जा सका।'
+        );
         toast({
           title: currentLanguage === 'en' ? 'Email not sent' : 'ईमेल नहीं भेजा गया',
           description: message,

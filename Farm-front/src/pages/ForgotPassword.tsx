@@ -7,6 +7,7 @@ import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { toast } from '@/hooks/use-toast';
 import { apiService } from '@/services/api';
+import { getApiErrorMessage } from '@/lib/apiErrors';
 
 type Step = 'email' | 'code';
 
@@ -40,9 +41,7 @@ const ForgotPassword = () => {
       });
       setStep('code');
     } catch (err: unknown) {
-      const message =
-        (err as { response?: { data?: { message?: string } } })?.response?.data?.message ||
-        'Could not send the code.';
+      const message = getApiErrorMessage(err, 'Could not send the code.');
       toast({ title: 'Request failed', description: message, variant: 'destructive' });
     } finally {
       setIsLoading(false);
