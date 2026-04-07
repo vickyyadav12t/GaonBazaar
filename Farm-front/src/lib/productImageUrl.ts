@@ -19,6 +19,9 @@ export function resolveBackendAssetUrl(rawUrl: string): string {
   if (isAbsoluteHttpUrl(url)) return url;
 
   // Only rewrite known backend asset paths to avoid breaking SPA-relative assets.
+  if (url.startsWith('uploads/') || url.startsWith('uploads\\')) {
+    return `${getSocketOrigin()}/${url.replace(/^[\\/]+/, '')}`;
+  }
   if (url.startsWith('/uploads/') || url === '/uploads' || url.startsWith('/uploads?')) {
     return `${getSocketOrigin()}${url}`;
   }
@@ -29,12 +32,31 @@ export function resolveBackendAssetUrl(rawUrl: string): string {
 }
 
 /**
+ * Some old data stores localhost absolute URLs (e.g. http://localhost:5000/uploads/..).
+ * Rewrite those to the current backend origin so other devices can load them.
+ */
+export function normalizePossiblyLocalAbsoluteUrl(rawUrl: string): string {
+  const url = String(rawUrl || '').trim();
+  if (!url) return url;
+  if (!isAbsoluteHttpUrl(url)) return url;
+  try {
+    const u = new URL(url);
+    if (u.hostname === 'localhost' || u.hostname === '127.0.0.1') {
+      return `${getSocketOrigin()}${u.pathname}${u.search}${u.hash}`;
+    }
+  } catch {
+    /* ignore */
+  }
+  return url;
+}
+
+/**
  * Tune image URLs for lighter card images (smaller decode cost, less CLS when width/height set).
  * - Prefix backend `/uploads/...` paths with the backend origin.
  * - Unsplash: auto=format serves WebP/AVIF based on Accept; w/q reduce bytes.
  */
 export function optimizeListingImageUrl(rawUrl: string, width = 640): string {
-  const url = resolveBackendAssetUrl(rawUrl);
+  const url = resolveBackendAssetUrl(normalizePossiblyLocalAbsoluteUrl(rawUrl));
   if (!url || typeof url !== 'string') return url;
   if (url.startsWith('blob:') || url.startsWith('data:')) return url;
   if (!isAbsoluteHttpUrl(url)) return url;
