@@ -12,6 +12,7 @@ import { clearCart } from '@/store/slices/cartSlice';
 import { useToast } from '@/hooks/use-toast';
 import { apiService } from '@/services/api';
 import { payAppOrderWithRazorpay } from '@/lib/razorpay';
+import { optimizeListingImageUrl } from '@/lib/productImageUrl';
 
 const Checkout = () => {
   const navigate = useNavigate();
@@ -413,7 +414,7 @@ const Checkout = () => {
                 {items.map((item) => (
                   <div key={item.product.id} className="flex gap-3">
                     <img
-                      src={item.product.images[0]}
+                      src={optimizeListingImageUrl(item.product.images[0], 120)}
                       alt={item.product.name}
                       className="w-12 h-12 rounded-lg object-cover"
                     />

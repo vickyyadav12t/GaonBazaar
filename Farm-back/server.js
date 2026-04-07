@@ -70,13 +70,24 @@ app.use((req, res, next) => {
 
 app.use(cors(getCorsMiddlewareOptions()));
 
+function rateLimitDisabled() {
+  return process.env.RATE_LIMIT_DISABLED === "1";
+}
+
+/** CORS preflights must not consume the auth budget (each POST often sends 1–2 OPTIONS first). */
+function skipForRateLimit(req) {
+  if (rateLimitDisabled()) return true;
+  if (req.method === "OPTIONS") return true;
+  return false;
+}
+
 /** Auth endpoints (login, send-email-code, forgot-password) get their own budget so they are not starved by other /api traffic. */
 const authLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
   max: Number(process.env.RATE_LIMIT_AUTH_MAX) || 200,
   standardHeaders: true,
   legacyHeaders: false,
-  skip: () => process.env.RATE_LIMIT_DISABLED === "1",
+  skip: skipForRateLimit,
   message: {
     message:
       "Too many authentication attempts from this network. Please wait a few minutes and try again.",
@@ -89,7 +100,7 @@ const apiLimiter = rateLimit({
   standardHeaders: true,
   legacyHeaders: false,
   skip: (req) => {
-    if (process.env.RATE_LIMIT_DISABLED === "1") return true;
+    if (skipForRateLimit(req)) return true;
     const url = req.originalUrl || req.url || "";
     return url.startsWith("/api/auth");
   },

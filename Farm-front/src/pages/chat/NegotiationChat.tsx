@@ -16,6 +16,7 @@ import { FairDealHelperPanel } from '@/components/chat/FairDealHelperPanel';
 import { Sheet, SheetContent } from '@/components/ui/sheet';
 import { useCopilot } from '@/context/CopilotContext';
 import { getSocketOrigin } from '@/lib/resolveApiBaseUrl';
+import { optimizeListingImageUrl } from '@/lib/productImageUrl';
 
 const NegotiationChat = () => {
   const { id } = useParams();
@@ -692,7 +693,7 @@ const NegotiationChat = () => {
               <ArrowLeft className="w-5 h-5" />
             </button>
             <img
-              src={product?.images[0]}
+              src={optimizeListingImageUrl(product?.images?.[0] || '', 160)}
               alt={product?.name}
               className="w-12 h-12 rounded-lg object-cover"
             />

@@ -13,6 +13,7 @@ import { Product } from '@/types';
 import { toggleWishlist } from '@/store/slices/wishlistSlice';
 import { resolveFarmerAvatarUrl } from '@/lib/farmerAvatarUrl';
 import { useCopilot } from '@/context/CopilotContext';
+import { optimizeListingImageUrl } from '@/lib/productImageUrl';
 
 const ProductDetail = () => {
   const { id } = useParams();
@@ -397,7 +398,7 @@ const ProductDetail = () => {
           <div>
             <div className="relative aspect-square rounded-2xl overflow-hidden bg-muted mb-4">
               <img
-                src={product.images[currentImageIndex]}
+                src={optimizeListingImageUrl(product.images[currentImageIndex], 1024)}
                 alt={product.name}
                 className="w-full h-full object-cover"
               />
@@ -466,7 +467,13 @@ const ProductDetail = () => {
                       currentImageIndex === index ? 'border-primary' : 'border-transparent'
                     }`}
                   >
-                    <img src={image} alt="" className="w-full h-full object-cover" />
+                    <img
+                      src={optimizeListingImageUrl(image, 200)}
+                      alt=""
+                      className="w-full h-full object-cover"
+                      loading="lazy"
+                      decoding="async"
+                    />
                   </button>
                 ))}
               </div>

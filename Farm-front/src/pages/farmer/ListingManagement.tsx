@@ -27,6 +27,7 @@ import { useAppSelector } from '@/hooks/useRedux';
 import { Product, CropCategory } from '@/types';
 import { useToast } from '@/hooks/use-toast';
 import { apiService } from '@/services/api';
+import { optimizeListingImageUrl } from '@/lib/productImageUrl';
 import {
   parseListingQuantity,
   validatePrice,
@@ -1342,7 +1343,7 @@ const ListingManagement = () => {
               <div className="relative bg-muted">
                 <div className="flex h-44 w-full items-center justify-center p-3 sm:h-52">
                   <img
-                    src={listing.images[0]}
+                    src={optimizeListingImageUrl(listing.images[0], 640)}
                     alt={listing.name}
                     className="max-h-full max-w-full object-contain"
                   />

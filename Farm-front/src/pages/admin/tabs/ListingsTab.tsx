@@ -7,6 +7,7 @@ import { AnimateOnScroll, StaggerContainer } from '@/components/animations';
 import ProductCard from '@/components/product/ProductCard';
 import { useAdminDashboard } from '../adminDashboardContext';
 import { AdminPager, LISTINGS_PAGE_SIZE } from '../adminShared';
+import { optimizeListingImageUrl } from '@/lib/productImageUrl';
 
 
 export default function AdminListingsTab() {
@@ -53,7 +54,13 @@ export default function AdminListingsTab() {
                 className="relative w-full text-left focus:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
                 onClick={() => vm.openListingDrawer(listing)}
               >
-                <img src={listing.images[0]} alt={listing.name} className="w-full h-40 object-cover" />
+                <img
+                  src={optimizeListingImageUrl(listing.images[0], 640)}
+                  alt={listing.name}
+                  className="w-full h-40 object-cover"
+                  loading="lazy"
+                  decoding="async"
+                />
                 <Badge
                   className={`absolute top-2 right-2 ${
                     listing.status === 'active'

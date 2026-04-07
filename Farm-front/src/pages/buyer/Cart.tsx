@@ -7,6 +7,7 @@ import { Input } from '@/components/ui/input';
 import { useAppSelector, useAppDispatch } from '@/hooks/useRedux';
 import { removeFromCart, updateQuantity, clearCart } from '@/store/slices/cartSlice';
 import { useToast } from '@/hooks/use-toast';
+import { optimizeListingImageUrl } from '@/lib/productImageUrl';
 
 const Cart = () => {
   const navigate = useNavigate();
@@ -78,7 +79,7 @@ const Cart = () => {
               <div key={item.product.id} className="card-elevated p-4">
                 <div className="flex gap-4">
                   <img
-                    src={item.product.images[0]}
+                    src={optimizeListingImageUrl(item.product.images[0], 240)}
                     alt={item.product.name}
                     className="w-24 h-24 rounded-lg object-cover"
                   />
