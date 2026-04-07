@@ -8,6 +8,7 @@ import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogT
 import { AnimateOnScroll } from '@/components/animations';
 import { useAdminDashboard } from '../adminDashboardContext';
 import { AdminKycPreview, AdminPager, KYC_PAGE_SIZE } from '../adminShared';
+import { resolveBackendAssetUrl } from '@/lib/productImageUrl';
 
 
 export default function AdminKycTab() {
@@ -52,7 +53,18 @@ export default function AdminKycTab() {
             vm.kycFarmersPage.map((farmer) => (
               <div key={farmer.id} className="card-elevated p-6 border-2 border-border hover:shadow-lg transition-shadow">
                 <div className="flex items-start gap-4">
-                  <img src={farmer.avatar} alt={farmer.name} className="w-20 h-20 rounded-full object-cover border-2 border-warning/20" />
+                  <img
+                    src={resolveBackendAssetUrl(farmer.avatar)}
+                    alt={farmer.name}
+                    className="w-20 h-20 rounded-full object-cover border-2 border-warning/20"
+                    loading="lazy"
+                    decoding="async"
+                    onError={(e) => {
+                      const el = e.currentTarget;
+                      el.onerror = null;
+                      el.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(farmer.name || 'Farmer')}&size=160`;
+                    }}
+                  />
                   <div className="flex-1">
                     <div className="flex items-center gap-2 mb-2">
                       <p className="font-semibold text-lg">{farmer.name}</p>

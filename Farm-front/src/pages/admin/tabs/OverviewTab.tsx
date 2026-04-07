@@ -43,6 +43,7 @@ import {
   Line,
 } from 'recharts';
 import { useAdminDashboard } from '../adminDashboardContext';
+import { resolveBackendAssetUrl } from '@/lib/productImageUrl';
 
 
 export default function AdminOverviewTab() {
@@ -303,7 +304,18 @@ export default function AdminOverviewTab() {
             {vm.overviewPendingKycFarmers.slice(0, 3).map((farmer) => (
               <div key={farmer.id} className="flex items-center justify-between p-4 bg-muted/50 rounded-lg hover:bg-muted transition-colors border border-border">
                 <div className="flex items-center gap-3">
-                  <img src={farmer.avatar} alt={farmer.name} className="w-12 h-12 rounded-full object-cover border-2 border-warning/20" />
+                  <img
+                    src={resolveBackendAssetUrl(farmer.avatar)}
+                    alt={farmer.name}
+                    className="w-12 h-12 rounded-full object-cover border-2 border-warning/20"
+                    loading="lazy"
+                    decoding="async"
+                    onError={(e) => {
+                      const el = e.currentTarget;
+                      el.onerror = null;
+                      el.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(farmer.name || 'Farmer')}&size=128`;
+                    }}
+                  />
                   <div>
                     <p className="font-semibold text-sm">{farmer.name}</p>
                     <p className="text-xs text-muted-foreground">{farmer.location.district}</p>

@@ -14,6 +14,7 @@ import {
   ROUTES,
 } from '@/constants';
 import { getSocketOrigin } from '@/lib/resolveApiBaseUrl';
+import { resolveBackendAssetUrl } from '@/lib/productImageUrl';
 
 const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -320,7 +321,18 @@ const Header = () => {
               >
                 <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-white/20 ring-2 ring-white/25 flex items-center justify-center overflow-hidden">
                   {user?.avatar ? (
-                    <img src={user.avatar} alt={user.name} className="w-full h-full object-cover" />
+                    <img
+                      src={resolveBackendAssetUrl(user.avatar)}
+                      alt={user.name}
+                      className="w-full h-full object-cover"
+                      loading="lazy"
+                      decoding="async"
+                      onError={(e) => {
+                        const el = e.currentTarget;
+                        el.onerror = null;
+                        el.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(user.name || 'User')}&size=128`;
+                      }}
+                    />
                   ) : (
                     <User className="w-5 h-5 text-primary-foreground" />
                   )}

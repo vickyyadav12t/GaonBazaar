@@ -595,7 +595,18 @@ const ProductDetail = () => {
               <div className="flex items-center gap-4">
                 <div className="w-16 h-16 rounded-full overflow-hidden bg-muted">
                   {product.farmerAvatar ? (
-                    <img src={product.farmerAvatar} alt={product.farmerName} className="w-full h-full object-cover" />
+                    <img
+                      src={optimizeListingImageUrl(product.farmerAvatar, 128)}
+                      alt={product.farmerName}
+                      className="w-full h-full object-cover"
+                      loading="lazy"
+                      decoding="async"
+                      onError={(e) => {
+                        const el = e.currentTarget;
+                        el.onerror = null;
+                        el.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(product.farmerName)}&size=128`;
+                      }}
+                    />
                   ) : (
                     <div className="w-full h-full flex items-center justify-center text-2xl font-bold">
                       {product.farmerName.charAt(0)}

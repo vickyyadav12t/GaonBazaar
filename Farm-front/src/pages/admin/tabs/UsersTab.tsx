@@ -6,6 +6,7 @@ import { Input } from '@/components/ui/input';
 import { AnimateOnScroll, StaggerContainer } from '@/components/animations';
 import { useAdminDashboard } from '../adminDashboardContext';
 import { AdminUserActionsMenu, AdminPager, USERS_PAGE_SIZE } from '../adminShared';
+import { resolveBackendAssetUrl } from '@/lib/productImageUrl';
 
 
 export default function AdminUsersTab() {
@@ -70,9 +71,16 @@ export default function AdminUsersTab() {
                   className="card-elevated p-4 flex flex-col gap-4 sm:flex-row sm:items-center hover:shadow-lg transition-shadow border-2 border-border"
                 >
                   <img
-                    src={farmer.avatar}
+                    src={resolveBackendAssetUrl(farmer.avatar)}
                     alt={farmer.name}
                     className="w-14 h-14 rounded-full object-cover border-2 border-success/20 shrink-0"
+                    loading="lazy"
+                    decoding="async"
+                    onError={(e) => {
+                      const el = e.currentTarget;
+                      el.onerror = null;
+                      el.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(farmer.name || 'Farmer')}&size=128`;
+                    }}
                   />
                   <div className="flex-1 min-w-0">
                     <div className="flex flex-wrap items-center gap-2 mb-1">
@@ -165,9 +173,16 @@ export default function AdminUsersTab() {
                   className="card-elevated p-4 flex flex-col gap-4 sm:flex-row sm:items-center hover:shadow-lg transition-shadow border-2 border-border"
                 >
                   <img
-                    src={buyer.avatar}
+                    src={resolveBackendAssetUrl(buyer.avatar)}
                     alt={buyer.name}
                     className="w-14 h-14 rounded-full object-cover border-2 border-accent/20 shrink-0"
+                    loading="lazy"
+                    decoding="async"
+                    onError={(e) => {
+                      const el = e.currentTarget;
+                      el.onerror = null;
+                      el.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(buyer.name || 'Buyer')}&size=128`;
+                    }}
                   />
                   <div className="flex-1 min-w-0">
                     <div className="flex flex-wrap items-center gap-2 mb-1">

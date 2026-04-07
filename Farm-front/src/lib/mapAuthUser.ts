@@ -1,4 +1,5 @@
 import type { KycDocumentItem, NotificationPreferences, User } from '@/types';
+import { resolveBackendAssetUrl } from '@/lib/productImageUrl';
 
 const defaultNotificationPreferences: NotificationPreferences = {
   emailNotifications: true,
@@ -46,7 +47,7 @@ export function mapApiUserToAuth(user: Record<string, any>): User {
     email: user.email || '',
     phone: user.phone ?? '',
     role: user.role,
-    avatar: user.avatar,
+    avatar: user.avatar ? resolveBackendAssetUrl(String(user.avatar)) : undefined,
     isVerified: user.kycStatus === 'approved',
     kycStatus: user.kycStatus || 'pending',
     location: {
