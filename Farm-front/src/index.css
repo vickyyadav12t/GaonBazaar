@@ -1,129 +1,132 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Noto+Sans+Devanagari:wght@400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Poppins:wght@500;600;700&family=Sora:wght@500;600;700&family=Noto+Sans+Devanagari:wght@400;500;600;700&display=swap');
 
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-/* Direct Access for Farmers - Design System
-   Agricultural marketplace with rural-friendly, accessible design
-   Colors: Fresh greens, warm earth tones, cream backgrounds
-*/
+/**
+ * Theme Vision — premium agri-marketplace design system
+ * Forest + earth + soft warm canvas, minimal elevation, restrained gold accents.
+ */
 
 @layer base {
   :root {
-    /* Core brand colors - Agricultural theme */
-    --background: 48 33% 97%;
-    --foreground: 156 30% 12%;
+    /* Canvas & type (#FAFAF5, #1F2937, #6B7280) */
+    --background: 60 20% 98%;
+    --foreground: 217 19% 17%;
 
     --card: 0 0% 100%;
-    --card-foreground: 156 30% 12%;
+    --card-foreground: 217 19% 17%;
 
     --popover: 0 0% 100%;
-    --popover-foreground: 156 30% 12%;
+    --popover-foreground: 217 19% 17%;
 
-    /* Primary - Fresh Green (Growth, Agriculture) */
-    --primary: 142 71% 35%;
+    /* Primary — #1B5E20 */
+    --primary: 124 55% 24%;
     --primary-foreground: 0 0% 100%;
-    --primary-light: 142 60% 45%;
-    --primary-dark: 142 80% 25%;
+    --primary-light: 124 48% 32%;
+    --primary-dark: 124 58% 18%;
 
-    /* Secondary - Warm Amber (Earth, Harvest) */
-    --secondary: 38 92% 50%;
-    --secondary-foreground: 0 0% 100%;
-    --secondary-light: 38 90% 60%;
+    /* Secondary — #3E2723 (earth) */
+    --secondary: 9 28% 19%;
+    --secondary-foreground: 40 20% 98%;
+    --secondary-light: 9 22% 26%;
 
-    /* Accent - Orange (CTAs, Energy) */
-    --accent: 24 95% 53%;
-    --accent-foreground: 0 0% 100%;
+    /* Accent — soft gold wash for hovers / chips (not loud) */
+    --accent: 46 38% 94%;
+    --accent-foreground: 217 19% 17%;
 
-    /* Muted - Warm Gray */
-    --muted: 40 20% 92%;
-    --muted-foreground: 156 10% 40%;
+    /* Premium gold — #D4AF37 (badges, stars, key highlights) */
+    --gold: 46 62% 52%;
+    --gold-foreground: 217 19% 17%;
 
-    /* Destructive */
-    --destructive: 0 84% 60%;
+    --muted: 60 12% 95%;
+    --muted-foreground: 215 13% 46%;
+
+    --destructive: 0 72% 46%;
     --destructive-foreground: 0 0% 100%;
 
-    /* Borders & Inputs */
-    --border: 40 20% 85%;
-    --input: 40 20% 88%;
-    --ring: 142 71% 35%;
+    --border: 220 13% 91%;
+    --input: 220 13% 91%;
+    --ring: 124 55% 24%;
 
-    --radius: 0.75rem;
+    --radius: 0.625rem;
 
-    /* Custom tokens */
-    --cream: 48 50% 96%;
-    --earth: 30 30% 30%;
-    --success: 142 70% 40%;
-    --warning: 45 93% 47%;
-    --info: 199 89% 48%;
+    --cream: 60 25% 97%;
+    --earth: 9 28% 19%;
+    --success: 124 42% 30%;
+    --warning: 38 55% 42%;
+    --info: 200 38% 42%;
 
-    /* Sidebar */
-    --sidebar-background: 142 30% 15%;
-    --sidebar-foreground: 0 0% 98%;
-    --sidebar-primary: 142 71% 45%;
+    /* Footer / dark regions — deep earth */
+    --sidebar-background: 9 28% 14%;
+    --sidebar-foreground: 40 15% 96%;
+    --sidebar-primary: 124 48% 32%;
     --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 142 40% 22%;
-    --sidebar-accent-foreground: 0 0% 98%;
-    --sidebar-border: 142 30% 25%;
-    --sidebar-ring: 142 71% 45%;
+    --sidebar-accent: 9 22% 22%;
+    --sidebar-accent-foreground: 40 15% 96%;
+    --sidebar-border: 9 18% 22%;
+    --sidebar-ring: 124 48% 36%;
 
-    /* Gradients */
-    --gradient-hero: linear-gradient(135deg, hsl(142, 71%, 35%) 0%, hsl(142, 60%, 28%) 100%);
-    --gradient-card: linear-gradient(180deg, hsl(0, 0%, 100%) 0%, hsl(48, 33%, 98%) 100%);
-    --gradient-accent: linear-gradient(135deg, hsl(24, 95%, 53%) 0%, hsl(38, 92%, 50%) 100%);
-    --gradient-success: linear-gradient(135deg, hsl(142, 70%, 40%) 0%, hsl(142, 80%, 30%) 100%);
+    /* Subtle surfaces only (avoid loud gradients) */
+    --gradient-hero: linear-gradient(180deg, hsl(60 20% 98%) 0%, hsl(60 15% 96%) 100%);
+    --gradient-card: linear-gradient(180deg, hsl(0 0% 100%) 0%, hsl(60 12% 99%) 100%);
+    --gradient-accent: linear-gradient(180deg, hsl(46 38% 96%) 0%, hsl(46 32% 92%) 100%);
+    --gradient-success: linear-gradient(180deg, hsl(124 42% 32%) 0%, hsl(124 48% 28%) 100%);
 
-    /* Shadows */
-    --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
-    --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
-    --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
-    --shadow-card: 0 4px 20px rgba(0, 0, 0, 0.08);
-    --shadow-glow: 0 0 20px rgba(34, 197, 94, 0.3);
+    --shadow-sm: 0 1px 2px rgba(31, 41, 55, 0.04);
+    --shadow-md: 0 4px 12px rgba(31, 41, 55, 0.06);
+    --shadow-lg: 0 12px 32px rgba(31, 41, 55, 0.08);
+    --shadow-card: 0 1px 3px rgba(31, 41, 55, 0.05), 0 6px 20px rgba(31, 41, 55, 0.04);
+    --shadow-glow: 0 0 0 1px hsl(46 62% 52% / 0.12);
   }
 
   .dark {
-    --background: 156 30% 8%;
-    --foreground: 48 33% 95%;
+    --background: 9 22% 10%;
+    --foreground: 60 15% 96%;
 
-    --card: 156 25% 12%;
-    --card-foreground: 48 33% 95%;
+    --card: 9 22% 12%;
+    --card-foreground: 60 15% 96%;
 
-    --popover: 156 25% 12%;
-    --popover-foreground: 48 33% 95%;
+    --popover: 9 22% 12%;
+    --popover-foreground: 60 15% 96%;
 
-    --primary: 142 60% 45%;
-    --primary-foreground: 156 30% 8%;
-    --primary-light: 142 50% 55%;
-    --primary-dark: 142 70% 35%;
+    --primary: 124 42% 38%;
+    --primary-foreground: 9 28% 8%;
+    --primary-light: 124 45% 44%;
+    --primary-dark: 124 48% 28%;
 
-    --secondary: 38 80% 55%;
-    --secondary-foreground: 156 30% 8%;
+    --secondary: 9 18% 22%;
+    --secondary-foreground: 60 15% 96%;
+    --secondary-light: 9 16% 28%;
 
-    --accent: 24 90% 55%;
-    --accent-foreground: 0 0% 100%;
+    --accent: 9 16% 18%;
+    --accent-foreground: 60 15% 92%;
 
-    --muted: 156 20% 18%;
-    --muted-foreground: 48 20% 65%;
+    --gold: 46 58% 48%;
+    --gold-foreground: 217 19% 12%;
 
-    --destructive: 0 62% 50%;
+    --muted: 9 14% 18%;
+    --muted-foreground: 215 12% 65%;
+
+    --destructive: 0 62% 42%;
     --destructive-foreground: 0 0% 100%;
 
-    --border: 156 20% 22%;
-    --input: 156 20% 22%;
-    --ring: 142 60% 45%;
+    --border: 9 14% 22%;
+    --input: 9 14% 22%;
+    --ring: 124 42% 40%;
 
-    --cream: 156 25% 10%;
-    --earth: 30 20% 70%;
+    --cream: 9 22% 8%;
+    --earth: 40 15% 85%;
 
-    --sidebar-background: 156 30% 6%;
-    --sidebar-foreground: 0 0% 98%;
-    --sidebar-primary: 142 60% 45%;
+    --sidebar-background: 9 28% 8%;
+    --sidebar-foreground: 60 15% 96%;
+    --sidebar-primary: 124 42% 38%;
     --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 156 25% 15%;
-    --sidebar-accent-foreground: 0 0% 98%;
-    --sidebar-border: 156 20% 18%;
-    --sidebar-ring: 142 60% 45%;
+    --sidebar-accent: 9 18% 16%;
+    --sidebar-accent-foreground: 60 15% 96%;
+    --sidebar-border: 9 14% 18%;
+    --sidebar-ring: 124 42% 40%;
   }
 }
 
@@ -145,50 +148,59 @@
     min-width: 0;
   }
 
-  /* Typography */
-  h1, h2, h3, h4, h5, h6 {
-    @apply font-heading font-bold tracking-tight;
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    @apply font-heading font-semibold tracking-tight text-foreground;
   }
 }
 
 @layer components {
-  /* Card Variants */
   .card-elevated {
-    @apply bg-card rounded-xl shadow-card border border-border/50 transition-all duration-300;
+    @apply rounded-xl border border-border bg-card shadow-card transition-all duration-300 ease-out;
   }
 
   .card-elevated:hover {
-    @apply shadow-lg -translate-y-1;
+    @apply shadow-md;
+    transform: scale(1.02);
   }
 
   .card-product {
-    @apply bg-card rounded-2xl overflow-hidden shadow-card border border-border/30 transition-all duration-300;
+    @apply overflow-hidden rounded-xl border border-border bg-card shadow-card transition-all duration-300 ease-out;
   }
 
   .card-product:hover {
-    @apply shadow-lg scale-[1.02];
+    @apply shadow-md;
+    transform: scale(1.02);
   }
 
-  /* Button Variants */
   .btn-hero {
-    @apply bg-gradient-to-r from-accent to-secondary text-white font-semibold px-8 py-4 rounded-xl shadow-lg transition-all duration-300;
+    @apply rounded-lg bg-primary px-8 py-4 text-base font-semibold text-primary-foreground shadow-md transition-all duration-300 ease-out;
+    box-shadow:
+      0 1px 2px rgba(31, 41, 55, 0.06),
+      inset 0 1px 0 hsl(46 62% 52% / 0.15);
   }
 
   .btn-hero:hover {
-    @apply shadow-xl scale-105;
+    @apply bg-primary-dark shadow-lg;
+    transform: scale(1.02);
   }
 
   .btn-primary-gradient {
-    @apply bg-gradient-to-r from-primary to-primary-light text-primary-foreground font-semibold rounded-xl shadow-md transition-all duration-300;
+    @apply rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground shadow-sm transition-all duration-300 ease-out;
+    box-shadow: inset 0 1px 0 hsl(46 62% 52% / 0.12);
   }
 
   .btn-primary-gradient:hover {
-    @apply shadow-lg scale-[1.02];
+    @apply bg-primary-dark shadow-md;
+    transform: scale(1.02);
   }
 
-  /* Navigation */
   .nav-item {
-    @apply flex flex-col items-center gap-1 p-3 rounded-xl transition-all duration-200 text-muted-foreground;
+    @apply flex flex-col items-center gap-1 rounded-lg p-3 text-muted-foreground transition-colors duration-200;
   }
 
   .nav-item:hover {
@@ -199,61 +211,52 @@
     @apply bg-primary/10 text-primary;
   }
 
-  /* Form Elements */
   .input-field {
-    @apply w-full px-4 py-3 bg-background border border-input rounded-xl focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition-all duration-200;
+    @apply w-full rounded-lg border border-input bg-background px-4 py-3 transition-all duration-200 focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20;
   }
 
-  /* Status Badges */
   .badge-success {
-    @apply bg-success/10 text-success px-3 py-1 rounded-full text-sm font-medium;
+    @apply rounded-full bg-emerald-50 px-3 py-1 text-sm font-medium text-emerald-800 dark:bg-emerald-950/50 dark:text-emerald-200;
   }
 
   .badge-warning {
-    @apply bg-warning/10 text-warning px-3 py-1 rounded-full text-sm font-medium;
+    @apply rounded-full bg-amber-50 px-3 py-1 text-sm font-medium text-amber-900 dark:bg-amber-950/40 dark:text-amber-100;
   }
 
   .badge-pending {
-    @apply bg-secondary/10 text-secondary px-3 py-1 rounded-full text-sm font-medium;
+    @apply rounded-full bg-muted px-3 py-1 text-sm font-medium text-muted-foreground;
   }
 
-  /* Chat Bubbles */
   .chat-bubble-sent {
-    @apply bg-primary text-primary-foreground rounded-2xl rounded-br-sm px-4 py-2 max-w-[80%] ml-auto;
+    @apply ml-auto max-w-[80%] rounded-2xl rounded-br-sm bg-primary px-4 py-2 text-primary-foreground;
   }
 
   .chat-bubble-received {
-    @apply bg-muted text-foreground rounded-2xl rounded-bl-sm px-4 py-2 max-w-[80%];
+    @apply max-w-[80%] rounded-2xl rounded-bl-sm bg-muted px-4 py-2 text-foreground;
   }
 
-  /* Glassmorphism */
   .glass {
-    @apply bg-white/80 backdrop-blur-lg border border-white/20;
+    @apply border border-border/60 bg-card/90 backdrop-blur-md;
   }
 
-  /* Mobile Bottom Nav */
   .mobile-nav {
-    @apply fixed bottom-0 left-0 right-0 bg-card border-t border-border shadow-lg z-50;
+    @apply fixed bottom-0 left-0 right-0 z-50 border-t border-border bg-card/95 shadow-[0_-4px_24px_rgba(31,41,55,0.06)] backdrop-blur-md;
   }
 
-  /* Dashboard Stats Card */
   .stat-card {
-    @apply bg-card rounded-2xl p-6 shadow-card border border-border/30;
+    @apply rounded-xl border border-border bg-card p-6 shadow-card;
   }
 
-  /* Price Tag */
   .price-tag {
-    @apply text-2xl font-bold text-primary;
+    @apply text-2xl font-semibold text-primary;
   }
 
-  /* Farmer Verified Badge */
   .verified-badge {
-    @apply inline-flex items-center gap-1 bg-primary/10 text-primary px-2 py-0.5 rounded-full text-xs font-medium;
+    @apply inline-flex items-center gap-1 rounded-full bg-[hsl(var(--gold)/0.12)] px-2 py-0.5 text-xs font-medium text-[hsl(var(--gold-foreground))];
   }
 }
 
 @layer utilities {
-  /* Custom Scrollbar */
   .scrollbar-hide::-webkit-scrollbar {
     display: none;
   }
@@ -263,16 +266,15 @@
     scrollbar-width: none;
   }
 
-  /* Text Gradient */
   .text-gradient {
-    @apply bg-clip-text text-transparent bg-gradient-to-r from-primary to-primary-light;
+    @apply bg-clip-text text-transparent;
+    background-image: linear-gradient(90deg, hsl(var(--primary)) 0%, hsl(var(--primary-light)) 100%);
   }
 
   .text-gradient-accent {
-    @apply bg-clip-text text-transparent bg-gradient-to-r from-accent to-secondary;
+    @apply text-[hsl(var(--gold))];
   }
 
-  /* Animate */
   .animate-fade-in {
     animation: fadeIn 0.5s ease-out;
   }
@@ -310,7 +312,6 @@
   }
 }
 
-/* Keyframe Animations */
 @keyframes fadeIn {
   from {
     opacity: 0;
@@ -323,7 +324,7 @@
 @keyframes slideUp {
   from {
     opacity: 0;
-    transform: translateY(20px);
+    transform: translateY(12px);
   }
   to {
     opacity: 1;
@@ -334,7 +335,7 @@
 @keyframes slideInRight {
   from {
     opacity: 0;
-    transform: translateX(20px);
+    transform: translateX(12px);
   }
   to {
     opacity: 1;
@@ -343,36 +344,39 @@
 }
 
 @keyframes bounceGentle {
-  0%, 100% {
+  0%,
+  100% {
     transform: translateY(0);
   }
   50% {
-    transform: translateY(-5px);
+    transform: translateY(-4px);
   }
 }
 
 @keyframes pulseSlow {
-  0%, 100% {
+  0%,
+  100% {
     opacity: 1;
   }
   50% {
-    opacity: 0.7;
+    opacity: 0.75;
   }
 }
 
 @keyframes floatSlow {
-  0%, 100% {
+  0%,
+  100% {
     transform: translateY(0);
   }
   50% {
-    transform: translateY(-10px);
+    transform: translateY(-6px);
   }
 }
 
 @keyframes scaleIn {
   from {
     opacity: 0;
-    transform: scale(0.9);
+    transform: scale(0.96);
   }
   to {
     opacity: 1;
@@ -383,7 +387,7 @@
 @keyframes zoomIn {
   from {
     opacity: 0;
-    transform: scale(0.8);
+    transform: scale(0.94);
   }
   to {
     opacity: 1;
@@ -394,7 +398,7 @@
 @keyframes slideInLeft {
   from {
     opacity: 0;
-    transform: translateX(-20px);
+    transform: translateX(-12px);
   }
   to {
     opacity: 1;
@@ -402,12 +406,10 @@
   }
 }
 
-/* Hindi Font Support */
 .font-hindi {
-  font-family: 'Noto Sans Devanagari', sans-serif;
+  font-family: 'Noto Sans Devanagari', 'Inter', sans-serif;
 }
 
-/* Responsive Typography */
 @media (max-width: 640px) {
   .hero-title {
     @apply text-3xl;
@@ -420,7 +422,6 @@
   }
 }
 
-/* Crop calendar: print-friendly schedule (paired with Tailwind print:hidden / hidden print:block) */
 @media print {
   .calendar-print-sheet {
     padding: 1.25rem;

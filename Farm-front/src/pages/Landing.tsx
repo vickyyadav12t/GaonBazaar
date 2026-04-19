@@ -14,6 +14,7 @@ import {
   Award,
   Zap,
   Heart,
+  ShoppingBag,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import Layout from '@/components/layout/Layout';
@@ -269,7 +270,6 @@ const Landing = () => {
           value: formatLandingInteger(liveStats.farmerCount),
           label: tr.stats.farmers,
           emoji: '👨‍🌾',
-          color: 'from-primary/10 to-primary/5',
           iconColor: 'text-primary',
         },
         {
@@ -277,7 +277,6 @@ const Landing = () => {
           value: formatLandingInteger(liveStats.buyerCount),
           label: tr.stats.buyers,
           emoji: '🛒',
-          color: 'from-secondary/10 to-secondary/5',
           iconColor: 'text-secondary',
         },
         {
@@ -285,25 +284,23 @@ const Landing = () => {
           value: formatLandingInteger(liveStats.deliveredDeals),
           label: tr.stats.transactions,
           emoji: '🤝',
-          color: 'from-accent/10 to-accent/5',
-          iconColor: 'text-accent',
+          iconColor: 'text-gold',
         },
         {
           kind: 'live' as const,
           value: formatLandingInteger(liveStats.activeListings),
           label: tr.stats.listings,
           emoji: '📋',
-          color: 'from-success/10 to-success/5',
           iconColor: 'text-success',
         },
       ];
     }
     return tr.stats.marketingCards.map((c, index) => {
       const colors = [
-        { color: 'from-primary/10 to-primary/5', iconColor: 'text-primary' },
-        { color: 'from-secondary/10 to-secondary/5', iconColor: 'text-secondary' },
-        { color: 'from-accent/10 to-accent/5', iconColor: 'text-accent' },
-        { color: 'from-success/10 to-success/5', iconColor: 'text-success' },
+        { iconColor: 'text-primary' },
+        { iconColor: 'text-secondary' },
+        { iconColor: 'text-gold' },
+        { iconColor: 'text-success' },
       ];
       const pal = colors[index % colors.length];
       return {
@@ -351,88 +348,84 @@ const Landing = () => {
 
   return (
     <Layout showMobileNav={false}>
-      {/* Hero — green gradient (original theme) */}
-      <section className="relative flex min-h-[90vh] min-w-0 items-center overflow-x-hidden bg-gradient-to-br from-primary via-primary/90 to-primary-dark text-primary-foreground">
-        <div className="absolute inset-0 bg-[url('data:image/svg+xml,%3Csvg%20width%3D%2260%22%20height%3D%2260%22%20viewBox%3D%220%200%2060%2060%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%3E%3Cg%20fill%3D%22none%22%20fill-rule%3D%22evenodd%22%3E%3Cg%20fill%3D%22%23ffffff%22%20fill-opacity%3D%220.08%22%3E%3Cpath%20d%3D%22M36%2034v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6%2034v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6%204V0H4v4H0v2h4v4h2V6h4V4H6z%22%2F%3E%3C%2Fg%3E%3C%2Fg%3E%3C%2Fsvg%3E')] opacity-40" />
-
+      {/* Hero — Theme Vision: warm canvas, forest + gold accents */}
+      <section className="relative flex min-h-[88vh] min-w-0 items-center overflow-x-hidden bg-background">
         <div
-          className="absolute left-10 top-20 h-20 w-20 animate-pulse-slow rounded-full bg-secondary/20 blur-xl"
-          style={{ animationDelay: '0s' }}
-        />
-        <div
-          className="absolute right-20 top-40 h-32 w-32 animate-pulse-slow rounded-full bg-accent/20 blur-2xl"
-          style={{ animationDelay: '1s' }}
-        />
-        <div
-          className="absolute bottom-20 left-1/4 h-24 w-24 animate-pulse-slow rounded-full bg-secondary-light/20 blur-xl"
-          style={{ animationDelay: '2s' }}
+          className="pointer-events-none absolute inset-0 opacity-[0.35]"
+          style={{
+            background:
+              'radial-gradient(ellipse 80% 50% at 50% -20%, hsl(var(--primary) / 0.08), transparent 55%), radial-gradient(ellipse 60% 40% at 100% 50%, hsl(var(--gold) / 0.06), transparent 45%)',
+          }}
+          aria-hidden
         />
 
-        <div className="container relative z-10 mx-auto min-w-0 px-3 py-16 sm:px-4 sm:py-20 md:py-32">
-          <div className="mx-auto max-w-4xl min-w-0 text-center">
+        <div className="container relative z-10 mx-auto min-w-0 px-3 py-16 sm:px-4 sm:py-24 md:py-32">
+          <div className="mx-auto max-w-3xl min-w-0 text-center">
             <AnimateOnScroll animation="fade-in" delay={0}>
-              <div className="mb-6 inline-flex max-w-full items-center gap-2 rounded-full border border-white/20 bg-white/15 px-3 py-2 shadow-lg backdrop-blur-md transition-all duration-300 hover:bg-white/20 sm:mb-8 sm:px-5 sm:py-2.5">
-                <Sparkles className="h-4 w-4 shrink-0 text-secondary-light" />
-                <span className="text-left text-xs font-semibold leading-snug sm:text-sm">{trustBadgeText}</span>
-                <Award className="h-4 w-4 shrink-0 text-secondary-light" />
+              <div className="mb-6 inline-flex max-w-full items-center gap-2 rounded-full border border-border bg-card px-3 py-2 shadow-sm sm:mb-8 sm:px-4 sm:py-2.5">
+                <Sparkles className="h-4 w-4 shrink-0 text-gold" />
+                <span className="text-left text-xs font-medium leading-snug text-muted-foreground sm:text-sm">
+                  {trustBadgeText}
+                </span>
+                <Award className="h-4 w-4 shrink-0 text-gold" />
               </div>
             </AnimateOnScroll>
 
             <AnimateOnScroll animation="slide-up" delay={0.1}>
               <h1
-                className={`mb-6 text-4xl font-extrabold leading-tight sm:text-5xl md:text-7xl lg:text-8xl ${currentLanguage === 'hi' ? 'font-hindi' : ''}`}
+                className={`font-heading mb-4 text-4xl font-semibold leading-[1.1] tracking-tight text-foreground sm:mb-6 sm:text-5xl md:text-6xl lg:text-7xl ${currentLanguage === 'hi' ? 'font-hindi' : ''}`}
               >
                 <span className="block">{t.hero.title}</span>
-                <span className="mt-2 block text-secondary-light drop-shadow-lg">{t.hero.subtitle}</span>
+                <span className="mt-3 block text-2xl font-medium text-primary sm:text-3xl md:text-4xl">
+                  {t.hero.subtitle}
+                </span>
               </h1>
             </AnimateOnScroll>
 
             <AnimateOnScroll animation="slide-up" delay={0.2}>
               <p
-                className={`mx-auto mb-8 max-w-3xl text-base font-medium leading-relaxed opacity-95 sm:mb-10 sm:text-xl md:text-2xl ${currentLanguage === 'hi' ? 'font-hindi' : ''}`}
+                className={`mx-auto mb-10 max-w-2xl text-base font-normal leading-relaxed text-muted-foreground sm:mb-12 sm:text-lg ${currentLanguage === 'hi' ? 'font-hindi' : ''}`}
               >
                 {t.hero.description}
               </p>
             </AnimateOnScroll>
 
             <AnimateOnScroll animation="slide-up" delay={0.3}>
-              <div className="mb-12 flex flex-col items-center justify-center gap-4 sm:flex-row">
-                <Link to="/register?role=farmer" className="group">
-                  <Button className="btn-hero w-full px-10 py-7 text-lg shadow-2xl transition-all duration-300 hover:shadow-secondary/50 group-hover:scale-105 sm:w-auto">
-                    <span className="mr-2 text-2xl">🧑‍🌾</span>
+              <div className="mb-14 flex flex-col items-stretch justify-center gap-3 sm:mb-16 sm:flex-row sm:items-center sm:justify-center sm:gap-4">
+                <Link to="/register?role=farmer" className="group sm:w-auto">
+                  <Button className="btn-hero flex w-full items-center justify-center gap-2 px-8 py-6 text-base sm:w-auto sm:py-6">
+                    <Leaf className="h-5 w-5 shrink-0" />
                     {t.hero.cta1}
-                    <ArrowRight className="ml-2 h-5 w-5 transition-transform group-hover:translate-x-1" />
+                    <ArrowRight className="h-5 w-5 shrink-0 transition-transform duration-300 group-hover:translate-x-0.5" />
                   </Button>
                 </Link>
-                <Link to="/register?role=buyer" className="group">
+                <Link to="/register?role=buyer" className="group sm:w-auto">
                   <Button
                     variant="outline"
-                    className="w-full border-2 border-white/30 bg-white/10 px-10 py-7 text-lg shadow-xl backdrop-blur-md transition-all duration-300 hover:border-white/50 hover:bg-white/20 sm:w-auto group-hover:scale-105"
+                    className="flex w-full items-center justify-center gap-2 border-primary/20 bg-card px-8 py-6 text-base transition-all duration-300 ease-out hover:border-primary/40 sm:w-auto sm:py-6"
                   >
-                    <span className="mr-2 text-2xl">🛒</span>
+                    <ShoppingBag className="h-5 w-5 shrink-0" />
                     {t.hero.cta2}
-                    <ArrowRight className="ml-2 h-5 w-5 transition-transform group-hover:translate-x-1" />
+                    <ArrowRight className="h-5 w-5 shrink-0 transition-transform duration-300 group-hover:translate-x-0.5" />
                   </Button>
                 </Link>
               </div>
             </AnimateOnScroll>
 
             <AnimateOnScroll animation="fade-in" delay={0.4}>
-              <div className="mx-auto grid max-w-2xl grid-cols-1 gap-4 border-t border-white/20 pt-6 sm:grid-cols-3 sm:gap-6 sm:pt-8">
+              <div className="mx-auto grid max-w-2xl grid-cols-1 gap-6 border-t border-border pt-8 sm:grid-cols-3 sm:gap-8 sm:pt-10">
                 {heroStrip.map((item, i) => (
                   <div key={i} className="text-center">
                     {'marketing' in item && item.marketing ? (
                       <div
-                        className={`text-base font-bold leading-snug text-secondary-light md:text-lg ${currentLanguage === 'hi' ? 'font-hindi' : ''}`}
+                        className={`text-sm font-medium leading-snug text-foreground md:text-base ${currentLanguage === 'hi' ? 'font-hindi' : ''}`}
                       >
                         {item.label}
                       </div>
                     ) : (
                       <>
-                        <div className="text-3xl font-bold text-secondary-light">{item.value}</div>
-                        <div
-                          className={`mt-1 text-sm opacity-80 ${currentLanguage === 'hi' ? 'font-hindi' : ''}`}
-                        >
+                        <div className="font-heading text-3xl font-semibold tabular-nums text-primary">{item.value}</div>
+                        <div className={`mt-1 text-xs text-muted-foreground sm:text-sm ${currentLanguage === 'hi' ? 'font-hindi' : ''}`}>
                           {item.label}
                         </div>
                       </>
@@ -443,19 +436,10 @@ const Landing = () => {
             </AnimateOnScroll>
           </div>
         </div>
-
-        <div className="absolute bottom-0 left-0 right-0">
-          <svg viewBox="0 0 1440 120" fill="none" xmlns="http://www.w3.org/2000/svg" className="h-auto w-full">
-            <path
-              d="M0 120L60 110C120 100 240 80 360 70C480 60 600 60 720 65C840 70 960 80 1080 85C1200 90 1320 90 1380 90L1440 90V120H1380C1320 120 1200 120 1080 120C960 120 840 120 720 120C600 120 480 120 360 120C240 120 120 120 60 120H0Z"
-              fill="hsl(var(--background))"
-            />
-          </svg>
-        </div>
       </section>
 
       {/* Stats */}
-      <section className="-mt-1 bg-gradient-to-b from-background to-muted/30 py-16">
+      <section className="border-t border-border bg-muted/25 py-16">
         <div className="container mx-auto min-w-0 px-3 sm:px-4">
           <StaggerContainer
             staggerDelay={0.1}
@@ -466,17 +450,19 @@ const Landing = () => {
             {statCards.map((stat, index) => (
               <div
                 key={index}
-                className={`group flex h-full flex-col rounded-3xl border border-border/50 bg-gradient-to-br ${stat.color} p-5 text-center shadow-lg backdrop-blur-sm transition-all duration-300 hover:scale-105 hover:shadow-xl sm:p-8`}
+                className="group flex h-full flex-col rounded-xl border border-border bg-card p-5 text-center shadow-card transition-all duration-300 ease-out hover:scale-[1.02] hover:shadow-md sm:p-8"
               >
                 <div
-                  className={`mb-4 shrink-0 animate-float-slow text-4xl transition-transform duration-300 group-hover:scale-110 ${stat.iconColor}`}
+                  className={`mb-4 shrink-0 animate-float-slow text-4xl transition-transform duration-300 ease-out group-hover:scale-105 ${stat.iconColor}`}
                 >
                   {stat.emoji}
                 </div>
                 <div className="flex min-h-0 flex-1 flex-col justify-start">
                   {stat.kind === 'live' ? (
                     <>
-                      <div className="mb-2 text-3xl font-extrabold text-foreground md:text-4xl">{stat.value}</div>
+                      <div className="font-heading mb-2 text-3xl font-semibold tabular-nums text-foreground md:text-4xl">
+                        {stat.value}
+                      </div>
                       <div
                         className={`text-balance text-sm font-medium leading-snug text-muted-foreground ${currentLanguage === 'hi' ? 'font-hindi' : ''}`}
                       >
@@ -486,7 +472,7 @@ const Landing = () => {
                   ) : (
                     <>
                       <div
-                        className={`mb-2 text-xl font-extrabold leading-tight text-foreground md:text-2xl ${currentLanguage === 'hi' ? 'font-hindi' : ''}`}
+                        className={`font-heading mb-2 text-xl font-semibold leading-tight text-foreground md:text-2xl ${currentLanguage === 'hi' ? 'font-hindi' : ''}`}
                       >
                         {stat.headline}
                       </div>
@@ -516,12 +502,20 @@ const Landing = () => {
       {/* Features */}
       <AnimateOnScroll animation="fade-in">
         <section className="relative overflow-hidden bg-background py-20">
-          <div className="absolute right-0 top-0 h-96 w-96 -translate-y-1/2 translate-x-1/2 rounded-full bg-primary/5 blur-3xl" />
-          <div className="absolute bottom-0 left-0 h-96 w-96 -translate-x-1/2 translate-y-1/2 rounded-full bg-secondary/5 blur-3xl" />
+          <div
+            className="pointer-events-none absolute inset-0 opacity-[0.4]"
+            style={{
+              background:
+                'radial-gradient(ellipse 55% 40% at 100% 0%, hsl(var(--primary) / 0.04), transparent 50%), radial-gradient(ellipse 50% 35% at 0% 100%, hsl(var(--gold) / 0.03), transparent 45%)',
+            }}
+            aria-hidden
+          />
 
           <div className="container relative z-10 mx-auto min-w-0 px-3 sm:px-4">
             <div className="mb-16 text-center">
-              <h2 className={`mb-4 text-4xl font-extrabold md:text-5xl ${currentLanguage === 'hi' ? 'font-hindi' : ''}`}>
+              <h2
+                className={`font-heading mb-4 text-4xl font-semibold tracking-tight md:text-5xl ${currentLanguage === 'hi' ? 'font-hindi' : ''}`}
+              >
                 {t.features.title}
               </h2>
               <p className={`mx-auto max-w-2xl text-lg text-muted-foreground ${currentLanguage === 'hi' ? 'font-hindi' : ''}`}>
@@ -537,24 +531,25 @@ const Landing = () => {
             >
               {t.features.items.map((feature, index) => {
                 const colors = [
-                  { bg: 'bg-primary/10', icon: 'text-primary', border: 'border-primary/20' },
-                  { bg: 'bg-secondary/10', icon: 'text-secondary', border: 'border-secondary/20' },
-                  { bg: 'bg-accent/10', icon: 'text-accent', border: 'border-accent/20' },
-                  { bg: 'bg-success/10', icon: 'text-success', border: 'border-success/20' },
+                  { bg: 'bg-primary/8', icon: 'text-primary' },
+                  { bg: 'bg-secondary/8', icon: 'text-secondary' },
+                  { bg: 'bg-gold/10', icon: 'text-gold' },
+                  { bg: 'bg-success/8', icon: 'text-success' },
                 ];
                 const color = colors[index % colors.length];
                 return (
                   <div
                     key={index}
-                    className={`card-elevated group relative overflow-hidden border-2 p-8 text-center transition-all duration-300 hover:-translate-y-2 hover:scale-105 hover:shadow-2xl ${color.border}`}
+                    className="group relative overflow-hidden rounded-xl border border-border bg-card p-8 text-center shadow-card transition-all duration-300 ease-out hover:scale-[1.02] hover:shadow-md"
                   >
-                    <div className={`absolute inset-0 ${color.bg} opacity-0 transition-opacity duration-300 group-hover:opacity-100`} />
                     <div
-                      className={`relative z-10 mx-auto mb-6 flex h-20 w-20 items-center justify-center rounded-3xl border-2 ${color.bg} ${color.border} transition-all duration-300 group-hover:rotate-6 group-hover:scale-110`}
+                      className={`relative z-10 mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-xl border border-border ${color.bg} transition-all duration-300 ease-out group-hover:shadow-sm`}
                     >
-                      <feature.icon className={`h-10 w-10 ${color.icon}`} />
+                      <feature.icon className={`h-8 w-8 ${color.icon}`} />
                     </div>
-                    <h3 className={`relative z-10 mb-3 text-xl font-bold ${currentLanguage === 'hi' ? 'font-hindi' : ''}`}>
+                    <h3
+                      className={`font-heading relative z-10 mb-3 text-lg font-semibold md:text-xl ${currentLanguage === 'hi' ? 'font-hindi' : ''}`}
+                    >
                       {feature.title}
                     </h3>
                     <p className={`relative z-10 text-sm leading-relaxed text-muted-foreground ${currentLanguage === 'hi' ? 'font-hindi' : ''}`}>
@@ -570,10 +565,12 @@ const Landing = () => {
 
       {/* How It Works */}
       <AnimateOnScroll animation="fade-in">
-        <section className="relative bg-gradient-to-b from-muted/30 to-background py-20">
+        <section className="relative border-y border-border bg-muted/20 py-20">
           <div className="container mx-auto min-w-0 px-3 sm:px-4">
             <div className="mb-16 text-center">
-              <h2 className={`mb-4 text-4xl font-extrabold md:text-5xl ${currentLanguage === 'hi' ? 'font-hindi' : ''}`}>
+              <h2
+                className={`font-heading mb-4 text-4xl font-semibold tracking-tight md:text-5xl ${currentLanguage === 'hi' ? 'font-hindi' : ''}`}
+              >
                 {t.howItWorks.title}
               </h2>
               <p className={`mx-auto max-w-2xl text-lg text-muted-foreground ${currentLanguage === 'hi' ? 'font-hindi' : ''}`}>
@@ -585,19 +582,21 @@ const Landing = () => {
               animation="scale-in"
               className="relative mx-auto grid max-w-6xl grid-cols-1 gap-12 md:grid-cols-3"
             >
-              <div className="absolute left-0 right-0 top-20 hidden h-1 bg-gradient-to-r from-primary via-secondary to-accent opacity-20 md:block" />
+              <div className="absolute left-[16%] right-[16%] top-[4.5rem] hidden h-px bg-border md:block" aria-hidden />
               {t.howItWorks.steps.map((step, index) => (
                 <div key={index} className="group relative text-center">
                   <div className="absolute -top-4 left-1/2 z-20 -translate-x-1/2">
-                    <div className="flex h-12 w-12 items-center justify-center rounded-full bg-gradient-to-br from-secondary to-accent text-lg font-bold text-white shadow-lg transition-all duration-300 group-hover:rotate-12 group-hover:scale-125">
+                    <div className="flex h-10 w-10 items-center justify-center rounded-full border-2 border-background bg-secondary text-sm font-semibold text-secondary-foreground shadow-sm transition-all duration-300 ease-out group-hover:scale-[1.06] group-hover:shadow-md">
                       {index + 1}
                     </div>
                   </div>
-                  <div className="relative z-10 mx-auto mb-6 flex h-24 w-24 items-center justify-center rounded-3xl bg-gradient-to-br from-primary to-primary-light shadow-2xl transition-all duration-300 group-hover:rotate-6 group-hover:scale-110">
-                    <step.icon className="h-12 w-12 text-primary-foreground" />
+                  <div className="relative z-10 mx-auto mb-6 flex h-20 w-20 items-center justify-center rounded-xl border border-primary/15 bg-primary text-primary-foreground shadow-card transition-all duration-300 ease-out group-hover:scale-[1.02] group-hover:shadow-md">
+                    <step.icon className="h-10 w-10" />
                   </div>
-                  <div className="card-elevated p-8 pt-12 transition-all duration-300 hover:scale-105 hover:shadow-2xl">
-                    <h3 className={`mb-3 text-xl font-bold ${currentLanguage === 'hi' ? 'font-hindi' : ''}`}>{step.title}</h3>
+                  <div className="rounded-xl border border-border bg-card p-8 pt-12 shadow-card transition-all duration-300 ease-out group-hover:shadow-md">
+                    <h3 className={`font-heading mb-3 text-lg font-semibold md:text-xl ${currentLanguage === 'hi' ? 'font-hindi' : ''}`}>
+                      {step.title}
+                    </h3>
                     <p className={`leading-relaxed text-muted-foreground ${currentLanguage === 'hi' ? 'font-hindi' : ''}`}>
                       {step.desc}
                     </p>
@@ -612,13 +611,10 @@ const Landing = () => {
       {/* Featured Products */}
       <AnimateOnScroll animation="fade-in">
         <section className="relative overflow-hidden bg-background py-20">
-          <div className="absolute left-0 top-1/2 h-96 w-96 -translate-y-1/2 rounded-full bg-primary/5 blur-3xl" />
-          <div className="absolute right-0 top-1/2 h-96 w-96 -translate-y-1/2 rounded-full bg-secondary/5 blur-3xl" />
-
           <div className="container relative z-10 mx-auto min-w-0 px-3 sm:px-4">
             <div className="mb-12 flex flex-col items-center justify-between md:flex-row">
               <div>
-                <h2 className="mb-2 text-4xl font-extrabold md:text-5xl">
+                <h2 className="font-heading mb-2 text-4xl font-semibold tracking-tight md:text-5xl">
                   {currentLanguage === 'en' ? 'Fresh From Farms' : 'खेतों से ताज़ा'}
                 </h2>
                 <p className="text-lg text-muted-foreground">
@@ -630,7 +626,7 @@ const Landing = () => {
               <Link to="/marketplace" className="group mt-4 md:mt-0">
                 <Button
                   variant="outline"
-                  className="border-2 px-8 py-6 text-lg transition-all duration-300 hover:bg-primary hover:text-primary-foreground group-hover:scale-105"
+                  className="border-primary/20 bg-card px-8 py-6 text-base transition-all duration-300 ease-out hover:border-primary/40 hover:bg-muted/50 group-hover:scale-[1.02]"
                 >
                   {currentLanguage === 'en' ? 'View All Products' : 'सभी उत्पाद देखें'}
                   <ArrowRight className="ml-2 h-5 w-5 transition-transform group-hover:translate-x-1" />
@@ -648,13 +644,12 @@ const Landing = () => {
 
       {/* Testimonials */}
       <AnimateOnScroll animation="fade-in">
-        <section className="relative overflow-hidden bg-gradient-to-b from-background via-muted/20 to-background py-20">
-          <div className="absolute left-1/4 top-0 h-72 w-72 rounded-full bg-primary/5 blur-3xl" />
-          <div className="absolute bottom-0 right-1/4 h-72 w-72 rounded-full bg-secondary/5 blur-3xl" />
-
+        <section className="relative overflow-hidden border-t border-border bg-muted/15 py-20">
           <div className="container relative z-10 mx-auto min-w-0 px-3 sm:px-4">
             <div className="mb-16 text-center">
-              <h2 className={`text-4xl font-extrabold md:text-5xl ${currentLanguage === 'hi' ? 'font-hindi' : ''}`}>
+              <h2
+                className={`font-heading text-4xl font-semibold tracking-tight md:text-5xl ${currentLanguage === 'hi' ? 'font-hindi' : ''}`}
+              >
                 {t.testimonials.title}
               </h2>
             </div>
@@ -662,7 +657,7 @@ const Landing = () => {
               {testimonials.map((testimonial, index) => (
                 <div
                   key={index}
-                  className="card-elevated group relative overflow-hidden p-8 transition-all duration-300 hover:-translate-y-2 hover:scale-105 hover:shadow-2xl"
+                  className="group relative overflow-hidden rounded-xl border border-border bg-card p-8 shadow-card transition-all duration-300 ease-out hover:scale-[1.02] hover:shadow-md"
                 >
                   <div className="absolute right-4 top-4 text-primary/10 transition-colors group-hover:text-primary/20">
                     <svg className="h-16 w-16" fill="currentColor" viewBox="0 0 24 24">
@@ -671,7 +666,7 @@ const Landing = () => {
                   </div>
                   <div className="relative z-10 mb-6 flex items-center gap-1">
                     {[...Array(testimonial.rating)].map((_, i) => (
-                      <Star key={i} className="h-5 w-5 fill-secondary text-secondary" />
+                      <Star key={i} className="h-5 w-5 fill-gold text-gold" />
                     ))}
                   </div>
                   <p className={`relative z-10 mb-6 text-lg leading-relaxed text-foreground ${currentLanguage === 'hi' ? 'font-hindi' : ''}`}>
@@ -705,53 +700,62 @@ const Landing = () => {
         </section>
       </AnimateOnScroll>
 
-      {/* CTA */}
+      {/* CTA — earth panel + gold accents (premium, not loud gradients) */}
       <AnimateOnScroll animation="zoom-in">
-        <section className="relative overflow-hidden bg-gradient-to-br from-primary via-primary/95 to-primary-dark py-24 text-primary-foreground">
-          <div className="absolute inset-0 bg-[url('data:image/svg+xml,%3Csvg%20width%3D%2260%22%20height%3D%2260%22%20viewBox%3D%220%200%2060%2060%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%3E%3Cg%20fill%3D%22none%22%20fill-rule%3D%22evenodd%22%3E%3Cg%20fill%3D%22%23ffffff%22%20fill-opacity%3D%220.1%22%3E%3Cpath%20d%3D%22M36%2034v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6%2034v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6%204V0H4v4H0v2h4v4h2V6h4V4H6z%22%2F%3E%3C%2Fg%3E%3C%2Fg%3E%3C%2Fsvg%3E')] opacity-30" />
-          <div className="absolute left-0 top-0 h-96 w-96 -translate-x-1/2 -translate-y-1/2 rounded-full bg-secondary/20 blur-3xl" />
-          <div className="absolute bottom-0 right-0 h-96 w-96 translate-x-1/2 translate-y-1/2 rounded-full bg-accent/20 blur-3xl" />
+        <section className="relative overflow-hidden bg-secondary py-24 text-secondary-foreground">
+          <div
+            className="pointer-events-none absolute inset-0 opacity-30"
+            style={{
+              background:
+                'radial-gradient(ellipse 70% 50% at 80% 0%, hsl(var(--gold) / 0.12), transparent 55%), radial-gradient(ellipse 50% 40% at 0% 100%, hsl(var(--primary) / 0.15), transparent 50%)',
+            }}
+            aria-hidden
+          />
 
-          <div className="container relative z-10 mx-auto min-w-0 px-3 sm:px-4 text-center">
-            <div className="mx-auto max-w-3xl">
-              <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/15 px-4 py-2 backdrop-blur-md">
-                <Zap className="h-4 w-4 text-secondary-light" />
-                <span className="text-sm font-semibold">{t.cta.zapLine}</span>
+          <div className="container relative z-10 mx-auto min-w-0 px-3 text-center sm:px-4">
+            <div className="mx-auto max-w-3xl rounded-2xl border border-white/10 bg-white/[0.04] px-6 py-12 shadow-lg backdrop-blur-[2px] sm:px-10 sm:py-14">
+              <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-gold/35 bg-gold/10 px-4 py-2">
+                <Zap className="h-4 w-4 text-gold" />
+                <span className="text-sm font-medium text-secondary-foreground/95">{t.cta.zapLine}</span>
               </div>
-              <h2 className={`mb-6 text-4xl font-extrabold leading-tight md:text-6xl ${currentLanguage === 'hi' ? 'font-hindi' : ''}`}>
+              <h2
+                className={`font-heading mb-6 text-4xl font-semibold leading-tight tracking-tight md:text-5xl lg:text-6xl ${currentLanguage === 'hi' ? 'font-hindi' : ''}`}
+              >
                 {t.cta.title}
               </h2>
-              <p className={`mb-10 text-xl leading-relaxed opacity-95 md:text-2xl ${currentLanguage === 'hi' ? 'font-hindi' : ''}`}>
+              <p
+                className={`mb-10 text-lg leading-relaxed text-secondary-foreground/85 md:text-xl ${currentLanguage === 'hi' ? 'font-hindi' : ''}`}
+              >
                 {t.cta.desc}
               </p>
-              <div className="flex flex-col items-center justify-center gap-4 sm:flex-row">
-                <Link to="/register" className="group">
-                  <Button className="btn-hero px-12 py-8 text-xl shadow-2xl transition-all duration-300 hover:shadow-secondary/50 group-hover:scale-110">
+              <div className="flex flex-col items-stretch justify-center gap-3 sm:flex-row sm:items-center sm:gap-4">
+                <Link to="/register" className="group sm:w-auto">
+                  <Button className="btn-hero flex w-full items-center justify-center gap-2 px-10 py-7 text-base sm:w-auto md:text-lg">
                     {t.cta.button}
-                    <ArrowRight className="ml-3 h-6 w-6 transition-transform group-hover:translate-x-2" />
+                    <ArrowRight className="h-5 w-5 shrink-0 transition-transform duration-300 group-hover:translate-x-0.5 md:h-6 md:w-6" />
                   </Button>
                 </Link>
-                <Link to="/marketplace" className="group">
+                <Link to="/marketplace" className="group sm:w-auto">
                   <Button
                     variant="outline"
-                    className="border-2 border-white/30 bg-white/10 px-12 py-8 text-xl backdrop-blur-md transition-all duration-300 hover:border-white/50 hover:bg-white/20 group-hover:scale-110"
+                    className="flex w-full items-center justify-center gap-2 border-white/25 bg-transparent px-10 py-7 text-base text-secondary-foreground transition-all duration-300 ease-out hover:border-white/45 hover:bg-white/10 sm:w-auto md:text-lg"
                   >
                     {t.cta.browse}
-                    <ArrowRight className="ml-3 h-6 w-6 transition-transform group-hover:translate-x-2" />
+                    <ArrowRight className="h-5 w-5 shrink-0 transition-transform duration-300 group-hover:translate-x-0.5 md:h-6 md:w-6" />
                   </Button>
                 </Link>
               </div>
-              <div className="mt-12 flex flex-wrap items-center justify-center gap-8 text-sm opacity-80">
+              <div className="mt-12 flex flex-wrap items-center justify-center gap-x-10 gap-y-4 text-sm text-secondary-foreground/75">
                 <div className="flex items-center gap-2">
-                  <Shield className="h-5 w-5 text-secondary-light" />
+                  <Shield className="h-5 w-5 shrink-0 text-gold" />
                   <span>{t.cta.trustSecure}</span>
                 </div>
                 <div className="flex items-center gap-2">
-                  <CheckCircle className="h-5 w-5 text-secondary-light" />
+                  <CheckCircle className="h-5 w-5 shrink-0 text-gold" />
                   <span>{t.cta.trustVerified}</span>
                 </div>
                 <div className="flex items-center gap-2">
-                  <Heart className="h-5 w-5 text-secondary-light" />
+                  <Heart className="h-5 w-5 shrink-0 text-gold" />
                   <span>{t.cta.trustSupport}</span>
                 </div>
               </div>

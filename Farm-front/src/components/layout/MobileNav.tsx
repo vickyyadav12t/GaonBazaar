@@ -239,7 +239,7 @@ const MobileNav = () => {
                   <span className="relative inline-flex">
                     <item.icon className={`h-6 w-6 shrink-0 ${isActive ? 'text-primary' : ''}`} />
                     {showCartBadge ? (
-                      <Badge className="absolute -right-2.5 -top-2 min-h-[1.125rem] min-w-[1.125rem] border-2 border-card px-0.5 py-0 text-[10px] font-bold leading-none text-accent-foreground">
+                      <Badge className="absolute -right-2.5 -top-2 min-h-[1.125rem] min-w-[1.125rem] border-2 border-card bg-gold px-0.5 py-0 text-[10px] font-bold leading-none text-gold-foreground">
                         {cartItemCount > 99 ? '99+' : cartItemCount}
                       </Badge>
                     ) : null}
@@ -289,7 +289,7 @@ const MobileNav = () => {
                       <span className="truncate">{t(labelEn, labelHi)}</span>
                     </span>
                     {notifBadge > 0 ? (
-                      <Badge className="shrink-0 bg-accent px-2 py-0.5 text-xs font-bold text-accent-foreground">
+                      <Badge className="shrink-0 bg-gold px-2 py-0.5 text-xs font-bold text-gold-foreground">
                         {notifBadge > 99 ? '99+' : notifBadge}
                       </Badge>
                     ) : null}
