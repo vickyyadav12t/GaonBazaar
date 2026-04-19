@@ -4,6 +4,41 @@
  */
 import { getSocketOrigin } from '@/lib/resolveApiBaseUrl';
 
+/** Neutral placeholder — not a specific crop (avoids “Potato” showing a grain stock photo). */
+export const LISTING_IMAGE_PLACEHOLDER =
+  'data:image/svg+xml,' +
+  encodeURIComponent(
+    `<svg xmlns="http://www.w3.org/2000/svg" width="800" height="600" viewBox="0 0 800 600">
+      <defs>
+        <linearGradient id="gb" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" style="stop-color:#e8eef2"/>
+          <stop offset="100%" style="stop-color:#d4dde4"/>
+        </linearGradient>
+      </defs>
+      <rect fill="url(#gb)" width="800" height="600"/>
+      <rect x="280" y="200" width="240" height="160" rx="16" fill="none" stroke="#94a3b8" stroke-width="3" stroke-dasharray="12 8"/>
+      <text x="400" y="285" text-anchor="middle" fill="#64748b" font-family="system-ui,sans-serif" font-size="22">No photo</text>
+      <text x="400" y="318" text-anchor="middle" fill="#94a3b8" font-family="system-ui,sans-serif" font-size="15">Add an image in listing settings</text>
+    </svg>`
+  );
+
+/** Drop empty / whitespace-only entries (bad DB rows like `[""]`). */
+export function sanitizeImageUrlList(images: unknown): string[] {
+  if (!Array.isArray(images)) return [];
+  const out: string[] = [];
+  for (const x of images) {
+    if (x == null) continue;
+    const s = String(x).trim();
+    if (s) out.push(s);
+  }
+  return out;
+}
+
+export function firstValidImageFromList(images: unknown): string | undefined {
+  const list = sanitizeImageUrlList(images);
+  return list[0];
+}
+
 function isAbsoluteHttpUrl(url: string): boolean {
   return /^https?:\/\//i.test(url);
 }
@@ -73,4 +108,21 @@ export function optimizeListingImageUrl(rawUrl: string, width = 640): string {
     /* ignore */
   }
   return url;
+}
+
+/**
+ * Single hero URL for cards: resolve + optimize, or neutral SVG if missing / not loadable as absolute HTTP(S) / data.
+ */
+export function listingHeroImageUrl(raw: string | undefined | null, width: number): string {
+  const trimmed = raw?.trim();
+  if (!trimmed) return LISTING_IMAGE_PLACEHOLDER;
+  const u = optimizeListingImageUrl(trimmed, width);
+  if (!u || typeof u !== 'string') return LISTING_IMAGE_PLACEHOLDER;
+  if (u.startsWith('data:') || u.startsWith('blob:')) return u;
+  if (!/^https?:\/\//i.test(u)) return LISTING_IMAGE_PLACEHOLDER;
+  return u;
+}
+
+export function listingHeroImageUrlFromList(images: unknown, width: number): string {
+  return listingHeroImageUrl(firstValidImageFromList(images), width);
 }

@@ -7,7 +7,10 @@ import { AnimateOnScroll, StaggerContainer } from '@/components/animations';
 import ProductCard from '@/components/product/ProductCard';
 import { useAdminDashboard } from '../adminDashboardContext';
 import { AdminPager, LISTINGS_PAGE_SIZE } from '../adminShared';
-import { optimizeListingImageUrl } from '@/lib/productImageUrl';
+import {
+  LISTING_IMAGE_PLACEHOLDER,
+  listingHeroImageUrlFromList,
+} from '@/lib/productImageUrl';
 
 
 export default function AdminListingsTab() {
@@ -55,11 +58,16 @@ export default function AdminListingsTab() {
                 onClick={() => vm.openListingDrawer(listing)}
               >
                 <img
-                  src={optimizeListingImageUrl(listing.images[0], 640)}
+                  src={listingHeroImageUrlFromList(listing.images, 640)}
                   alt={listing.name}
                   className="w-full h-40 object-cover"
                   loading="lazy"
                   decoding="async"
+                  onError={(e) => {
+                    const el = e.currentTarget;
+                    el.onerror = null;
+                    el.src = LISTING_IMAGE_PLACEHOLDER;
+                  }}
                 />
                 <Badge
                   className={`absolute top-2 right-2 ${

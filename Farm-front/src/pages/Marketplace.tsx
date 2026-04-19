@@ -12,6 +12,7 @@ import { CropCategory, Product } from '@/types';
 import { StaggerContainer, AnimateOnScroll } from '@/components/animations';
 import { apiService } from '@/services/api';
 import { resolveFarmerAvatarUrl } from '@/lib/farmerAvatarUrl';
+import { sanitizeImageUrlList } from '@/lib/productImageUrl';
 import { farmerRatingFromApi } from '@/lib/farmerRatingFromApi';
 import { useCopilot } from '@/context/CopilotContext';
 
@@ -75,10 +76,7 @@ function mapBackendProduct(p: any): Product {
     nameHindi: p.nameHindi,
     category: p.category,
     description: p.description || '',
-    images:
-      p.images && p.images.length > 0
-        ? p.images
-        : ['https://images.unsplash.com/photo-1574323347407-f5e1ad6d020b?w=600'],
+    images: sanitizeImageUrlList(p.images),
     price: p.price,
     unit: p.unit,
     minOrderQuantity: p.minOrderQuantity || 1,

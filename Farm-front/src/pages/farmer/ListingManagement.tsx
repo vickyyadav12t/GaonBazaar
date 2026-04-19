@@ -27,7 +27,12 @@ import { useAppSelector } from '@/hooks/useRedux';
 import { Product, CropCategory } from '@/types';
 import { useToast } from '@/hooks/use-toast';
 import { apiService } from '@/services/api';
-import { optimizeListingImageUrl } from '@/lib/productImageUrl';
+import {
+  LISTING_IMAGE_PLACEHOLDER,
+  listingHeroImageUrlFromList,
+  optimizeListingImageUrl,
+  sanitizeImageUrlList,
+} from '@/lib/productImageUrl';
 import {
   parseListingQuantity,
   validatePrice,
@@ -519,10 +524,7 @@ const ListingManagement = () => {
         nameHindi: p.nameHindi,
         category: p.category,
         description: p.description || '',
-        images:
-          p.images && p.images.length > 0
-            ? p.images
-            : ['https://images.unsplash.com/photo-1574323347407-f5e1ad6d020b?w=600'],
+        images: sanitizeImageUrlList(p.images),
         price: p.price,
         unit: p.unit,
         minOrderQuantity: p.minOrderQuantity || 1,
@@ -734,10 +736,7 @@ const ListingManagement = () => {
         harvestDate: latest.harvestDate || undefined,
         isOrganic: latest.isOrganic,
         isNegotiable: latest.isNegotiable,
-        images:
-          finalImages && finalImages.length > 0
-            ? finalImages
-            : ['https://images.unsplash.com/photo-1574323347407-f5e1ad6d020b?w=600'],
+        images: finalImages.length > 0 ? finalImages : [],
       };
 
       const isEdit = Boolean(editingProductId);
@@ -1343,9 +1342,14 @@ const ListingManagement = () => {
               <div className="relative bg-muted">
                 <div className="flex h-44 w-full items-center justify-center p-3 sm:h-52">
                   <img
-                    src={optimizeListingImageUrl(listing.images[0], 640)}
+                    src={listingHeroImageUrlFromList(listing.images, 640)}
                     alt={listing.name}
                     className="max-h-full max-w-full object-contain"
+                    onError={(e) => {
+                      const el = e.currentTarget;
+                      el.onerror = null;
+                      el.src = LISTING_IMAGE_PLACEHOLDER;
+                    }}
                   />
                 </div>
                 <div className="absolute top-2 right-2">

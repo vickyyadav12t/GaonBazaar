@@ -1,8 +1,5 @@
 import { Order, OrderDetail, OrderLineItem } from '@/types';
-import { optimizeListingImageUrl } from '@/lib/productImageUrl';
-
-const PLACEHOLDER_IMG =
-  'https://images.unsplash.com/photo-1574323347407-f5e1ad6d020b?w=600';
+import { listingHeroImageUrlFromList } from '@/lib/productImageUrl';
 
 export function mapOrderStatusFromApi(status: string | undefined): Order['status'] {
   if (status === 'confirmed') return 'processing';
@@ -18,7 +15,10 @@ function productIdFromItem(item: any): string {
 
 function mapApiLineItem(item: any): OrderLineItem {
   const prod = item?.product && typeof item.product === 'object' ? item.product : null;
-  const img = optimizeListingImageUrl(prod?.images?.[0] || PLACEHOLDER_IMG, 640);
+  const imgCandidates: unknown[] = [];
+  if (item?.image) imgCandidates.push(item.image);
+  if (Array.isArray(prod?.images)) imgCandidates.push(...prod.images);
+  const img = listingHeroImageUrlFromList(imgCandidates, 640);
   const qty = Number(item?.quantity) || 0;
   const price = Number(item?.price) || 0;
   const lineTotal =
@@ -37,10 +37,10 @@ function mapApiLineItem(item: any): OrderLineItem {
 export function mapApiOrderToOrder(o: any): Order {
   const first = o.items?.[0];
   const firstProd = first?.product && typeof first.product === 'object' ? first.product : null;
-  const firstImage = optimizeListingImageUrl(
-    firstProd?.images?.[0] || first?.image || PLACEHOLDER_IMG,
-    640
-  );
+  const firstImgCandidates: unknown[] = [];
+  if (first?.image) firstImgCandidates.push(first.image);
+  if (Array.isArray(firstProd?.images)) firstImgCandidates.push(...firstProd.images);
+  const firstImage = listingHeroImageUrlFromList(firstImgCandidates, 640);
   return {
     id: o._id || o.id,
     buyerId: o.buyer?._id || o.buyer,

@@ -3,7 +3,11 @@ import { Star, MapPin, CheckCircle, Eye } from 'lucide-react';
 import { Product } from '@/types';
 import { Badge } from '@/components/ui/badge';
 import { useAppSelector } from '@/hooks/useRedux';
-import { optimizeListingImageUrl } from '@/lib/productImageUrl';
+import {
+  LISTING_IMAGE_PLACEHOLDER,
+  listingHeroImageUrlFromList,
+  optimizeListingImageUrl,
+} from '@/lib/productImageUrl';
 
 interface ProductCardProps {
   product: Product;
@@ -16,13 +20,7 @@ const CARD_IMG_H = 360;
 
 const ProductCard = ({ product, imagePriority = 'low' }: ProductCardProps) => {
   const { currentLanguage } = useAppSelector((state) => state.language);
-  const rawHero = product.images?.[0];
-  const heroSrc = rawHero
-    ? optimizeListingImageUrl(rawHero, CARD_IMG_W)
-    : optimizeListingImageUrl(
-        'https://images.unsplash.com/photo-1574323347407-f5e1ad6d020b?w=600',
-        CARD_IMG_W
-      );
+  const heroSrc = listingHeroImageUrlFromList(product.images, CARD_IMG_W);
 
   const formatPrice = (price: number) => {
     return new Intl.NumberFormat('en-IN', {
@@ -49,10 +47,7 @@ const ProductCard = ({ product, imagePriority = 'low' }: ProductCardProps) => {
             onError={(e) => {
               const el = e.currentTarget;
               el.onerror = null;
-              el.src = optimizeListingImageUrl(
-                'https://images.unsplash.com/photo-1574323347407-f5e1ad6d020b?w=600',
-                CARD_IMG_W
-              );
+              el.src = LISTING_IMAGE_PLACEHOLDER;
             }}
           />
           {/* Badges */}

@@ -49,6 +49,11 @@ import { mapApiOrderToOrder, mapApiOrderToDetail } from '@/lib/mapOrderFromApi';
 import { OrderStatusTimeline } from '@/components/orders/OrderStatusTimeline';
 import { ADMIN_PANEL_TABS, type AdminPanelTab } from '@/constants';
 import { resolveFarmerAvatarUrl } from '@/lib/farmerAvatarUrl';
+import {
+  LISTING_IMAGE_PLACEHOLDER,
+  optimizeListingImageUrl,
+  sanitizeImageUrlList,
+} from '@/lib/productImageUrl';
 import { AdminDashboardProvider, type AdminDashboardModel } from './adminDashboardContext';
 import type { OverviewMonthlyRow, OverviewCategoryRow, AdminWithdrawalRow, AdminSupportTicketRow, AuditLogRow } from './adminShared';
 import {
@@ -370,10 +375,7 @@ const AdminDashboard = () => {
       nameHindi: p.nameHindi,
       category: p.category,
       description: p.description || '',
-      images:
-        p.images && p.images.length > 0
-          ? p.images
-          : ['https://images.unsplash.com/photo-1574323347407-f5e1ad6d020b?w=600'],
+      images: sanitizeImageUrlList(p.images),
       price: p.price,
       unit: p.unit,
       minOrderQuantity: p.minOrderQuantity || 1,
@@ -1864,12 +1866,11 @@ const AdminDashboard = () => {
                 </SheetHeader>
 
                 {(() => {
+                  const raw = sanitizeImageUrlList(listingDrawerProduct.images);
                   const imgs =
-                    listingDrawerProduct.images?.length > 0
-                      ? listingDrawerProduct.images
-                      : [
-                          'https://images.unsplash.com/photo-1574323347407-f5e1ad6d020b?w=800',
-                        ];
+                    raw.length > 0
+                      ? raw.map((u) => optimizeListingImageUrl(u, 800))
+                      : [LISTING_IMAGE_PLACEHOLDER];
                   const safeIdx = Math.min(listingDrawerImageIndex, imgs.length - 1);
                   const mainSrc = imgs[safeIdx] ?? imgs[0];
                   return (
@@ -1879,6 +1880,11 @@ const AdminDashboard = () => {
                           src={mainSrc}
                           alt={listingDrawerProduct.name}
                           className="aspect-[4/3] w-full object-cover"
+                          onError={(e) => {
+                            const el = e.currentTarget;
+                            el.onerror = null;
+                            el.src = LISTING_IMAGE_PLACEHOLDER;
+                          }}
                         />
                       </div>
                       {imgs.length > 1 ? (
@@ -1892,7 +1898,16 @@ const AdminDashboard = () => {
                                 i === safeIdx ? 'border-primary' : 'border-transparent opacity-80'
                               }`}
                             >
-                              <img src={src} alt="" className="h-full w-full object-cover" />
+                              <img
+                                src={src}
+                                alt=""
+                                className="h-full w-full object-cover"
+                                onError={(e) => {
+                                  const el = e.currentTarget;
+                                  el.onerror = null;
+                                  el.src = LISTING_IMAGE_PLACEHOLDER;
+                                }}
+                              />
                             </button>
                           ))}
                         </div>

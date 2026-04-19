@@ -15,6 +15,7 @@ import { formatPrice } from '@/lib/format';
 import { mapApiOrderToOrder } from '@/lib/mapOrderFromApi';
 import { getAnalyticsPeriodStart, isOrderInPeriod } from '@/lib/analyticsPeriod';
 import { resolveFarmerAvatarUrl } from '@/lib/farmerAvatarUrl';
+import { sanitizeImageUrlList } from '@/lib/productImageUrl';
 import { fetchAllOrdersForCurrentUser } from '@/lib/fetchAllPaginated';
 import { 
   LineChart, Line, BarChart, Bar, PieChart, Pie, Cell, 
@@ -61,10 +62,7 @@ const Analytics = () => {
         nameHindi: p.nameHindi,
         category: p.category,
         description: p.description || '',
-        images:
-          p.images && p.images.length > 0
-            ? p.images
-            : ['https://images.unsplash.com/photo-1574323347407-f5e1ad6d020b?w=600'],
+        images: sanitizeImageUrlList(p.images),
         price: p.price,
         unit: p.unit,
         minOrderQuantity: p.minOrderQuantity || 1,

@@ -13,7 +13,11 @@ import { Product } from '@/types';
 import { toggleWishlist } from '@/store/slices/wishlistSlice';
 import { resolveFarmerAvatarUrl } from '@/lib/farmerAvatarUrl';
 import { useCopilot } from '@/context/CopilotContext';
-import { optimizeListingImageUrl } from '@/lib/productImageUrl';
+import {
+  LISTING_IMAGE_PLACEHOLDER,
+  optimizeListingImageUrl,
+  sanitizeImageUrlList,
+} from '@/lib/productImageUrl';
 
 const ProductDetail = () => {
   const { id } = useParams();
@@ -61,9 +65,7 @@ const ProductDetail = () => {
           nameHindi: backendProduct.nameHindi,
           category: backendProduct.category,
           description: backendProduct.description || '',
-          images: backendProduct.images && backendProduct.images.length > 0
-            ? backendProduct.images
-            : ['https://images.unsplash.com/photo-1574323347407-f5e1ad6d020b?w=600'],
+          images: sanitizeImageUrlList(backendProduct.images),
           price: backendProduct.price,
           unit: backendProduct.unit,
           minOrderQuantity: backendProduct.minOrderQuantity || 1,
@@ -82,6 +84,7 @@ const ProductDetail = () => {
         };
 
         setProduct(mapped);
+        setCurrentImageIndex(0);
         setQuantity(mapped.minOrderQuantity || 1);
         setIsWishlisted(wishlistIds.includes(mapped.id));
 
@@ -111,9 +114,7 @@ const ProductDetail = () => {
             nameHindi: p.nameHindi,
             category: p.category,
             description: p.description || '',
-            images: p.images && p.images.length > 0
-              ? p.images
-              : ['https://images.unsplash.com/photo-1574323347407-f5e1ad6d020b?w=600'],
+            images: sanitizeImageUrlList(p.images),
             price: p.price,
             unit: p.unit,
             minOrderQuantity: p.minOrderQuantity || 1,
@@ -381,6 +382,10 @@ const ProductDetail = () => {
 
   const t = content[currentLanguage];
 
+  const galleryImages =
+    product.images.length > 0 ? product.images : [LISTING_IMAGE_PLACEHOLDER];
+  const safeImageIndex = Math.min(currentImageIndex, Math.max(0, galleryImages.length - 1));
+
   return (
     <Layout>
       <div className="container mx-auto px-4 py-6">
@@ -398,22 +403,27 @@ const ProductDetail = () => {
           <div>
             <div className="relative aspect-square rounded-2xl overflow-hidden bg-muted mb-4">
               <img
-                src={optimizeListingImageUrl(product.images[currentImageIndex], 1024)}
+                src={optimizeListingImageUrl(galleryImages[safeImageIndex], 1024)}
                 alt={product.name}
                 className="w-full h-full object-cover"
+                onError={(e) => {
+                  const el = e.currentTarget;
+                  el.onerror = null;
+                  el.src = LISTING_IMAGE_PLACEHOLDER;
+                }}
               />
               
               {/* Image Navigation */}
-              {product.images.length > 1 && (
+              {galleryImages.length > 1 && (
                 <>
                   <button
-                    onClick={() => setCurrentImageIndex((prev) => (prev === 0 ? product.images.length - 1 : prev - 1))}
+                    onClick={() => setCurrentImageIndex((prev) => (prev === 0 ? galleryImages.length - 1 : prev - 1))}
                     className="absolute left-4 top-1/2 -translate-y-1/2 w-10 h-10 bg-background/80 backdrop-blur-sm rounded-full flex items-center justify-center hover:bg-background transition-colors"
                   >
                     <ChevronLeft className="w-5 h-5" />
                   </button>
                   <button
-                    onClick={() => setCurrentImageIndex((prev) => (prev === product.images.length - 1 ? 0 : prev + 1))}
+                    onClick={() => setCurrentImageIndex((prev) => (prev === galleryImages.length - 1 ? 0 : prev + 1))}
                     className="absolute right-4 top-1/2 -translate-y-1/2 w-10 h-10 bg-background/80 backdrop-blur-sm rounded-full flex items-center justify-center hover:bg-background transition-colors"
                   >
                     <ChevronRight className="w-5 h-5" />
@@ -457,14 +467,14 @@ const ProductDetail = () => {
             </div>
 
             {/* Thumbnails */}
-            {product.images.length > 1 && (
+            {galleryImages.length > 1 && (
               <div className="flex gap-2">
-                {product.images.map((image, index) => (
+                {galleryImages.map((image, index) => (
                   <button
                     key={index}
                     onClick={() => setCurrentImageIndex(index)}
                     className={`w-20 h-20 rounded-xl overflow-hidden border-2 transition-colors ${
-                      currentImageIndex === index ? 'border-primary' : 'border-transparent'
+                      safeImageIndex === index ? 'border-primary' : 'border-transparent'
                     }`}
                   >
                     <img
@@ -473,6 +483,11 @@ const ProductDetail = () => {
                       className="w-full h-full object-cover"
                       loading="lazy"
                       decoding="async"
+                      onError={(e) => {
+                        const el = e.currentTarget;
+                        el.onerror = null;
+                        el.src = LISTING_IMAGE_PLACEHOLDER;
+                      }}
                     />
                   </button>
                 ))}

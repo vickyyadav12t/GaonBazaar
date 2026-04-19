@@ -16,7 +16,11 @@ import { FairDealHelperPanel } from '@/components/chat/FairDealHelperPanel';
 import { Sheet, SheetContent } from '@/components/ui/sheet';
 import { useCopilot } from '@/context/CopilotContext';
 import { getSocketOrigin } from '@/lib/resolveApiBaseUrl';
-import { optimizeListingImageUrl } from '@/lib/productImageUrl';
+import {
+  LISTING_IMAGE_PLACEHOLDER,
+  listingHeroImageUrlFromList,
+  sanitizeImageUrlList,
+} from '@/lib/productImageUrl';
 
 const NegotiationChat = () => {
   const { id } = useParams();
@@ -130,10 +134,7 @@ const NegotiationChat = () => {
             nameHindi: backendProduct.nameHindi,
             category: backendProduct.category,
             description: backendProduct.description || '',
-            images:
-              backendProduct.images && backendProduct.images.length > 0
-                ? backendProduct.images
-                : ['https://images.unsplash.com/photo-1574323347407-f5e1ad6d020b?w=600'],
+            images: sanitizeImageUrlList(backendProduct.images),
             price: backendProduct.price,
             unit: backendProduct.unit,
             minOrderQuantity: backendProduct.minOrderQuantity || 1,
@@ -183,10 +184,7 @@ const NegotiationChat = () => {
               nameHindi: backendProduct.nameHindi,
               category: backendProduct.category,
               description: backendProduct.description || '',
-              images:
-                backendProduct.images && backendProduct.images.length > 0
-                  ? backendProduct.images
-                  : ['https://images.unsplash.com/photo-1574323347407-f5e1ad6d020b?w=600'],
+              images: sanitizeImageUrlList(backendProduct.images),
               price: backendProduct.price,
               unit: backendProduct.unit,
               minOrderQuantity: backendProduct.minOrderQuantity || 1,
@@ -693,9 +691,14 @@ const NegotiationChat = () => {
               <ArrowLeft className="w-5 h-5" />
             </button>
             <img
-              src={optimizeListingImageUrl(product?.images?.[0] || '', 160)}
+              src={listingHeroImageUrlFromList(product?.images, 160)}
               alt={product?.name}
               className="w-12 h-12 rounded-lg object-cover"
+              onError={(e) => {
+                const el = e.currentTarget;
+                el.onerror = null;
+                el.src = LISTING_IMAGE_PLACEHOLDER;
+              }}
             />
             <div className="flex-1 min-w-0">
               <h2 className="font-semibold truncate">{isFarmer ? chat.buyerName : chat.farmerName}</h2>
