@@ -1,9 +1,13 @@
 const User = require("../models/User");
+const { rewriteLocalhostUploadUrl } = require("../utils/publicAssetUrl");
 
 const sanitizeUser = (user) => {
   if (!user) return null;
   const plain = user.toObject ? user.toObject() : user;
   delete plain.password;
+  if (plain.avatar) {
+    plain.avatar = rewriteLocalhostUploadUrl(String(plain.avatar));
+  }
   return plain;
 };
 

@@ -3,6 +3,7 @@ const fs = require("fs");
 const jwt = require("jsonwebtoken");
 const { OAuth2Client } = require("google-auth-library");
 const User = require("../models/User");
+const { sanitizeUser } = require("./user.controller");
 
 const JWT_SECRET = process.env.JWT_SECRET || "dev-secret-key";
 const JWT_EXPIRES_IN = "7d";
@@ -16,12 +17,6 @@ const generateToken = (user) => {
     JWT_SECRET,
     { expiresIn: JWT_EXPIRES_IN }
   );
-};
-
-const sanitizeUser = (user) => {
-  const plain = user.toObject ? user.toObject() : user;
-  delete plain.password;
-  return plain;
 };
 
 function normalizeEmail(email) {

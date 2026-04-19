@@ -14,6 +14,7 @@ import { fetchAllOrdersForCurrentUser } from '@/lib/fetchAllPaginated';
 import { updateUser } from '@/store/slices/authSlice';
 import { validateEmail, validatePhone, validateRequired, getValidationError } from '@/lib/validators';
 import { mapApiUserToAuth } from '@/lib/mapAuthUser';
+import { resolveBackendAssetUrl } from '@/lib/productImageUrl';
 import { mapApiOrderToOrder } from '@/lib/mapOrderFromApi';
 import type { BuyerBusinessType } from '@/types';
 
@@ -182,9 +183,9 @@ const BuyerProfile = () => {
     }
   };
 
-  const avatarDisplayUrl =
-    user?.avatar ||
-    `https://ui-avatars.com/api/?name=${encodeURIComponent(user?.name || 'User')}&size=256`;
+  const avatarDisplayUrl = user?.avatar
+    ? resolveBackendAssetUrl(user.avatar)
+    : `https://ui-avatars.com/api/?name=${encodeURIComponent(user?.name || 'User')}&size=256`;
 
   const handleAvatarFile = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -277,6 +278,11 @@ const BuyerProfile = () => {
                 src={avatarDisplayUrl}
                 alt={user?.name || 'Buyer'}
                 className="w-24 h-24 rounded-full object-cover border-4 border-primary/20"
+                onError={(e) => {
+                  const el = e.currentTarget;
+                  el.onerror = null;
+                  el.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(user?.name || 'User')}&size=256`;
+                }}
               />
               <button
                 type="button"
