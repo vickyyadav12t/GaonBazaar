@@ -112,14 +112,20 @@ const Header = () => {
 
   const barLink = (active: boolean) =>
     `text-sm font-medium transition-colors ${
-      active ? 'text-primary' : 'text-muted-foreground hover:text-foreground'
+      active
+        ? 'text-primary-foreground'
+        : 'text-primary-foreground/90 hover:text-primary-foreground'
     }`;
 
   return (
-    <header className="sticky top-0 z-50 border-b border-border/80 bg-card/90 shadow-sm backdrop-blur-md supports-[backdrop-filter]:bg-card/80">
-      <div className="relative">
+    <header className="sticky top-0 z-50 shadow-md">
+      <div className="relative bg-primary text-primary-foreground">
+        <div
+          className="pointer-events-none absolute inset-0 bg-[url('data:image/svg+xml,%3Csvg%20width%3D%2260%22%20height%3D%2260%22%20viewBox%3D%220%200%2060%2060%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%3E%3Cg%20fill%3D%22none%22%20fill-rule%3D%22evenodd%22%3E%3Cg%20fill%3D%22%23ffffff%22%20fill-opacity%3D%220.08%22%3E%3Cpath%20d%3D%22M36%2034v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6%2034v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6%204V0H4v4H0v2h4v4h2V6h4V4H6z%22%2F%3E%3C%2Fg%3E%3C%2Fg%3E%3C%2Fsvg%3E')] opacity-40"
+          aria-hidden
+        />
         <div className="relative container mx-auto min-w-0 px-3 sm:px-4">
-          <div className="flex min-h-[4.25rem] items-center justify-between gap-3 py-2 sm:gap-6 md:min-h-[4.5rem] md:py-2.5">
+          <div className="flex items-center justify-between gap-3 sm:gap-6 min-h-[4.5rem] py-2 md:min-h-[4.75rem] md:py-2.5">
             <div className="flex items-center gap-4 md:gap-8 min-w-0 flex-1">
               <Link
                 to="/"
@@ -129,7 +135,8 @@ const Header = () => {
                 <img
                   src={`${import.meta.env.BASE_URL}assets/logo.png`}
                   alt="GaonBazaar"
-                  className="block h-[30px] w-auto max-w-[200px] shrink-0 border-0 bg-transparent object-contain p-0 align-middle sm:h-[32px]"
+                  className="h-[32px] w-auto max-w-none shrink-0 object-contain block m-0 p-0 align-middle border-0 bg-transparent"
+                  style={{ filter: 'brightness(0) invert(1)', backgroundColor: 'transparent' }}
                 />
               </Link>
             <nav className="hidden md:flex items-center gap-5 lg:gap-7 flex-wrap min-w-0">
@@ -228,7 +235,7 @@ const Header = () => {
             <button
               type="button"
               onClick={() => dispatch(toggleLanguage())}
-              className="flex items-center gap-1 rounded-lg border border-border bg-muted/60 px-2.5 py-1.5 text-sm font-medium text-foreground transition-colors hover:bg-muted"
+              className="flex items-center gap-1 px-2.5 sm:px-3 py-1.5 rounded-full bg-white/15 hover:bg-white/25 transition-colors text-sm font-medium text-primary-foreground"
             >
               <Globe className="w-4 h-4 shrink-0" />
               <span>{currentLanguage === 'en' ? 'हिं' : 'EN'}</span>
@@ -237,11 +244,11 @@ const Header = () => {
             {isAuthenticated && (
               <Link
                 to="/notifications"
-                className="relative rounded-lg p-2 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+                className="relative p-2 rounded-full text-primary-foreground hover:bg-white/10 transition-colors"
               >
-                <Bell className="h-5 w-5" />
+                <Bell className="w-5 h-5" />
                 {unreadNotificationCount > 0 && (
-                  <span className="absolute -right-0.5 -top-0.5 flex h-[1.125rem] min-w-[1.125rem] items-center justify-center rounded-full bg-gold px-0.5 text-[10px] font-bold text-gold-foreground shadow-sm">
+                  <span className="absolute -top-0.5 -right-0.5 min-w-[1.125rem] h-[1.125rem] px-0.5 bg-accent text-accent-foreground text-[10px] font-bold rounded-full flex items-center justify-center">
                     {unreadNotificationCount > 99 ? '99+' : unreadNotificationCount}
                   </span>
                 )}
@@ -251,9 +258,9 @@ const Header = () => {
             {isAuthenticated && (
               <Link
                 to="/settings"
-                className="hidden rounded-lg p-2 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground sm:inline-flex"
+                className="p-2 rounded-full text-primary-foreground hover:bg-white/10 transition-colors hidden sm:inline-flex"
               >
-                <Settings className="h-5 w-5" />
+                <Settings className="w-5 h-5" />
               </Link>
             )}
 
@@ -262,7 +269,7 @@ const Header = () => {
                 type="button"
                 variant="outline"
                 size="sm"
-                className="hidden border-border bg-transparent md:inline-flex hover:bg-muted"
+                className="hidden md:inline-flex items-center gap-2 border-primary-foreground/40 text-primary-foreground bg-transparent hover:bg-white/10"
                 onClick={handleLogout}
               >
                 <LogOut className="w-4 h-4" />
@@ -273,11 +280,11 @@ const Header = () => {
             {isAuthenticated && user?.role === 'buyer' && (
               <Link
                 to="/buyer/cart"
-                className="relative rounded-lg p-2 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+                className="relative p-2 rounded-full text-primary-foreground hover:bg-white/10 transition-colors"
               >
-                <ShoppingCart className="h-5 w-5" />
+                <ShoppingCart className="w-5 h-5" />
                 {cartItemCount > 0 && (
-                  <span className="absolute -right-0.5 -top-0.5 flex h-[1.125rem] min-w-[1.125rem] items-center justify-center rounded-full bg-gold px-0.5 text-[10px] font-bold text-gold-foreground shadow-sm">
+                  <span className="absolute -top-0.5 -right-0.5 min-w-[1.125rem] h-[1.125rem] px-0.5 bg-accent text-accent-foreground text-[10px] font-bold rounded-full flex items-center justify-center">
                     {cartItemCount}
                   </span>
                 )}
@@ -290,13 +297,13 @@ const Header = () => {
                   <Button
                     variant="ghost"
                     size="sm"
-                    className="text-muted-foreground hover:bg-muted hover:text-foreground"
+                    className="text-primary-foreground hover:bg-white/10 hover:text-primary-foreground"
                   >
                     Login
                   </Button>
                 </Link>
                 <Link to="/register">
-                  <Button size="sm" className="shadow-sm">
+                  <Button size="sm" className="bg-white text-primary hover:bg-white/90 shadow-sm">
                     Register
                   </Button>
                 </Link>
@@ -312,7 +319,7 @@ const Header = () => {
                 }
                 className="hidden sm:block"
               >
-                <div className="flex h-9 w-9 items-center justify-center overflow-hidden rounded-full border border-border bg-muted ring-2 ring-background sm:h-10 sm:w-10">
+                <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-white/20 ring-2 ring-white/25 flex items-center justify-center overflow-hidden">
                   {user?.avatar ? (
                     <img
                       src={resolveBackendAssetUrl(user.avatar)}
@@ -327,7 +334,7 @@ const Header = () => {
                       }}
                     />
                   ) : (
-                    <User className="h-5 w-5 text-muted-foreground" />
+                    <User className="w-5 h-5 text-primary-foreground" />
                   )}
                 </div>
               </Link>
@@ -335,7 +342,7 @@ const Header = () => {
 
             <button
               type="button"
-              className="rounded-lg p-2 text-muted-foreground transition-colors hover:bg-muted md:hidden"
+              className="md:hidden p-2 rounded-lg text-primary-foreground hover:bg-white/10 transition-colors"
               onClick={() => setIsMenuOpen(!isMenuOpen)}
               aria-expanded={isMenuOpen}
               aria-label="Menu"
@@ -344,31 +351,32 @@ const Header = () => {
             </button>
           </div>
         </div>
+        </div>
       </div>
 
       {/* Mobile Menu */}
       {isMenuOpen && (
-        <nav className="animate-slide-up border-t border-border bg-card shadow-inner md:hidden">
-            <div className="container mx-auto flex flex-col gap-1 px-4 py-4">
+        <nav className="md:hidden border-t border-gray-100 bg-white animate-slide-up shadow-inner">
+            <div className="container mx-auto px-4 flex flex-col gap-2 py-4">
               {isAuthenticated && (
                 <>
                   <Link
                     to="/marketplace"
-                    className="rounded-lg px-4 py-3 font-medium text-foreground transition-colors hover:bg-muted hover:text-primary"
+                    className="px-4 py-3 rounded-lg text-gray-800 hover:bg-gray-50 hover:text-green-600 transition-colors font-medium"
                     onClick={() => setIsMenuOpen(false)}
                   >
                     Marketplace
                   </Link>
                   <Link
                     to="/calendar"
-                    className="rounded-lg px-4 py-3 font-medium text-foreground transition-colors hover:bg-muted hover:text-primary"
+                    className="px-4 py-3 rounded-lg text-gray-800 hover:bg-gray-50 hover:text-green-600 transition-colors font-medium"
                     onClick={() => setIsMenuOpen(false)}
                   >
                     Seasonal Guide
                   </Link>
                   <Link
                     to="/support"
-                    className="rounded-lg px-4 py-3 font-medium text-foreground transition-colors hover:bg-muted hover:text-primary"
+                    className="px-4 py-3 rounded-lg text-gray-800 hover:bg-gray-50 hover:text-green-600 transition-colors font-medium"
                     onClick={() => setIsMenuOpen(false)}
                   >
                     Help &amp; Support
@@ -379,14 +387,14 @@ const Header = () => {
                 <>
                   <Link
                     to="/farmer/dashboard"
-                    className="rounded-lg px-4 py-3 font-medium text-foreground transition-colors hover:bg-muted hover:text-primary"
+                    className="px-4 py-3 rounded-lg text-gray-800 hover:bg-gray-50 hover:text-green-600 transition-colors font-medium"
                     onClick={() => setIsMenuOpen(false)}
                   >
                     Farmer Dashboard
                   </Link>
                   <Link
                     to="/farmer/news"
-                    className="rounded-lg px-4 py-3 font-medium text-foreground transition-colors hover:bg-muted hover:text-primary"
+                    className="px-4 py-3 rounded-lg text-gray-800 hover:bg-gray-50 hover:text-green-600 transition-colors font-medium"
                     onClick={() => setIsMenuOpen(false)}
                   >
                     Farmer news
@@ -396,7 +404,7 @@ const Header = () => {
               {isAuthenticated && user?.role === 'buyer' && (
                 <Link 
                   to="/buyer/dashboard" 
-                  className="rounded-lg px-4 py-3 font-medium text-foreground transition-colors hover:bg-muted hover:text-primary"
+                  className="px-4 py-3 rounded-lg text-gray-800 hover:bg-gray-50 hover:text-green-600 transition-colors font-medium"
                   onClick={() => setIsMenuOpen(false)}
                 >
                   Buyer Dashboard
@@ -405,7 +413,7 @@ const Header = () => {
               {isAuthenticated && user?.role === 'admin' && (
                 <Link 
                   to={ROUTES.ADMIN_DASHBOARD} 
-                  className="rounded-lg px-4 py-3 font-medium text-foreground transition-colors hover:bg-muted hover:text-primary"
+                  className="px-4 py-3 rounded-lg text-gray-800 hover:bg-gray-50 hover:text-green-600 transition-colors font-medium"
                   onClick={() => setIsMenuOpen(false)}
                 >
                   Admin Dashboard
@@ -415,14 +423,14 @@ const Header = () => {
                 <>
                   <Link 
                     to="/notifications" 
-                    className="rounded-lg px-4 py-3 font-medium text-foreground transition-colors hover:bg-muted hover:text-primary"
+                    className="px-4 py-3 rounded-lg text-gray-800 hover:bg-gray-50 hover:text-green-600 transition-colors font-medium"
                     onClick={() => setIsMenuOpen(false)}
                   >
                     Notifications
                   </Link>
                   <Link 
                     to="/settings" 
-                    className="rounded-lg px-4 py-3 font-medium text-foreground transition-colors hover:bg-muted hover:text-primary"
+                    className="px-4 py-3 rounded-lg text-gray-800 hover:bg-gray-50 hover:text-green-600 transition-colors font-medium"
                     onClick={() => setIsMenuOpen(false)}
                   >
                     Settings
@@ -450,7 +458,6 @@ const Header = () => {
             </div>
         </nav>
       )}
-      </div>
     </header>
   );
 };

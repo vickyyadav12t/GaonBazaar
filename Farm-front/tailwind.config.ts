@@ -23,9 +23,9 @@ export default {
     },
     extend: {
       fontFamily: {
-        sans: ["Inter", "system-ui", "sans-serif"],
-        heading: ["Sora", "Poppins", "Inter", "system-ui", "sans-serif"],
-        hindi: ["Noto Sans Devanagari", "Inter", "sans-serif"],
+        sans: ["Plus Jakarta Sans", "sans-serif"],
+        heading: ["Plus Jakarta Sans", "sans-serif"],
+        hindi: ["Noto Sans Devanagari", "sans-serif"],
       },
       colors: {
         border: "hsl(var(--border))",
@@ -61,10 +61,6 @@ export default {
           DEFAULT: "hsl(var(--accent))",
           foreground: "hsl(var(--accent-foreground))",
         },
-        gold: {
-          DEFAULT: "hsl(var(--gold))",
-          foreground: "hsl(var(--gold-foreground))",
-        },
         popover: {
           DEFAULT: "hsl(var(--popover))",
           foreground: "hsl(var(--popover-foreground))",
@@ -88,9 +84,9 @@ export default {
         lg: "var(--radius)",
         md: "calc(var(--radius) - 2px)",
         sm: "calc(var(--radius) - 4px)",
-        xl: "0.75rem",
-        "2xl": "0.75rem",
-        "3xl": "1rem",
+        xl: "1rem",
+        "2xl": "1.5rem",
+        "3xl": "2rem",
       },
       boxShadow: {
         card: "var(--shadow-card)",

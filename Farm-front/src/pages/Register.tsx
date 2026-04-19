@@ -1,18 +1,6 @@
 import { useRef, useState } from 'react';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
-import {
-  ArrowRight,
-  Upload,
-  CheckCircle,
-  Shield,
-  Sparkles,
-  MapPin,
-  User,
-  FileText,
-  ArrowLeft,
-  Leaf,
-  ShoppingBag,
-} from 'lucide-react';
+import { ArrowRight, Upload, CheckCircle, Shield, Sparkles, MapPin, User, FileText, ArrowLeft } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -417,18 +405,16 @@ const Register = () => {
   ];
 
   return (
-    <div className="flex min-h-screen overflow-x-hidden bg-background">
+    <div className="flex min-h-screen overflow-x-hidden bg-gradient-to-br from-background via-muted/20 to-background">
       {/* Left Side - Branding */}
-      <div className="relative hidden flex-col justify-between overflow-hidden bg-primary p-12 text-primary-foreground lg:flex lg:w-1/2">
-        <div
-          className="pointer-events-none absolute inset-0 opacity-[0.12]"
-          style={{
-            background:
-              'radial-gradient(ellipse 80% 60% at 100% 0%, hsl(0 0% 100% / 0.25), transparent 50%), radial-gradient(ellipse 50% 45% at 0% 100%, hsl(var(--gold) / 0.12), transparent 45%)',
-          }}
-          aria-hidden
-        />
-
+      <div className="hidden lg:flex lg:w-1/2 bg-gradient-to-br from-primary via-primary/90 to-primary-dark text-primary-foreground p-12 flex-col justify-between relative overflow-hidden">
+        {/* Background Pattern */}
+        <div className="absolute inset-0 bg-[url('data:image/svg+xml,%3Csvg%20width%3D%2260%22%20height%3D%2260%22%20viewBox%3D%220%200%2060%2060%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%3E%3Cg%20fill%3D%22none%22%20fill-rule%3D%22evenodd%22%3E%3Cg%20fill%3D%22%23ffffff%22%20fill-opacity%3D%220.08%22%3E%3Cpath%20d%3D%22M36%2034v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6%2034v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6%204V0H4v4H0v2h4v4h2V6h4V4H6z%22%2F%3E%3C%2Fg%3E%3C%2Fg%3E%3C%2Fsvg%3E')] opacity-40" />
+        
+        {/* Floating Elements */}
+        <div className="absolute top-20 right-20 w-32 h-32 bg-secondary/20 rounded-full blur-2xl" />
+        <div className="absolute bottom-40 left-20 w-40 h-40 bg-accent/20 rounded-full blur-3xl" />
+        
         <div className="relative z-10 isolate">
           <Link to="/" className="mb-12 block group" aria-label="GaonBazaar home">
             <img
@@ -441,18 +427,18 @@ const Register = () => {
         </div>
 
         <div className="relative z-10">
-          <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-4 py-2 backdrop-blur-sm">
-            <Sparkles className="h-4 w-4 text-gold" />
-            <span className="text-sm font-medium">
+          <div className="inline-flex items-center gap-2 bg-white/15 backdrop-blur-md px-4 py-2 rounded-full mb-6 border border-white/20">
+            <Sparkles className="w-4 h-4" />
+            <span className="text-sm font-semibold">
               {currentLanguage === 'en' ? 'Join Our Community' : 'हमारे समुदाय में शामिल हों'}
             </span>
           </div>
-          <h2 className="font-heading mb-6 text-4xl font-semibold leading-tight tracking-tight md:text-5xl">
+          <h2 className="text-5xl font-extrabold mb-6 leading-tight">
             {role === 'farmer' 
               ? (currentLanguage === 'en' ? 'Start Selling Today' : 'आज ही बेचना शुरू करें')
               : (currentLanguage === 'en' ? 'Source Fresh Produce' : 'ताज़ा उपज प्राप्त करें')}
           </h2>
-          <p className="text-lg leading-relaxed text-primary-foreground/90 md:text-xl">
+          <p className="text-xl opacity-95 leading-relaxed">
             {role === 'farmer'
               ? (currentLanguage === 'en' 
                   ? 'List your crops, connect with buyers, and get fair prices without middlemen.'
@@ -574,18 +560,16 @@ const Register = () => {
             <AnimateOnScroll animation="fade-in">
               <div className="space-y-4">
                 <Card 
-                  className={`cursor-pointer border-2 transition-all duration-300 ease-out hover:scale-[1.02] hover:shadow-md ${
+                  className={`cursor-pointer hover:shadow-xl hover:scale-105 transition-all duration-300 border-2 ${
                     role === 'farmer' 
-                      ? 'border-primary bg-primary/5 shadow-sm ring-1 ring-primary/10' 
-                      : 'border-border hover:border-primary/40'
+                      ? 'border-primary bg-gradient-to-br from-primary/10 to-primary/5 shadow-lg' 
+                      : 'border-border hover:border-primary/50'
                   }`}
                   onClick={() => setRole('farmer')}
                 >
                   <CardContent className="p-4 sm:p-6">
                     <div className="flex items-start gap-3 sm:items-center sm:gap-4">
-                      <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl border border-border bg-muted/60 sm:h-14 sm:w-14">
-                        <Leaf className="h-6 w-6 text-primary sm:h-7 sm:w-7" />
-                      </div>
+                      <div className="shrink-0 text-4xl sm:text-5xl">🧑‍🌾</div>
                       <div className="min-w-0 flex-1">
                         <h3 className={`font-bold text-xl mb-2 ${currentLanguage === 'hi' ? 'font-hindi' : ''}`}>
                           {t.farmer}
@@ -604,18 +588,16 @@ const Register = () => {
                 </Card>
 
                 <Card 
-                  className={`cursor-pointer border-2 transition-all duration-300 ease-out hover:scale-[1.02] hover:shadow-md ${
+                  className={`cursor-pointer hover:shadow-xl hover:scale-105 transition-all duration-300 border-2 ${
                     role === 'buyer' 
-                      ? 'border-primary bg-primary/5 shadow-sm ring-1 ring-primary/10' 
-                      : 'border-border hover:border-primary/40'
+                      ? 'border-primary bg-gradient-to-br from-primary/10 to-primary/5 shadow-lg' 
+                      : 'border-border hover:border-primary/50'
                   }`}
                   onClick={() => setRole('buyer')}
                 >
                   <CardContent className="p-4 sm:p-6">
                     <div className="flex items-start gap-3 sm:items-center sm:gap-4">
-                      <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl border border-border bg-muted/60 sm:h-14 sm:w-14">
-                        <ShoppingBag className="h-6 w-6 text-secondary sm:h-7 sm:w-7" />
-                      </div>
+                      <div className="shrink-0 text-4xl sm:text-5xl">🛒</div>
                       <div className="min-w-0 flex-1">
                         <h3 className={`font-bold text-xl mb-2 ${currentLanguage === 'hi' ? 'font-hindi' : ''}`}>
                           {t.buyer}

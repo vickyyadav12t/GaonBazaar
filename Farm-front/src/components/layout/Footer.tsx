@@ -76,7 +76,7 @@ const Footer = () => {
   };
 
   return (
-    <footer className="border-t border-border bg-muted/30 text-foreground">
+    <footer className="bg-sidebar text-sidebar-foreground">
       <div className="container mx-auto min-w-0 px-3 py-10 sm:px-4 sm:py-12">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
           
@@ -90,11 +90,12 @@ const Footer = () => {
               <img
                 src={`${import.meta.env.BASE_URL}assets/logo.png`}
                 alt="GaonBazaar"
-                className="h-[40px] w-auto max-w-none shrink-0 object-contain block m-0 p-0 align-middle border-0 bg-transparent transition-opacity group-hover:opacity-90"
+                className="h-[40px] w-auto max-w-none shrink-0 object-contain block m-0 p-0 align-middle border-0 bg-transparent group-hover:opacity-95 transition-opacity"
+                style={{ filter: 'brightness(0) invert(1)', backgroundColor: 'transparent' }}
               />
             </Link>
 
-            <p className="text-xs text-muted-foreground mb-4 leading-relaxed">
+            <p className="text-xs text-sidebar-foreground/80 mb-4 leading-relaxed">
               Empowering farmers by connecting them directly with buyers.
               No middlemen, only fair deals.
             </p>
@@ -108,7 +109,8 @@ const Footer = () => {
                   target={href.startsWith('http') ? '_blank' : undefined}
                   rel={href.startsWith('http') ? 'noopener noreferrer' : undefined}
                   aria-label={label}
-                  className="flex h-9 w-9 items-center justify-center rounded-full border border-border bg-card text-muted-foreground transition-all duration-300 ease-out hover:scale-[1.02] hover:border-primary/30 hover:text-primary"
+                  className="w-9 h-9 rounded-full bg-sidebar-accent flex items-center justify-center
+                             hover:bg-primary hover:scale-110 transition-all"
                 >
                   <Icon className="w-4 h-4" />
                 </a>
@@ -118,13 +120,14 @@ const Footer = () => {
 
           {/* Quick Links */}
           <nav aria-label="Footer Quick Links">
-            <h4 className="font-heading mb-4 text-lg font-semibold">Quick Links</h4>
+            <h4 className="font-semibold text-lg mb-4">Quick Links</h4>
             <ul className="space-y-2">
               {quickLinks.map((link) => (
                 <li key={link.label}>
                   <Link
                     to={link.to}
-                    className="inline-block text-sm text-muted-foreground transition-all hover:translate-x-0.5 hover:text-primary"
+                    className="text-sm text-sidebar-foreground/80 hover:text-primary
+                               transition-all hover:translate-x-1 inline-block"
                   >
                     {link.label}
                   </Link>
@@ -135,13 +138,14 @@ const Footer = () => {
 
           {/* Resources */}
           <nav aria-label="Footer Resources">
-            <h4 className="font-heading mb-4 text-lg font-semibold">Resources</h4>
+            <h4 className="font-semibold text-lg mb-4">Resources</h4>
             <ul className="space-y-2">
               {resources.map((item) => (
                 <li key={item.label}>
                   <Link
                     to={item.to}
-                    className="inline-block text-sm text-muted-foreground transition-all hover:translate-x-0.5 hover:text-primary"
+                    className="text-sm text-sidebar-foreground/80 hover:text-primary
+                               transition-all hover:translate-x-1 inline-block"
                   >
                     {item.label}
                   </Link>
@@ -152,32 +156,32 @@ const Footer = () => {
 
           {/* Contact */}
           <div>
-            <h4 className="font-heading mb-4 text-lg font-semibold">Contact Us</h4>
+            <h4 className="font-semibold text-lg mb-4">Contact Us</h4>
             <address className="not-italic">
               <ul className="space-y-3">
                 <li className="flex items-start gap-3">
-                  <MapPin className="mt-0.5 h-5 w-5 shrink-0 text-primary" />
-                  <span className="text-sm text-muted-foreground">
+                  <MapPin className="w-5 h-5 text-primary mt-0.5" />
+                  <span className="text-sm text-sidebar-foreground/80">
                     Agricultural Innovation Hub <br />
                     New Delhi, India – 110001
                   </span>
                 </li>
 
                 <li className="flex items-center gap-3">
-                  <Phone className="h-5 w-5 shrink-0 text-primary" />
+                  <Phone className="w-5 h-5 text-primary" />
                   <a
                     href="tel:+916203135782"
-                    className="text-sm text-muted-foreground transition-colors hover:text-primary"
+                    className="text-sm text-sidebar-foreground/80 hover:text-primary"
                   >
                     +91 6203135782
                   </a>
                 </li>
 
                 <li className="flex items-center gap-3">
-                  <Mail className="h-5 w-5 shrink-0 text-primary" />
+                  <Mail className="w-5 h-5 text-primary" />
                   <a
                     href="mailto:praj01012003@gmail.com"
-                    className="text-sm text-muted-foreground transition-colors hover:text-primary"
+                    className="text-sm text-sidebar-foreground/80 hover:text-primary"
                   >
                     praj01012003@gmail.com
                   </a>
@@ -187,19 +191,21 @@ const Footer = () => {
 
             {/* Newsletter */}
             <div className="mt-5">
-              <p className="mb-2 text-sm font-medium text-foreground">Get farming updates</p>
+              <p className="text-sm font-medium mb-2">Get farming updates</p>
               <form className="flex gap-2" onSubmit={handleSubscribe}>
                 <input
                   type="email"
                   placeholder="Your email"
                   value={newsletterEmail}
                   onChange={(e) => setNewsletterEmail(e.target.value)}
-                  className="flex-1 rounded-lg border border-border bg-card px-3 py-2 text-sm text-foreground outline-none ring-offset-background transition-shadow focus:ring-2 focus:ring-primary/25"
+                  className="flex-1 px-3 py-2 rounded-lg bg-sidebar-accent
+                             text-sm outline-none focus:ring-2 focus:ring-primary"
                 />
                 <button
                   type="submit"
                   disabled={isSubscribing}
-                  className="rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-opacity hover:opacity-95 disabled:opacity-60"
+                  className="px-4 py-2 bg-primary text-white rounded-lg
+                             text-sm hover:opacity-90 transition"
                 >
                   {isSubscribing ? 'Subscribing...' : 'Subscribe'}
                 </button>
@@ -209,10 +215,14 @@ const Footer = () => {
         </div>
 
         {/* Bottom Bar */}
-        <div className="mt-12 border-t border-border pt-8">
-          <div className="flex flex-col items-center justify-between gap-4 md:flex-row">
-            <p className="text-sm text-muted-foreground">© {new Date().getFullYear()} GaonBazaar. All rights reserved.</p>
-            <p className="text-sm text-muted-foreground">Built for Indian farmers and buyers.</p>
+        <div className="mt-12 pt-8 border-t border-sidebar-border">
+          <div className="flex flex-col md:flex-row items-center justify-between gap-4">
+            <p className="text-sm text-sidebar-foreground/60">
+              © {new Date().getFullYear()} GaonBazaar. All rights reserved.
+            </p>
+            <p className="text-sm text-sidebar-foreground/60">
+              Made with ❤️ for Indian Farmers
+            </p>
           </div>
         </div>
       </div>
