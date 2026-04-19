@@ -133,8 +133,8 @@ export default function AdminOverviewTab() {
             the Total Orders KPI.
           </CardDescription>
         </CardHeader>
-        <CardContent>
-          <div className="h-64">
+        <CardContent className="min-w-0">
+          <div className="h-64 min-w-0 w-full">
             <ResponsiveContainer width="100%" height="100%">
               <AreaChart data={vm.chartData}>
                 <CartesianGrid strokeDasharray="3 3" className="opacity-30" />
@@ -160,8 +160,8 @@ export default function AdminOverviewTab() {
             only).
           </CardDescription>
         </CardHeader>
-        <CardContent>
-          <div className="h-64">
+        <CardContent className="min-w-0">
+          <div className="h-64 min-w-0 w-full">
             <ResponsiveContainer width="100%" height="100%">
               <BarChart data={vm.chartData}>
                 <CartesianGrid strokeDasharray="3 3" className="opacity-30" />
@@ -201,8 +201,8 @@ export default function AdminOverviewTab() {
           </CardTitle>
           <CardDescription>New accounts per month (last 6 months)</CardDescription>
         </CardHeader>
-        <CardContent>
-          <div className="h-48">
+        <CardContent className="min-w-0">
+          <div className="h-48 min-w-0 w-full">
             <ResponsiveContainer width="100%" height="100%">
               <LineChart data={vm.chartData}>
                 <CartesianGrid strokeDasharray="3 3" className="opacity-30" />
@@ -225,8 +225,8 @@ export default function AdminOverviewTab() {
           </CardTitle>
           <CardDescription>All vm.listings by category (current)</CardDescription>
         </CardHeader>
-        <CardContent>
-          <div className="h-48">
+        <CardContent className="min-w-0">
+          <div className="h-48 min-w-0 w-full">
             {vm.categoryChartData.length === 0 ? (
               <div className="h-full flex items-center justify-center text-sm text-muted-foreground">
                 No products yet
@@ -421,8 +421,8 @@ export default function AdminOverviewTab() {
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
-        <div className="flex flex-col lg:flex-row gap-4">
-          <div className="flex-1 space-y-1.5 min-w-[200px]">
+        <div className="flex min-w-0 flex-col gap-4 lg:flex-row">
+          <div className="min-w-0 flex-1 space-y-1.5">
             <Label htmlFor="broadcast-audience" className="text-xs text-muted-foreground">
               Audience
             </Label>
@@ -442,7 +442,7 @@ export default function AdminOverviewTab() {
           </div>
 
           {vm.notifAudience === 'user' && (
-            <div className="flex-1 space-y-1.5 min-w-[220px]">
+            <div className="min-w-0 flex-1 space-y-1.5">
               <Label htmlFor="broadcast-user-id" className="text-xs text-muted-foreground">
                 Recipient user id
               </Label>

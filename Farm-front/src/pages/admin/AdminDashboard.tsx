@@ -128,18 +128,19 @@ const AdminDashboard = () => {
     return 'overview';
   }, [rawTab]);
 
-  const tabInUrl = searchParams.get('tab');
+  /** Canonicalize URL: missing or invalid `tab` → `tab=overview` (preserves other query params). */
+  const tabFromUrl = searchParams.get('tab');
   useEffect(() => {
-    if (tabInUrl === adminTab) return;
+    if (tabFromUrl && ADMIN_TAB_SET.has(tabFromUrl)) return;
     setSearchParams(
       (prev) => {
         const next = new URLSearchParams(prev);
-        next.set('tab', adminTab);
+        next.set('tab', 'overview');
         return next;
       },
       { replace: true }
     );
-  }, [tabInUrl, adminTab, setSearchParams]);
+  }, [tabFromUrl, setSearchParams]);
 
   const handleAdminTabChange = useCallback(
     (value: string) => {
@@ -1546,10 +1547,10 @@ const AdminDashboard = () => {
             <>
               <AnimateOnScroll animation="fade-in">
                 <div className="mb-8 flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
-                  <div>
-                    <div className="inline-flex items-center gap-2 bg-primary/10 px-4 py-2 rounded-full mb-4">
-                      <Calendar className="w-4 h-4 text-primary" />
-                      <span className="text-sm font-semibold text-primary">
+                  <div className="min-w-0 flex-1">
+                    <div className="mb-4 inline-flex max-w-full items-center gap-2 rounded-full bg-primary/10 px-3 py-2 sm:px-4">
+                      <Calendar className="h-4 w-4 shrink-0 text-primary" />
+                      <span className="text-xs font-semibold text-primary sm:text-sm">
                         {new Date().toLocaleDateString('en-US', {
                           weekday: 'long',
                           year: 'numeric',
@@ -1558,8 +1559,12 @@ const AdminDashboard = () => {
                         })}
                       </span>
                     </div>
-                    <h1 className="text-4xl md:text-5xl font-extrabold text-foreground mb-2">Admin Dashboard</h1>
-                    <p className="text-lg text-muted-foreground">Platform overview and management</p>
+                    <h1 className="mb-2 text-2xl font-extrabold text-foreground sm:text-3xl md:text-5xl">
+                      Admin Dashboard
+                    </h1>
+                    <p className="text-sm text-muted-foreground sm:text-lg">
+                      Platform overview and management
+                    </p>
                   </div>
                   <Button
                     type="button"
@@ -1610,53 +1615,80 @@ const AdminDashboard = () => {
 
               <AdminDashboardProvider value={dashboardModel}>
           <Tabs value={adminTab} onValueChange={handleAdminTabChange} className="space-y-6">
-            <TabsList className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-9 w-full bg-muted/50 p-1 rounded-lg h-auto gap-1">
-              <TabsTrigger value="overview" className="data-[state=active]:bg-background data-[state=active]:shadow-sm">
-                <Activity className="w-4 h-4 mr-2 shrink-0" />
+            <TabsList className="flex h-auto w-full max-w-full flex-nowrap items-stretch justify-start gap-1 overflow-x-auto overflow-y-hidden rounded-lg bg-muted/50 p-1 [-webkit-overflow-scrolling:touch] lg:grid lg:grid-cols-5 lg:overflow-x-visible xl:grid-cols-9">
+              <TabsTrigger
+                value="overview"
+                className="shrink-0 data-[state=active]:bg-background data-[state=active]:shadow-sm lg:min-w-0"
+              >
+                <Activity className="mr-2 h-4 w-4 shrink-0" />
                 Overview
               </TabsTrigger>
-              <TabsTrigger value="orders" className="data-[state=active]:bg-background data-[state=active]:shadow-sm">
-                <ClipboardList className="w-4 h-4 mr-2 shrink-0" />
+              <TabsTrigger
+                value="orders"
+                className="shrink-0 data-[state=active]:bg-background data-[state=active]:shadow-sm lg:min-w-0"
+              >
+                <ClipboardList className="mr-2 h-4 w-4 shrink-0" />
                 Orders
               </TabsTrigger>
-              <TabsTrigger value="users" className="data-[state=active]:bg-background data-[state=active]:shadow-sm">
-                <Users className="w-4 h-4 mr-2 shrink-0" />
+              <TabsTrigger
+                value="users"
+                className="shrink-0 data-[state=active]:bg-background data-[state=active]:shadow-sm lg:min-w-0"
+              >
+                <Users className="mr-2 h-4 w-4 shrink-0" />
                 Users
               </TabsTrigger>
-              <TabsTrigger value="kyc" className="data-[state=active]:bg-background data-[state=active]:shadow-sm">
-                <Shield className="w-4 h-4 mr-2 shrink-0" />
+              <TabsTrigger
+                value="kyc"
+                className="shrink-0 data-[state=active]:bg-background data-[state=active]:shadow-sm lg:min-w-0"
+              >
+                <Shield className="mr-2 h-4 w-4 shrink-0" />
                 KYC
                 {pendingKYC > 0 && (
                   <Badge className="ml-2 bg-warning text-warning-foreground">{pendingKYC}</Badge>
                 )}
               </TabsTrigger>
-              <TabsTrigger value="payouts" className="data-[state=active]:bg-background data-[state=active]:shadow-sm">
-                <Wallet className="w-4 h-4 mr-2 shrink-0" />
+              <TabsTrigger
+                value="payouts"
+                className="shrink-0 data-[state=active]:bg-background data-[state=active]:shadow-sm lg:min-w-0"
+              >
+                <Wallet className="mr-2 h-4 w-4 shrink-0" />
                 Payouts
                 {pendingWithdrawals > 0 && (
                   <Badge className="ml-2 bg-accent text-accent-foreground">{pendingWithdrawals}</Badge>
                 )}
               </TabsTrigger>
-              <TabsTrigger value="listings" className="data-[state=active]:bg-background data-[state=active]:shadow-sm">
-                <Package className="w-4 h-4 mr-2 shrink-0" />
+              <TabsTrigger
+                value="listings"
+                className="shrink-0 data-[state=active]:bg-background data-[state=active]:shadow-sm lg:min-w-0"
+              >
+                <Package className="mr-2 h-4 w-4 shrink-0" />
                 Listings
               </TabsTrigger>
-              <TabsTrigger value="reviews" className="data-[state=active]:bg-background data-[state=active]:shadow-sm">
-                <Star className="w-4 h-4 mr-2 shrink-0" />
+              <TabsTrigger
+                value="reviews"
+                className="shrink-0 data-[state=active]:bg-background data-[state=active]:shadow-sm lg:min-w-0"
+              >
+                <Star className="mr-2 h-4 w-4 shrink-0" />
                 Reviews
                 {pendingReviewsCount > 0 && (
                   <Badge className="ml-2 bg-warning text-warning-foreground">{pendingReviewsCount}</Badge>
                 )}
               </TabsTrigger>
-              <TabsTrigger value="support" className="data-[state=active]:bg-background data-[state=active]:shadow-sm">
-                <MessageCircle className="w-4 h-4 mr-2 shrink-0" />
+              <TabsTrigger
+                value="support"
+                className="shrink-0 data-[state=active]:bg-background data-[state=active]:shadow-sm lg:min-w-0"
+              >
+                <MessageCircle className="mr-2 h-4 w-4 shrink-0" />
                 Support
                 {openSupportTickets > 0 && (
                   <Badge className="ml-2 bg-accent text-accent-foreground">{openSupportTickets}</Badge>
                 )}
               </TabsTrigger>
-              <TabsTrigger value="audit" className="data-[state=active]:bg-background data-[state=active]:shadow-sm">
-                <History className="w-4 h-4 mr-2 shrink-0" />
+              <TabsTrigger
+                value="audit"
+                className="shrink-0 data-[state=active]:bg-background data-[state=active]:shadow-sm lg:min-w-0"
+              >
+                <History className="mr-2 h-4 w-4 shrink-0" />
                 Audit log
               </TabsTrigger>
             </TabsList>

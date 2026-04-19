@@ -61,12 +61,14 @@ const StatCard = ({ title, value, subtitle, icon: Icon, trend, variant = 'defaul
 
   return (
     <div className={`stat-card ${styles.bg} animate-slide-up hover:scale-[1.02] transition-all duration-300 hover:shadow-lg group`}>
-      <div className="flex items-start justify-between">
-        <div className="animate-fade-in">
-          <p className="text-sm text-muted-foreground mb-1">{title}</p>
-          <h3 className="text-2xl font-bold text-foreground group-hover:scale-105 transition-transform duration-300">{formatValue(value)}</h3>
+      <div className="flex items-start justify-between gap-2">
+        <div className="min-w-0 flex-1 animate-fade-in">
+          <p className="mb-1 text-sm text-muted-foreground">{title}</p>
+          <h3 className="text-2xl font-bold text-foreground transition-transform duration-300 group-hover:scale-105">
+            {formatValue(value)}
+          </h3>
           {subtitle != null && subtitle !== '' && (
-            <div className="text-sm text-muted-foreground mt-1">{subtitle}</div>
+            <div className="mt-1 break-words text-xs text-muted-foreground sm:text-sm">{subtitle}</div>
           )}
           {trend && (
             <p className={`text-sm mt-2 animate-slide-fade ${trend.isPositive ? 'text-success' : 'text-destructive'}`}>
@@ -74,8 +76,10 @@ const StatCard = ({ title, value, subtitle, icon: Icon, trend, variant = 'defaul
             </p>
           )}
         </div>
-        <div className={`w-12 h-12 rounded-xl ${styles.iconBg} flex items-center justify-center group-hover:scale-110 group-hover:rotate-3 transition-all duration-300`}>
-          <Icon className={`w-6 h-6 ${styles.iconColor}`} />
+        <div
+          className={`flex h-12 w-12 shrink-0 items-center justify-center rounded-xl ${styles.iconBg} transition-all duration-300 group-hover:rotate-3 group-hover:scale-110`}
+        >
+          <Icon className={`h-6 w-6 ${styles.iconColor}`} />
         </div>
       </div>
     </div>
