@@ -405,7 +405,7 @@ const Register = () => {
   ];
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-background via-muted/20 to-background flex">
+    <div className="flex min-h-screen overflow-x-hidden bg-gradient-to-br from-background via-muted/20 to-background">
       {/* Left Side - Branding */}
       <div className="hidden lg:flex lg:w-1/2 bg-gradient-to-br from-primary via-primary/90 to-primary-dark text-primary-foreground p-12 flex-col justify-between relative overflow-hidden">
         {/* Background Pattern */}
@@ -485,8 +485,8 @@ const Register = () => {
       </div>
 
       {/* Right Side - Registration Form */}
-      <div className="flex-1 flex items-center justify-center p-6 lg:p-12">
-        <div className="w-full max-w-md">
+      <div className="flex min-w-0 flex-1 items-center justify-center p-4 sm:p-6 lg:p-12">
+        <div className="mx-auto w-full min-w-0 max-w-md">
           {/* Mobile Logo */}
           <AnimateOnScroll animation="fade-in">
             <div className="lg:hidden mb-8 text-center">
@@ -502,13 +502,13 @@ const Register = () => {
 
           {/* Mobile Progress */}
           <AnimateOnScroll animation="slide-up" delay={0.1}>
-            <div className="lg:hidden mb-8">
-              <div className="flex items-center justify-center gap-2 mb-4">
+            <div className="mb-8 lg:hidden">
+              <div className="-mx-1 mb-4 flex items-center justify-center gap-1 overflow-x-auto px-1 pb-1 sm:gap-2">
                 {[1, 2, 3, 4].map((s) => {
                   const StepIcon = stepIcons[s - 1].icon;
                   return (
-                    <div key={s} className="flex items-center gap-2">
-                      <div className={`w-10 h-10 rounded-xl flex items-center justify-center transition-all ${
+                    <div key={s} className="flex shrink-0 items-center gap-1 sm:gap-2">
+                      <div className={`flex h-9 w-9 items-center justify-center rounded-xl transition-all sm:h-10 sm:w-10 ${
                         s === step 
                           ? 'bg-primary text-primary-foreground shadow-lg scale-110' 
                           : s < step 
@@ -522,7 +522,7 @@ const Register = () => {
                         )}
                       </div>
                       {s < 4 && (
-                        <div className={`w-8 h-1 rounded-full ${
+                        <div className={`h-1 w-5 shrink-0 rounded-full sm:w-8 ${
                           s < step ? 'bg-primary' : 'bg-border'
                         }`} />
                       )}
@@ -534,14 +534,16 @@ const Register = () => {
           </AnimateOnScroll>
 
           <AnimateOnScroll animation="slide-up" delay={0.2}>
-            <div className="text-center mb-10">
+            <div className="mb-8 text-center sm:mb-10">
               <div className="inline-flex items-center gap-2 bg-primary/10 px-4 py-2 rounded-full mb-4">
                 <Shield className="w-4 h-4 text-primary" />
                 <span className="text-sm font-semibold text-primary">
                   {currentLanguage === 'en' ? 'Step' : 'चरण'} {step} {currentLanguage === 'en' ? 'of' : 'का'} 4
                 </span>
               </div>
-              <h1 className={`text-4xl md:text-5xl font-extrabold text-foreground mb-3 ${currentLanguage === 'hi' ? 'font-hindi' : ''}`}>
+              <h1
+                className={`mb-3 text-3xl font-extrabold text-foreground sm:text-4xl md:text-5xl ${currentLanguage === 'hi' ? 'font-hindi' : ''}`}
+              >
                 {t.title}
               </h1>
               <p className={`text-lg text-muted-foreground ${currentLanguage === 'hi' ? 'font-hindi' : ''}`}>
@@ -565,10 +567,10 @@ const Register = () => {
                   }`}
                   onClick={() => setRole('farmer')}
                 >
-                  <CardContent className="p-6">
-                    <div className="flex items-center gap-4">
-                      <div className="text-5xl">🧑‍🌾</div>
-                      <div className="flex-1">
+                  <CardContent className="p-4 sm:p-6">
+                    <div className="flex items-start gap-3 sm:items-center sm:gap-4">
+                      <div className="shrink-0 text-4xl sm:text-5xl">🧑‍🌾</div>
+                      <div className="min-w-0 flex-1">
                         <h3 className={`font-bold text-xl mb-2 ${currentLanguage === 'hi' ? 'font-hindi' : ''}`}>
                           {t.farmer}
                         </h3>
@@ -593,10 +595,10 @@ const Register = () => {
                   }`}
                   onClick={() => setRole('buyer')}
                 >
-                  <CardContent className="p-6">
-                    <div className="flex items-center gap-4">
-                      <div className="text-5xl">🛒</div>
-                      <div className="flex-1">
+                  <CardContent className="p-4 sm:p-6">
+                    <div className="flex items-start gap-3 sm:items-center sm:gap-4">
+                      <div className="shrink-0 text-4xl sm:text-5xl">🛒</div>
+                      <div className="min-w-0 flex-1">
                         <h3 className={`font-bold text-xl mb-2 ${currentLanguage === 'hi' ? 'font-hindi' : ''}`}>
                           {t.buyer}
                         </h3>
@@ -620,7 +622,7 @@ const Register = () => {
           {step === 2 && (
             <AnimateOnScroll animation="fade-in">
               <Card className="border-2 shadow-lg">
-                <CardContent className="p-6">
+                <CardContent className="p-4 sm:p-6">
                   <div className="space-y-5">
                     <div>
                       <Label htmlFor="name" className="text-sm font-semibold mb-2 block">
@@ -639,8 +641,8 @@ const Register = () => {
                       <Label htmlFor="phone" className="text-sm font-semibold mb-2 block">
                         {currentLanguage === 'en' ? 'Phone Number' : 'फ़ोन नंबर'}
                       </Label>
-                      <div className="flex gap-2">
-                        <div className="flex items-center px-4 bg-muted rounded-xl border-2 border-input font-medium">
+                      <div className="flex min-w-0 gap-2">
+                        <div className="flex shrink-0 items-center rounded-xl border-2 border-input bg-muted px-3 font-medium sm:px-4">
                           <span className="text-sm text-foreground">+91</span>
                         </div>
                         <Input
@@ -650,7 +652,7 @@ const Register = () => {
                           placeholder="98765 43210"
                           value={formData.phone}
                           onChange={handleInputChange}
-                          className="flex-1 border-2 focus:border-primary py-6"
+                          className="min-w-0 flex-1 border-2 py-5 focus:border-primary sm:py-6"
                         />
                       </div>
                     </div>
@@ -756,7 +758,7 @@ const Register = () => {
           {step === 3 && (
             <AnimateOnScroll animation="fade-in">
               <Card className="border-2 shadow-lg">
-                <CardContent className="p-6">
+                <CardContent className="p-4 sm:p-6">
                   <div className="space-y-5">
                     <div>
                       <Label htmlFor="state" className="text-sm font-semibold mb-2 block">
@@ -828,7 +830,7 @@ const Register = () => {
           {step === 4 && (
             <AnimateOnScroll animation="fade-in">
               <Card className="border-2 shadow-lg">
-                <CardContent className="p-6">
+                <CardContent className="p-4 sm:p-6">
                   <div className="space-y-6">
                     <div className="space-y-2">
                       <Label htmlFor="email-otp" className="text-sm font-semibold block">
@@ -919,7 +921,7 @@ const Register = () => {
                           <button
                             type="button"
                             onClick={() => kycInputRef.current?.click()}
-                            className={`w-full border-2 border-dashed rounded-xl p-8 text-center cursor-pointer transition-all duration-300 hover:scale-[1.01] ${
+                            className={`w-full cursor-pointer rounded-xl border-2 border-dashed p-5 text-center transition-all duration-300 hover:scale-[1.01] sm:p-8 ${
                               kycFile
                                 ? 'border-primary bg-primary/5'
                                 : 'border-border hover:border-primary/50 hover:bg-muted/50'
@@ -959,22 +961,22 @@ const Register = () => {
 
           {/* Navigation Buttons */}
           <AnimateOnScroll animation="slide-up" delay={0.3}>
-            <div className="flex gap-3 mt-8">
+            <div className="mt-8 flex flex-col gap-3 sm:flex-row">
               {step > 1 && (
-                <Button 
-                  variant="outline" 
-                  onClick={handleBack} 
-                  className="flex-1 py-6 border-2 hover:bg-muted"
+                <Button
+                  variant="outline"
+                  onClick={handleBack}
+                  className="w-full border-2 py-5 hover:bg-muted sm:flex-1 sm:py-6"
                   disabled={isLoading}
                 >
-                  <ArrowLeft className="w-5 h-5 mr-2" />
+                  <ArrowLeft className="mr-2 h-5 w-5" />
                   {t.back}
                 </Button>
               )}
-              <Button 
-                onClick={handleNext} 
+              <Button
+                onClick={handleNext}
                 disabled={isLoading}
-                className="flex-1 btn-primary-gradient py-7 text-lg font-semibold hover:scale-105 transition-transform shadow-lg"
+                className="w-full py-6 text-base font-semibold shadow-lg transition-transform btn-primary-gradient sm:flex-1 sm:py-7 sm:text-lg sm:hover:scale-[1.02]"
               >
                 {isLoading ? (
                   <>

@@ -94,12 +94,12 @@ const ForgotPassword = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-b from-background to-muted/30 p-4">
-      <Card className="w-full max-w-md border-2 shadow-lg">
-        <CardHeader className="space-y-1">
-          <div className="flex items-center gap-2 text-primary mb-2">
-            <KeyRound className="w-6 h-6" />
-            <CardTitle className="text-2xl">
+    <div className="flex min-h-screen items-center justify-center overflow-x-hidden bg-gradient-to-b from-background to-muted/30 p-3 sm:p-4">
+      <Card className="w-full min-w-0 max-w-md border-2 shadow-lg">
+        <CardHeader className="space-y-1 px-4 pt-6 sm:px-6">
+          <div className="mb-2 flex items-start gap-2 text-primary sm:items-center">
+            <KeyRound className="mt-0.5 h-6 w-6 shrink-0 sm:mt-0" />
+            <CardTitle className="text-xl break-words sm:text-2xl">
               {step === 'email' ? 'Forgot password' : 'Enter code & new password'}
             </CardTitle>
           </div>
@@ -109,7 +109,7 @@ const ForgotPassword = () => {
               : `We sent a code to ${email.trim() || 'your email'}. Enter it below with your new password.`}
           </CardDescription>
         </CardHeader>
-        <CardContent>
+        <CardContent className="px-4 pb-6 sm:px-6">
           {step === 'email' ? (
             <form onSubmit={handleSendCode} className="space-y-4">
               <div className="space-y-2">

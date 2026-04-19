@@ -20,7 +20,9 @@ const Layout = ({ children, showFooter = true, showMobileNav = true }: LayoutPro
       <div className="print:hidden">
         <Header />
       </div>
-      <main className={`flex-1 ${showMobileNav && isAuthenticated ? 'pb-20 md:pb-0' : ''}`}>
+      <main
+        className={`flex-1 min-w-0 ${showMobileNav && isAuthenticated ? 'pb-20 md:pb-0' : ''}`}
+      >
         {children}
       </main>
       {showFooter && (

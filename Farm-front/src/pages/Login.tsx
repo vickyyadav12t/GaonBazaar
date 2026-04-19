@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { useGoogleOAuthButtonWidth } from '@/hooks/useGoogleOAuthButtonWidth';
 import { Link, useNavigate, useSearchParams, useLocation } from 'react-router-dom';
 import { Eye, EyeOff, Phone, ArrowRight, Mail, Shield, CheckCircle } from 'lucide-react';
 import { GoogleLogin } from '@react-oauth/google';
@@ -46,6 +47,7 @@ const Login = () => {
 
   const googleClientId = (import.meta.env.VITE_GOOGLE_CLIENT_ID || '').trim();
   const googleEnabled = Boolean(googleClientId);
+  const googleBtnWidth = useGoogleOAuthButtonWidth(40);
 
   const content = {
     en: {
@@ -241,7 +243,7 @@ const Login = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-background via-muted/20 to-background flex">
+    <div className="min-h-screen bg-gradient-to-br from-background via-muted/20 to-background flex overflow-x-hidden">
       {/* Left Side - Branding */}
       <div className="hidden lg:flex lg:w-1/2 bg-gradient-to-br from-primary via-primary/90 to-primary-dark text-primary-foreground p-12 flex-col justify-start gap-12 relative overflow-hidden">
         {/* Background Pattern */}
@@ -281,8 +283,8 @@ const Login = () => {
       </div>
 
       {/* Right Side - Login Form */}
-      <div className="flex-1 flex items-center justify-center p-6 lg:p-12">
-        <div className="w-full max-w-md">
+      <div className="flex min-w-0 flex-1 items-center justify-center p-4 sm:p-6 lg:p-12">
+        <div className="mx-auto w-full min-w-0 max-w-md">
           {/* Mobile Logo */}
           <AnimateOnScroll animation="fade-in">
             <div className="lg:hidden mb-8 text-center">
@@ -297,14 +299,16 @@ const Login = () => {
           </AnimateOnScroll>
 
           <AnimateOnScroll animation="slide-up" delay={0.1}>
-            <div className="text-center mb-10">
+            <div className="mb-8 text-center sm:mb-10">
               <div className="inline-flex items-center gap-2 bg-primary/10 px-4 py-2 rounded-full mb-4">
                 <Shield className="w-4 h-4 text-primary" />
                 <span className="text-sm font-semibold text-primary">
                   {currentLanguage === 'en' ? 'Secure Login' : 'सुरक्षित लॉगिन'}
                 </span>
               </div>
-              <h1 className={`text-4xl md:text-5xl font-extrabold text-foreground mb-3 ${currentLanguage === 'hi' ? 'font-hindi' : ''}`}>
+              <h1
+                className={`mb-3 text-3xl font-extrabold text-foreground sm:text-4xl md:text-5xl ${currentLanguage === 'hi' ? 'font-hindi' : ''}`}
+              >
                 {t.title}
               </h1>
               <p className={`text-lg text-muted-foreground ${currentLanguage === 'hi' ? 'font-hindi' : ''}`}>
@@ -320,24 +324,26 @@ const Login = () => {
                 <div className="flex rounded-lg bg-muted p-1">
                   <button
                     onClick={() => setLoginMethod('phone')}
-                    className={`flex-1 py-3 rounded-lg text-sm font-semibold transition-all duration-300 flex items-center justify-center gap-2 ${
-                      loginMethod === 'phone' 
-                        ? 'bg-primary text-primary-foreground shadow-lg scale-105' 
+                    type="button"
+                    className={`flex flex-1 items-center justify-center gap-1.5 rounded-lg py-2.5 text-xs font-semibold transition-all duration-300 sm:gap-2 sm:py-3 sm:text-sm ${
+                      loginMethod === 'phone'
+                        ? 'bg-primary text-primary-foreground shadow-lg sm:scale-105'
                         : 'text-muted-foreground hover:text-foreground'
                     }`}
                   >
-                    <Phone className="w-4 h-4" />
+                    <Phone className="h-4 w-4 shrink-0" />
                     Phone
                   </button>
                   <button
+                    type="button"
                     onClick={() => setLoginMethod('email')}
-                    className={`flex-1 py-3 rounded-lg text-sm font-semibold transition-all duration-300 flex items-center justify-center gap-2 ${
-                      loginMethod === 'email' 
-                        ? 'bg-primary text-primary-foreground shadow-lg scale-105' 
+                    className={`flex flex-1 items-center justify-center gap-1.5 rounded-lg py-2.5 text-xs font-semibold transition-all duration-300 sm:gap-2 sm:py-3 sm:text-sm ${
+                      loginMethod === 'email'
+                        ? 'bg-primary text-primary-foreground shadow-lg sm:scale-105'
                         : 'text-muted-foreground hover:text-foreground'
                     }`}
                   >
-                    <Mail className="w-4 h-4" />
+                    <Mail className="h-4 w-4 shrink-0" />
                     Email
                   </button>
                 </div>
@@ -348,15 +354,15 @@ const Login = () => {
           {/* Login Form */}
           <AnimateOnScroll animation="slide-up" delay={0.3}>
             <Card className="border-2 shadow-lg mb-6">
-              <CardContent className="p-6">
+              <CardContent className="p-4 sm:p-6">
                 <div className="space-y-5">
                   {loginMethod === 'phone' ? (
                     <div>
                       <Label htmlFor="phone" className={`text-sm font-semibold mb-2 block ${currentLanguage === 'hi' ? 'font-hindi' : ''}`}>
                         {t.phone}
                       </Label>
-                      <div className="flex gap-2">
-                        <div className="flex items-center px-4 bg-muted rounded-xl border-2 border-input font-medium">
+                      <div className="flex min-w-0 gap-2">
+                        <div className="flex shrink-0 items-center rounded-xl border-2 border-input bg-muted px-3 font-medium sm:px-4">
                           <span className="text-sm text-foreground">+91</span>
                         </div>
                         <Input
@@ -365,7 +371,7 @@ const Login = () => {
                           placeholder="98765 43210"
                           value={phone}
                           onChange={(e) => setPhone(e.target.value)}
-                          className="flex-1 border-2 focus:border-primary py-6"
+                          className="min-w-0 flex-1 border-2 py-5 focus:border-primary sm:py-6"
                         />
                       </div>
                     </div>
@@ -380,13 +386,13 @@ const Login = () => {
                         placeholder="your@email.com"
                         value={email}
                         onChange={(e) => setEmail(e.target.value)}
-                        className="border-2 focus:border-primary py-6"
+                        className="border-2 py-5 focus:border-primary sm:py-6"
                       />
                     </div>
                   )}
 
                   <div>
-                    <div className="flex items-center justify-between gap-2 mb-2">
+                    <div className="mb-2 flex flex-col gap-1.5 sm:flex-row sm:items-center sm:justify-between sm:gap-2">
                       <Label
                         htmlFor="password"
                         className={`text-sm font-semibold block ${currentLanguage === 'hi' ? 'font-hindi' : ''}`}
@@ -395,7 +401,7 @@ const Login = () => {
                       </Label>
                       <Link
                         to="/forgot-password"
-                        className={`text-sm font-medium text-primary hover:underline shrink-0 ${currentLanguage === 'hi' ? 'font-hindi' : ''}`}
+                        className={`self-start text-sm font-medium text-primary hover:underline sm:self-auto ${currentLanguage === 'hi' ? 'font-hindi' : ''}`}
                       >
                         {t.forgotPassword}
                       </Link>
@@ -411,7 +417,7 @@ const Login = () => {
                         }
                         value={password}
                         onChange={(e) => setPassword(e.target.value)}
-                        className="border-2 focus:border-primary py-6 pr-12"
+                        className="border-2 py-5 pr-12 focus:border-primary sm:py-6"
                       />
                       <button
                         type="button"
@@ -427,8 +433,8 @@ const Login = () => {
                     </div>
                   </div>
 
-                  <Button 
-                    className="w-full btn-primary-gradient py-7 text-lg font-semibold hover:scale-105 transition-transform shadow-lg"
+                  <Button
+                    className="w-full py-6 text-base font-semibold shadow-lg transition-transform btn-primary-gradient sm:py-7 sm:text-lg sm:hover:scale-[1.02]"
                     onClick={handleLogin}
                     disabled={
                       isLoading ||
@@ -471,7 +477,7 @@ const Login = () => {
                       {currentLanguage === 'en' ? 'Signing in…' : 'साइन इन…'}
                     </div>
                   ) : googleEnabled ? (
-                    <div className="mx-auto w-full max-w-[384px]">
+                    <div className="mx-auto flex w-full max-w-full justify-center overflow-x-hidden">
                       <GoogleLogin
                         onSuccess={(res) => void handleGoogleSuccess(res.credential)}
                         onError={() =>
@@ -487,7 +493,7 @@ const Login = () => {
                         text="continue_with"
                         shape="rectangular"
                         size="large"
-                        width={384}
+                        width={googleBtnWidth}
                         locale={currentLanguage === 'hi' ? 'hi' : 'en'}
                       />
                     </div>
@@ -514,9 +520,7 @@ const Login = () => {
 
           {/* Error message */}
           {error && (
-            <p className="text-center text-sm text-red-600 mt-4">
-              {error}
-            </p>
+            <p className="mt-4 break-words px-1 text-center text-sm text-red-600">{error}</p>
           )}
 
           {/* Register Link */}

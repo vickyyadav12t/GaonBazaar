@@ -60,18 +60,18 @@ const ResetPassword = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-b from-background to-muted/30 p-4">
-      <Card className="w-full max-w-md border-2 shadow-lg">
-        <CardHeader className="space-y-1">
-          <div className="flex items-center gap-2 text-primary mb-2">
-            <KeyRound className="w-6 h-6" />
-            <CardTitle className="text-2xl">Set new password</CardTitle>
+    <div className="flex min-h-screen items-center justify-center overflow-x-hidden bg-gradient-to-b from-background to-muted/30 p-3 sm:p-4">
+      <Card className="w-full min-w-0 max-w-md border-2 shadow-lg">
+        <CardHeader className="space-y-1 px-4 pt-6 sm:px-6">
+          <div className="mb-2 flex items-start gap-2 text-primary sm:items-center">
+            <KeyRound className="mt-0.5 h-6 w-6 shrink-0 sm:mt-0" />
+            <CardTitle className="text-xl break-words sm:text-2xl">Set new password</CardTitle>
           </div>
           <CardDescription>
             Choose a new password for your account. This link expires after 24 hours.
           </CardDescription>
         </CardHeader>
-        <CardContent>
+        <CardContent className="px-4 pb-6 sm:px-6">
           {!token ? (
             <p className="text-sm text-muted-foreground mb-4">
               No reset token in the URL. Use the link from your email or request a new reset from an
