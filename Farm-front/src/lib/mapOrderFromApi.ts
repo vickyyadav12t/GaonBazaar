@@ -1,9 +1,28 @@
-import { Order, OrderDetail, OrderLineItem } from '@/types';
+import { Order, OrderDetail, OrderLineItem, OrderReturnRequest } from '@/types';
 import { listingHeroImageUrlFromList } from '@/lib/productImageUrl';
 
 export function mapOrderStatusFromApi(status: string | undefined): Order['status'] {
   if (status === 'confirmed') return 'processing';
   return (status as Order['status']) || 'pending';
+}
+
+function mapReturnRequest(raw: unknown): OrderReturnRequest | undefined {
+  if (!raw || typeof raw !== 'object') return undefined;
+  const r = raw as Record<string, unknown>;
+  const st = String(r.status || 'none') as OrderReturnRequest['status'];
+  if (!st || st === 'none') return undefined;
+  const toIso = (d: unknown) =>
+    d instanceof Date ? d.toISOString() : typeof d === 'string' ? d : undefined;
+  return {
+    status: st,
+    reason: typeof r.reason === 'string' ? r.reason : undefined,
+    details: typeof r.details === 'string' ? r.details : undefined,
+    requestedAt: toIso(r.requestedAt),
+    resolvedAt: toIso(r.resolvedAt),
+    resolutionNote: typeof r.resolutionNote === 'string' ? r.resolutionNote : undefined,
+    refundAmount: typeof r.refundAmount === 'number' ? r.refundAmount : undefined,
+    razorpayRefundId: typeof r.razorpayRefundId === 'string' ? r.razorpayRefundId : undefined,
+  };
 }
 
 function productIdFromItem(item: any): string {
@@ -63,6 +82,13 @@ export function mapApiOrderToOrder(o: any): Order {
     updatedAt: o.updatedAt || o.createdAt || new Date().toISOString(),
     expectedDelivery: undefined,
     productCategory: firstProd?.category,
+    deliveredAt:
+      o.deliveredAt instanceof Date
+        ? o.deliveredAt.toISOString()
+        : typeof o.deliveredAt === 'string'
+          ? o.deliveredAt
+          : undefined,
+    returnRequest: mapReturnRequest(o.returnRequest),
   };
 }
 

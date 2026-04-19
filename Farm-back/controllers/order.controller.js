@@ -7,6 +7,35 @@ const { sendMail, isMailConfigured } = require("../utils/mail");
 const { LINKED_ORDER_STAGES } = require("../utils/orderLinked");
 const { prefsFromDoc, createNotificationIfAllowed } = require("../utils/notificationDispatch");
 const { rewriteDeepLocalhostUploads } = require("../utils/publicAssetUrl");
+const { refundRazorpayForOrder } = require("./payment.controller");
+
+const RETURN_WINDOW_DAYS = Number(process.env.ORDER_RETURN_WINDOW_DAYS) || 7;
+const RETURN_REASONS = new Set([
+  "quality_defective",
+  "wrong_item",
+  "damaged",
+  "not_as_described",
+  "other",
+]);
+
+function returnStatusOf(order) {
+  const s = order?.returnRequest?.status;
+  return s && s !== "none" ? s : "none";
+}
+
+function deliveredTimestamp(order) {
+  if (order.deliveredAt) return new Date(order.deliveredAt).getTime();
+  if (order.status === "delivered" && order.updatedAt) return new Date(order.updatedAt).getTime();
+  return 0;
+}
+
+function withinReturnWindow(order) {
+  if (order.status !== "delivered") return false;
+  const t = deliveredTimestamp(order);
+  if (!t) return false;
+  const deadline = t + RETURN_WINDOW_DAYS * 24 * 60 * 60 * 1000;
+  return Date.now() <= deadline;
+}
 
 const ADMIN_ORDER_LIST_MAX_LIMIT = 100;
 const ADMIN_ORDER_DEFAULT_LIMIT = 25;
@@ -778,6 +807,9 @@ exports.updateOrder = async (req, res) => {
     const prevPaymentStatus = order.paymentStatus;
 
     if (status && (role === "farmer" || role === "admin")) {
+      if (status === "delivered" && prevStatus !== "delivered") {
+        order.deliveredAt = new Date();
+      }
       order.status = status;
     }
 
@@ -995,6 +1027,229 @@ exports.cancelOrder = async (req, res) => {
     return res.status(500).json({
       message: err.message || "Server error while cancelling order",
     });
+  }
+};
+
+// POST /api/orders/:id/return-request — buyer (delivered, paid, within window, no prior return)
+exports.requestOrderReturn = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const userId = req.user?.id;
+    const role = req.user?.role;
+    if (role !== "buyer") {
+      return res.status(403).json({ message: "Only buyers can request a return" });
+    }
+    const { reason, details } = req.body || {};
+    if (!reason || !RETURN_REASONS.has(String(reason))) {
+      return res.status(400).json({
+        message: `Invalid reason. Use one of: ${[...RETURN_REASONS].join(", ")}`,
+      });
+    }
+
+    const order = await Order.findById(id);
+    if (!order) return res.status(404).json({ message: "Order not found" });
+    if (refUserId(order.buyer) !== String(userId)) {
+      return res.status(403).json({ message: "Access denied" });
+    }
+    if (order.status !== "delivered") {
+      return res.status(400).json({ message: "Returns are only allowed after delivery" });
+    }
+    if (order.paymentStatus !== "paid") {
+      return res.status(400).json({ message: "Return is only available for paid orders" });
+    }
+    if (returnStatusOf(order) !== "none") {
+      return res.status(400).json({ message: "A return has already been filed for this order" });
+    }
+    if (!withinReturnWindow(order)) {
+      return res.status(400).json({
+        message: `Return window is ${RETURN_WINDOW_DAYS} days after delivery`,
+      });
+    }
+
+    order.returnRequest = {
+      status: "requested",
+      reason: String(reason),
+      details: details != null ? String(details).slice(0, 2000) : "",
+      requestedAt: new Date(),
+    };
+    await order.save();
+
+    try {
+      await Promise.all([
+        createNotificationIfAllowed(Notification, {
+          userId: order.farmer,
+          type: "order",
+          title: "Return requested",
+          message: `Buyer requested a return for order #${String(order._id).slice(-8)}. Open order details to approve or reject.`,
+          link: `/farmer/orders/${String(order._id)}`,
+        }),
+        createNotificationIfAllowed(Notification, {
+          userId: order.buyer,
+          type: "order",
+          title: "Return request submitted",
+          message: "The seller will review your return request.",
+          link: `/buyer/orders/${String(order._id)}`,
+        }),
+      ]);
+    } catch {
+      /* ignore */
+    }
+
+    return res.json({ order: buildOrderResponse(order) });
+  } catch (err) {
+    console.error("Request return error:", err);
+    return res.status(500).json({ message: err.message || "Server error" });
+  }
+};
+
+// POST /api/orders/:id/return-respond — farmer approves or rejects
+exports.respondOrderReturn = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const userId = req.user?.id;
+    const role = req.user?.role;
+    if (role !== "farmer") {
+      return res.status(403).json({ message: "Only farmers can respond to return requests" });
+    }
+    const { decision, note } = req.body || {};
+    const dec = String(decision || "").toLowerCase();
+    if (!["approve", "reject"].includes(dec)) {
+      return res.status(400).json({ message: "decision must be approve or reject" });
+    }
+
+    const order = await Order.findById(id);
+    if (!order) return res.status(404).json({ message: "Order not found" });
+    if (refUserId(order.farmer) !== String(userId)) {
+      return res.status(403).json({ message: "Access denied" });
+    }
+    if (returnStatusOf(order) !== "requested") {
+      return res.status(400).json({ message: "No pending return request for this order" });
+    }
+
+    const noteTrim = note != null ? String(note).trim().slice(0, 1000) : "";
+
+    if (dec === "reject") {
+      order.returnRequest.status = "rejected";
+      order.returnRequest.resolvedAt = new Date();
+      order.returnRequest.resolutionNote = noteTrim || "Return request was not approved.";
+      await order.save();
+      try {
+        await createNotificationIfAllowed(Notification, {
+          userId: order.buyer,
+          type: "order",
+          title: "Return not approved",
+          message: order.returnRequest.resolutionNote,
+          link: `/buyer/orders/${String(order._id)}`,
+        });
+      } catch {
+        /* ignore */
+      }
+      return res.json({ order: buildOrderResponse(order) });
+    }
+
+    // approve
+    if (order.paymentMethod === "razorpay") {
+      try {
+        const { refundId, amountInr } = await refundRazorpayForOrder(order);
+        if (order.stockAdjusted) {
+          await restoreOrderStock(order);
+          order.stockAdjusted = false;
+        }
+        order.returnRequest.status = "refunded";
+        order.returnRequest.resolvedAt = new Date();
+        order.returnRequest.razorpayRefundId = refundId;
+        order.returnRequest.refundAmount = amountInr;
+        order.returnRequest.resolutionNote =
+          noteTrim ||
+          `Refund of ₹${amountInr.toLocaleString("en-IN")} will appear on your original payment method per Razorpay timelines.`;
+        order.paymentStatus = "refunded";
+        await order.save();
+      } catch (e) {
+        console.error("Razorpay refund error:", e);
+        const msg =
+          e?.code === "RAZORPAY_NOT_CONFIGURED"
+            ? "Refunds are not configured on the server. Contact support."
+            : e?.message || "Could not process online refund";
+        return res.status(502).json({ message: msg });
+      }
+    } else {
+      if (order.stockAdjusted) {
+        await restoreOrderStock(order);
+        order.stockAdjusted = false;
+      }
+      order.returnRequest.status = "approved";
+      order.returnRequest.resolutionNote =
+        noteTrim ||
+        "Return approved. Please coordinate return of goods and offline refund with the buyer. When you have refunded, tap Confirm refund on this order.";
+      await order.save();
+    }
+
+    try {
+      await createNotificationIfAllowed(Notification, {
+        userId: order.buyer,
+        type: "order",
+        title: "Return update",
+        message:
+          order.returnRequest.status === "refunded"
+            ? "Your return was approved and your online payment refund has been initiated."
+            : "Your return was approved. The seller will coordinate refund for COD or bank transfer.",
+        link: `/buyer/orders/${String(order._id)}`,
+      });
+    } catch {
+      /* ignore */
+    }
+
+    return res.json({ order: buildOrderResponse(order) });
+  } catch (err) {
+    console.error("Respond return error:", err);
+    return res.status(500).json({ message: err.message || "Server error" });
+  }
+};
+
+// POST /api/orders/:id/return-cod-refunded — farmer confirms offline refund (COD / bank transfer)
+exports.confirmCodReturnRefunded = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const userId = req.user?.id;
+    const role = req.user?.role;
+    if (role !== "farmer" && role !== "admin") {
+      return res.status(403).json({ message: "Only farmers or admins can confirm refund" });
+    }
+    const order = await Order.findById(id);
+    if (!order) return res.status(404).json({ message: "Order not found" });
+    if (role === "farmer" && refUserId(order.farmer) !== String(userId)) {
+      return res.status(403).json({ message: "Access denied" });
+    }
+    if (order.returnRequest?.status !== "approved") {
+      return res
+        .status(400)
+        .json({ message: "No approved return is waiting for refund confirmation on this order" });
+    }
+    if (!["cod", "bank_transfer"].includes(String(order.paymentMethod || ""))) {
+      return res.status(400).json({ message: "This action is only for COD or bank transfer orders" });
+    }
+
+    order.returnRequest.status = "refunded";
+    order.returnRequest.resolvedAt = new Date();
+    order.paymentStatus = "refunded";
+    await order.save();
+
+    try {
+      await createNotificationIfAllowed(Notification, {
+        userId: order.buyer,
+        type: "payment",
+        title: "Refund completed",
+        message: "The seller confirmed your return refund.",
+        link: `/buyer/orders/${String(order._id)}`,
+      });
+    } catch {
+      /* ignore */
+    }
+
+    return res.json({ order: buildOrderResponse(order) });
+  } catch (err) {
+    console.error("Confirm COD return refund error:", err);
+    return res.status(500).json({ message: err.message || "Server error" });
   }
 };
 

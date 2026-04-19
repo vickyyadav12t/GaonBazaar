@@ -222,3 +222,46 @@ exports.verifyPayment = async (req, res) => {
     });
   }
 };
+
+/**
+ * Full refund for an app order paid via Razorpay (subtotal + platform fee).
+ * Caller must persist order fields after success.
+ * @returns {{ refundId: string, amountPaise: number, amountInr: number }}
+ */
+exports.refundRazorpayForOrder = async (order) => {
+  const rz = getRazorpayOrNull();
+  if (!rz) {
+    const e = new Error("Online refunds are not configured (Razorpay keys missing).");
+    e.code = "RAZORPAY_NOT_CONFIGURED";
+    throw e;
+  }
+  if (order.paymentMethod !== "razorpay") {
+    const e = new Error("This order was not paid online.");
+    e.code = "NOT_RAZORPAY";
+    throw e;
+  }
+  if (order.paymentStatus !== "paid") {
+    const e = new Error("Order is not in paid status.");
+    e.code = "NOT_PAID";
+    throw e;
+  }
+  const pid = order.razorpayPaymentId;
+  if (!pid) {
+    const e = new Error("No Razorpay payment id on file for this order.");
+    e.code = "NO_PAYMENT_ID";
+    throw e;
+  }
+  const amountPaise = amountPaiseFromOrder(order);
+  if (amountPaise < 1) {
+    const e = new Error("Refund amount is invalid.");
+    e.code = "INVALID_AMOUNT";
+    throw e;
+  }
+  const refund = await rz.instance.payments.refund(pid, {
+    amount: amountPaise,
+    notes: { app_order_id: String(order._id), reason: "return_approved" },
+    speed: "optimum",
+  });
+  const amountInr = amountPaise / 100;
+  return { refundId: refund.id, amountPaise, amountInr };
+};

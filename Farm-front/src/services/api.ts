@@ -276,6 +276,11 @@ export const apiService = {
     create: (data: any) => api.post('/orders', data),
     update: (id: string, data: any) => api.put(`/orders/${id}`, data),
     cancel: (id: string) => api.post(`/orders/${id}/cancel`),
+    requestReturn: (id: string, body: { reason: string; details?: string }) =>
+      api.post(`/orders/${id}/return-request`, body),
+    respondReturn: (id: string, body: { decision: 'approve' | 'reject'; note?: string }) =>
+      api.post(`/orders/${id}/return-respond`, body),
+    confirmCodReturnRefunded: (id: string) => api.post(`/orders/${id}/return-cod-refunded`),
   },
 
   // Chats

@@ -14,6 +14,15 @@ import Layout from '@/components/layout/Layout';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
 import {
   Select,
   SelectContent,
@@ -35,6 +44,30 @@ import {
 } from '@/lib/orderPaymentCopy';
 import { useCopilot } from '@/context/CopilotContext';
 
+const RETURN_WINDOW_DAYS = 7;
+
+const RETURN_REASON_OPTIONS: { value: string; en: string; hi: string }[] = [
+  { value: 'quality_defective', en: 'Poor quality / defective', hi: 'खराब गुणवत्ता / दोषपूर्ण' },
+  { value: 'wrong_item', en: 'Wrong item received', hi: 'गलत वस्तु मिली' },
+  { value: 'damaged', en: 'Damaged in transit', hi: 'ट्रांजिट में क्षतिग्रस्त' },
+  { value: 'not_as_described', en: 'Not as described', hi: 'विवरण के अनुसार नहीं' },
+  { value: 'other', en: 'Other', hi: 'अन्य' },
+];
+
+function deliveredAtMs(o: OrderDetail): number {
+  if (o.deliveredAt) return new Date(o.deliveredAt).getTime();
+  if (o.status === 'delivered') return new Date(o.updatedAt).getTime();
+  return 0;
+}
+
+function canBuyerRequestReturn(o: OrderDetail): boolean {
+  if (o.status !== 'delivered' || o.paymentStatus !== 'paid') return false;
+  if (o.returnRequest) return false;
+  const t = deliveredAtMs(o);
+  if (!t) return false;
+  return Date.now() <= t + RETURN_WINDOW_DAYS * 86400000;
+}
+
 const formatInr = (n: number) =>
   new Intl.NumberFormat('en-IN', {
     style: 'currency',
@@ -54,6 +87,12 @@ const OrderDetailPage = () => {
   const [loading, setLoading] = useState(true);
   const [acting, setActing] = useState(false);
   const [payingOnline, setPayingOnline] = useState(false);
+  const [returnDialogOpen, setReturnDialogOpen] = useState(false);
+  const [returnReason, setReturnReason] = useState('quality_defective');
+  const [returnDetails, setReturnDetails] = useState('');
+  const [returnBusy, setReturnBusy] = useState(false);
+  const [respondOpen, setRespondOpen] = useState<'approve' | 'reject' | null>(null);
+  const [respondNote, setRespondNote] = useState('');
   const [adminOrderStatus, setAdminOrderStatus] = useState<string>('');
   const [adminPaymentStatus, setAdminPaymentStatus] = useState<string>('');
   const { setCopilotContext } = useCopilot();
@@ -286,6 +325,88 @@ const OrderDetailPage = () => {
     }
   };
 
+  const handleRequestReturn = async () => {
+    if (!order) return;
+    try {
+      setReturnBusy(true);
+      await apiService.orders.requestReturn(order.id, {
+        reason: returnReason,
+        details: returnDetails.trim() || undefined,
+      });
+      toast({
+        title: en ? 'Return requested' : 'वापसी अनुरोध',
+        description: en
+          ? 'The seller will review your request.'
+          : 'विक्रेता आपके अनुरोध की समीक्षा करेगा।',
+      });
+      setReturnDialogOpen(false);
+      setReturnDetails('');
+      await refreshAfterAction();
+    } catch (error: any) {
+      toast({
+        title: en ? 'Error' : 'त्रुटि',
+        description: error?.response?.data?.message || error?.message,
+        variant: 'destructive',
+      });
+    } finally {
+      setReturnBusy(false);
+    }
+  };
+
+  const handleRespondReturn = async () => {
+    if (!order || !respondOpen) return;
+    try {
+      setReturnBusy(true);
+      await apiService.orders.respondReturn(order.id, {
+        decision: respondOpen,
+        note: respondNote.trim() || undefined,
+      });
+      toast({
+        title: en ? 'Updated' : 'अपडेट',
+        description:
+          respondOpen === 'approve'
+            ? en
+              ? 'Return response saved.'
+              : 'वापसी प्रतिक्रिया सहेजी गई।'
+            : en
+              ? 'Return request was declined.'
+              : 'वापसी अस्वीकृत।',
+      });
+      setRespondOpen(null);
+      setRespondNote('');
+      await refreshAfterAction();
+    } catch (error: any) {
+      toast({
+        title: en ? 'Error' : 'त्रुटि',
+        description: error?.response?.data?.message || error?.message,
+        variant: 'destructive',
+      });
+    } finally {
+      setReturnBusy(false);
+    }
+  };
+
+  const handleConfirmCodReturn = async () => {
+    if (!order) return;
+    try {
+      setReturnBusy(true);
+      await apiService.orders.confirmCodReturnRefunded(order.id);
+      toast({
+        title: en ? 'Refund recorded' : 'रिफंड दर्ज',
+        description: en ? 'The buyer has been notified.' : 'खरीदार को सूचित किया गया।',
+      });
+      await refreshAfterAction();
+    } catch (error: any) {
+      toast({
+        title: en ? 'Error' : 'त्रुटि',
+        description: error?.response?.data?.message || error?.message,
+        variant: 'destructive',
+      });
+    } finally {
+      setReturnBusy(false);
+    }
+  };
+
   const handleBuyerCancel = async () => {
     if (!order) return;
     try {
@@ -456,6 +577,199 @@ const OrderDetailPage = () => {
               paymentMethod={order.paymentMethod}
               paymentStatus={order.paymentStatus}
             />
+
+            {(order.returnRequest ||
+              (user.role === 'buyer' && canBuyerRequestReturn(order)) ||
+              (user.role === 'farmer' && order.returnRequest?.status === 'requested') ||
+              (user.role === 'farmer' &&
+                order.returnRequest?.status === 'approved' &&
+                (order.paymentMethod === 'cod' || order.paymentMethod === 'bank_transfer')) ||
+              (user.role === 'admin' && order.returnRequest)) && (
+              <div className="card-elevated p-6 border-2 border-amber-500/20 bg-amber-500/5">
+                <h2 className="text-lg font-semibold mb-2">
+                  {en ? 'Return & refund' : 'वापसी और रिफंड'}
+                </h2>
+                <p className="text-sm text-muted-foreground mb-4">
+                  {en
+                    ? `If the item is not satisfactory, you can request a return within ${RETURN_WINDOW_DAYS} days of delivery (paid orders only). The seller approves or declines; online payments are refunded automatically when approved.`
+                    : `डिलीवरी के ${RETURN_WINDOW_DAYS} दिनों के भीतर (केवल भुगतान किए ऑर्डर) वापसी का अनुरोध करें। विक्रेता स्वीकार/अस्वीकार करता है; ऑनलाइन भुगतान स्वीकृति पर स्वतः रिफंड होता है।`}
+                </p>
+                {order.returnRequest ? (
+                  <div className="space-y-2 text-sm">
+                    <div className="flex flex-wrap gap-2 items-center">
+                      <span className="font-medium">{en ? 'Status' : 'स्थिति'}:</span>
+                      <Badge variant="secondary" className="capitalize">
+                        {order.returnRequest.status.replace(/_/g, ' ')}
+                      </Badge>
+                    </div>
+                    {order.returnRequest.reason ? (
+                      <p>
+                        <span className="font-medium">{en ? 'Reason' : 'कारण'}: </span>
+                        {RETURN_REASON_OPTIONS.find((r) => r.value === order.returnRequest?.reason)?.[
+                          en ? 'en' : 'hi'
+                        ] || order.returnRequest.reason}
+                      </p>
+                    ) : null}
+                    {order.returnRequest.details ? (
+                      <p className="whitespace-pre-wrap">
+                        <span className="font-medium">{en ? 'Details' : 'विवरण'}: </span>
+                        {order.returnRequest.details}
+                      </p>
+                    ) : null}
+                    {order.returnRequest.requestedAt ? (
+                      <p className="text-muted-foreground text-xs">
+                        {en ? 'Requested' : 'अनुरोध'}:{' '}
+                        {new Date(order.returnRequest.requestedAt).toLocaleString(
+                          en ? 'en-IN' : 'hi-IN',
+                          { dateStyle: 'medium', timeStyle: 'short' }
+                        )}
+                      </p>
+                    ) : null}
+                    {order.returnRequest.resolutionNote ? (
+                      <p className="pt-2 border-t border-border">
+                        <span className="font-medium">{en ? 'Note' : 'टिप्पणी'}: </span>
+                        {order.returnRequest.resolutionNote}
+                      </p>
+                    ) : null}
+                    {order.returnRequest.refundAmount != null &&
+                    order.returnRequest.status === 'refunded' ? (
+                      <p className="text-primary font-medium">
+                        {en ? 'Refund amount' : 'रिफंड राशि'}: {formatInr(order.returnRequest.refundAmount)}
+                      </p>
+                    ) : null}
+                  </div>
+                ) : null}
+                <div className="mt-4 flex flex-wrap gap-2">
+                  {user.role === 'buyer' && canBuyerRequestReturn(order) ? (
+                    <Button variant="outline" onClick={() => setReturnDialogOpen(true)}>
+                      {en ? 'Request return / refund' : 'वापसी / रिफंड अनुरोध'}
+                    </Button>
+                  ) : null}
+                  {user.role === 'farmer' && order.returnRequest?.status === 'requested' ? (
+                    <>
+                      <Button
+                        className="bg-success hover:bg-success/90"
+                        disabled={returnBusy}
+                        onClick={() => setRespondOpen('approve')}
+                      >
+                        {en ? 'Approve return' : 'वापसी स्वीकारें'}
+                      </Button>
+                      <Button
+                        variant="destructive"
+                        disabled={returnBusy}
+                        onClick={() => setRespondOpen('reject')}
+                      >
+                        {en ? 'Reject' : 'अस्वीकार'}
+                      </Button>
+                    </>
+                  ) : null}
+                  {user.role === 'farmer' &&
+                  order.returnRequest?.status === 'approved' &&
+                  (order.paymentMethod === 'cod' || order.paymentMethod === 'bank_transfer') ? (
+                    <Button disabled={returnBusy} onClick={() => void handleConfirmCodReturn()}>
+                      {en ? 'Confirm refund given to buyer' : 'खरीदार को रिफंड की पुष्टि'}
+                    </Button>
+                  ) : null}
+                </div>
+              </div>
+            )}
+
+            <Dialog open={returnDialogOpen} onOpenChange={setReturnDialogOpen}>
+              <DialogContent>
+                <DialogHeader>
+                  <DialogTitle>{en ? 'Request return' : 'वापसी अनुरोध'}</DialogTitle>
+                  <DialogDescription>
+                    {en
+                      ? 'Tell us what went wrong. The seller will respond soon.'
+                      : 'बताएं क्या समस्या है। विक्रेता जल्द जवाब देगा।'}
+                  </DialogDescription>
+                </DialogHeader>
+                <div className="space-y-3 py-2">
+                  <div className="space-y-2">
+                    <Label>{en ? 'Reason' : 'कारण'}</Label>
+                    <Select value={returnReason} onValueChange={setReturnReason}>
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {RETURN_REASON_OPTIONS.map((r) => (
+                          <SelectItem key={r.value} value={r.value}>
+                            {en ? r.en : r.hi}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="space-y-2">
+                    <Label>{en ? 'More details (optional)' : 'अधिक विवरण (वैकल्पिक)'}</Label>
+                    <Textarea
+                      value={returnDetails}
+                      onChange={(e) => setReturnDetails(e.target.value)}
+                      rows={4}
+                      maxLength={2000}
+                      placeholder={en ? 'Describe the issue…' : 'समस्या लिखें…'}
+                    />
+                  </div>
+                </div>
+                <DialogFooter>
+                  <Button variant="outline" onClick={() => setReturnDialogOpen(false)}>
+                    {en ? 'Cancel' : 'रद्द'}
+                  </Button>
+                  <Button disabled={returnBusy} onClick={() => void handleRequestReturn()}>
+                    {returnBusy ? <Loader2 className="w-4 h-4 animate-spin" /> : null}
+                    {en ? 'Submit' : 'जमा करें'}
+                  </Button>
+                </DialogFooter>
+              </DialogContent>
+            </Dialog>
+
+            <Dialog open={respondOpen !== null} onOpenChange={(o) => !o && setRespondOpen(null)}>
+              <DialogContent>
+                <DialogHeader>
+                  <DialogTitle>
+                    {respondOpen === 'approve'
+                      ? en
+                        ? 'Approve this return?'
+                        : 'वापसी स्वीकार करें?'
+                      : en
+                        ? 'Reject this return?'
+                        : 'वापसी अस्वीकार करें?'}
+                  </DialogTitle>
+                  <DialogDescription>
+                    {respondOpen === 'approve'
+                      ? en
+                        ? 'Online orders: refund is started automatically. COD / bank transfer: you must refund the buyer offline, then tap “Confirm refund given”.'
+                        : 'ऑनलाइन: रिफंड स्वचालित। COD: पहले नकद लौटाएं, फिर पुष्टि करें।'
+                      : en
+                        ? 'Optional message to the buyer.'
+                        : 'खरीदार के लिए संदेश (वैकल्पिक)।'}
+                  </DialogDescription>
+                </DialogHeader>
+                <div className="py-2">
+                  <Label>{en ? 'Note to buyer (optional)' : 'खरीदार को नोट'}</Label>
+                  <Textarea
+                    className="mt-2"
+                    value={respondNote}
+                    onChange={(e) => setRespondNote(e.target.value)}
+                    rows={3}
+                    maxLength={1000}
+                  />
+                </div>
+                <DialogFooter>
+                  <Button variant="outline" onClick={() => setRespondOpen(null)}>
+                    {en ? 'Back' : 'वापस'}
+                  </Button>
+                  <Button
+                    variant={respondOpen === 'reject' ? 'destructive' : 'default'}
+                    disabled={returnBusy}
+                    onClick={() => void handleRespondReturn()}
+                  >
+                    {returnBusy ? <Loader2 className="w-4 h-4 animate-spin" /> : null}
+                    {respondOpen === 'approve' ? (en ? 'Approve' : 'स्वीकार') : (en ? 'Reject' : 'अस्वीकार')}
+                  </Button>
+                </DialogFooter>
+              </DialogContent>
+            </Dialog>
 
             <div className="card-elevated p-6">
               <h2 className="text-lg font-semibold mb-4 flex items-center gap-2">

@@ -127,6 +127,20 @@ export type OrderStatus =
   | 'delivered'
   | 'cancelled';
 
+/** Buyer return / refund lifecycle (after delivery) */
+export type ReturnRequestStatus = 'none' | 'requested' | 'approved' | 'rejected' | 'refunded';
+
+export interface OrderReturnRequest {
+  status: ReturnRequestStatus;
+  reason?: string;
+  details?: string;
+  requestedAt?: string;
+  resolvedAt?: string;
+  resolutionNote?: string;
+  refundAmount?: number;
+  razorpayRefundId?: string;
+}
+
 export interface OrderLineItem {
   productId: string;
   name: string;
@@ -161,6 +175,10 @@ export interface Order {
   updatedAt: string;
   /** Set when API embeds product on the first line item (category signals for buyers). */
   productCategory?: CropCategory;
+  /** Server: when order was marked delivered (return window) */
+  deliveredAt?: string;
+  /** Server: return / refund request after delivery */
+  returnRequest?: OrderReturnRequest;
 }
 
 /** Full order from API with every line item (detail view). */

@@ -16,6 +16,27 @@ const orderItemSchema = new mongoose.Schema(
   { _id: false }
 );
 
+/** Buyer return / refund (Flipkart-style) after delivery */
+const returnRequestSchema = new mongoose.Schema(
+  {
+    status: {
+      type: String,
+      enum: ["none", "requested", "approved", "rejected", "refunded"],
+      default: "none",
+    },
+    /** Machine key, e.g. quality_defective */
+    reason: { type: String, trim: true, maxlength: 80 },
+    details: { type: String, trim: true, maxlength: 2000 },
+    requestedAt: { type: Date },
+    resolvedAt: { type: Date },
+    /** Farmer rejection note or system message */
+    resolutionNote: { type: String, trim: true, maxlength: 1000 },
+    refundAmount: { type: Number },
+    razorpayRefundId: { type: String },
+  },
+  { _id: false }
+);
+
 const orderSchema = new mongoose.Schema(
   {
     buyer: {
@@ -56,6 +77,9 @@ const orderSchema = new mongoose.Schema(
     negotiatedPrice: { type: Number },
     // true if availableQuantity was decremented on create (used to restore on cancel)
     stockAdjusted: { type: Boolean, default: false },
+    /** Set when order first moves to delivered (return window anchor) */
+    deliveredAt: { type: Date },
+    returnRequest: { type: returnRequestSchema },
   },
   {
     timestamps: true,
