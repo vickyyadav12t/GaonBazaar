@@ -1520,8 +1520,8 @@ const AdminDashboard = () => {
 
   return (
     <Layout showMobileNav={false}>
-      <div className="min-h-screen bg-gradient-to-b from-background to-muted/20">
-        <div className="container mx-auto px-4 py-8">
+      <div className="min-h-screen min-w-0 overflow-x-hidden bg-gradient-to-b from-background to-muted/20">
+        <div className="container mx-auto min-w-0 px-3 py-6 sm:px-4 sm:py-8">
           {!initialLoading ? (
             <div className="mb-6 flex flex-col gap-3 rounded-xl border border-primary/20 bg-primary/5 px-4 py-3 md:hidden">
               <p className="text-sm text-muted-foreground">
@@ -2217,7 +2217,7 @@ const AdminDashboard = () => {
                     disabled={supportStatusPatching}
                     onValueChange={(v) => void handleSupportTicketStatusChange(v)}
                   >
-                    <SelectTrigger className="w-[200px] h-9">
+                    <SelectTrigger className="h-9 w-full min-w-0 max-w-[220px] sm:w-[200px]">
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>

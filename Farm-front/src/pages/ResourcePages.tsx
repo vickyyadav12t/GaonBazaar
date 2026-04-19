@@ -4,9 +4,13 @@ import Layout from '@/components/layout/Layout';
 function DocShell({ title, children }: { title: string; children: ReactNode }) {
   return (
     <Layout showMobileNav={false}>
-      <article className="container mx-auto max-w-3xl px-4 py-12">
-        <h1 className="mb-6 text-3xl font-bold tracking-tight text-foreground md:text-4xl">{title}</h1>
-        <div className="space-y-4 text-sm leading-relaxed text-muted-foreground md:text-base">{children}</div>
+      <article className="container mx-auto min-w-0 max-w-3xl px-4 py-10 sm:py-12">
+        <h1 className="mb-6 text-2xl font-bold tracking-tight text-foreground sm:text-3xl md:text-4xl">
+          {title}
+        </h1>
+        <div className="min-w-0 space-y-4 break-words text-sm leading-relaxed text-muted-foreground md:text-base">
+          {children}
+        </div>
       </article>
     </Layout>
   );

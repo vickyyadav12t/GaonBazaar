@@ -8,7 +8,7 @@ const Wishlist = () => {
 
   return (
     <Layout>
-      <div className="container mx-auto px-4 py-6">
+      <div className="container mx-auto min-w-0 px-3 py-5 sm:px-4 sm:py-6">
         <div className="mb-6">
           <h1 className={`text-2xl font-bold ${currentLanguage === 'hi' ? 'font-hindi' : ''}`}>
             {currentLanguage === 'en' ? 'Wishlist' : 'इच्छा-सूची'}

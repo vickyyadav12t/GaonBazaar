@@ -141,6 +141,10 @@
     font-feature-settings: "rlig" 1, "calt" 1;
   }
 
+  #root {
+    min-width: 0;
+  }
+
   /* Typography */
   h1, h2, h3, h4, h5, h6 {
     @apply font-heading font-bold tracking-tight;

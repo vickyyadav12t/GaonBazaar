@@ -213,8 +213,8 @@ const Support = () => {
 
   return (
     <Layout>
-      <div className="min-h-screen bg-gradient-to-b from-background to-muted/20">
-        <div className="container mx-auto px-4 py-12">
+      <div className="min-h-screen min-w-0 overflow-x-hidden bg-gradient-to-b from-background to-muted/20">
+        <div className="container mx-auto min-w-0 px-3 py-10 sm:px-4 sm:py-12">
           {/* Header Section */}
           <AnimateOnScroll animation="fade-in">
             <div className="text-center mb-12">

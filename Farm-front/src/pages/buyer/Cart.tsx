@@ -30,7 +30,7 @@ const Cart = () => {
   if (items.length === 0) {
     return (
       <Layout>
-        <div className="container mx-auto px-4 py-12">
+        <div className="container mx-auto min-w-0 px-3 py-10 sm:px-4 sm:py-12">
           <div className="text-center max-w-md mx-auto">
             <div className="w-24 h-24 bg-muted rounded-full flex items-center justify-center mx-auto mb-6">
               <ShoppingBag className="w-12 h-12 text-muted-foreground" />
@@ -56,7 +56,7 @@ const Cart = () => {
 
   return (
     <Layout>
-      <div className="container mx-auto px-4 py-6">
+      <div className="container mx-auto min-w-0 px-3 py-5 sm:px-4 sm:py-6">
         {/* Header */}
         <div className="flex items-center gap-4 mb-6">
           <button onClick={() => navigate(-1)} className="p-2 hover:bg-muted rounded-lg">

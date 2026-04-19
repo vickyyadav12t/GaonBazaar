@@ -212,7 +212,7 @@ const Checkout = () => {
     const paid = placedPaymentStatus === 'paid';
     return (
       <Layout>
-        <div className="container mx-auto px-4 py-12">
+        <div className="container mx-auto min-w-0 px-3 py-10 sm:px-4 sm:py-12">
           <div className="max-w-md mx-auto text-center">
             <div
               className={`w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-6 animate-scale-in ${
@@ -261,7 +261,7 @@ const Checkout = () => {
 
   return (
     <Layout>
-      <div className="container mx-auto px-4 py-6">
+      <div className="container mx-auto min-w-0 px-3 py-5 sm:px-4 sm:py-6">
         {/* Header */}
         <div className="flex items-center gap-4 mb-6">
           <button onClick={() => navigate(-1)} className="p-2 hover:bg-muted rounded-lg">

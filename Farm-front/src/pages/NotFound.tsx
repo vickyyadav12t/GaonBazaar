@@ -31,7 +31,7 @@ const NotFound = () => {
 
   return (
     <Layout>
-      <div className="container mx-auto px-4 py-16">
+      <div className="container mx-auto min-w-0 px-3 py-12 sm:px-4 sm:py-16">
         <div className="max-w-2xl mx-auto text-center">
           <div className="text-8xl font-bold text-primary/20 mb-4">{t.title}</div>
           

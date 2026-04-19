@@ -122,7 +122,7 @@ const FarmerNews = () => {
 
   return (
     <Layout>
-      <div className="container mx-auto px-4 py-6 max-w-3xl">
+      <div className="container mx-auto min-w-0 max-w-3xl px-3 py-5 sm:px-4 sm:py-6">
         <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between mb-6">
           <div className="flex items-start gap-3">
             <Button variant="ghost" size="icon" className="shrink-0 mt-0.5" asChild>

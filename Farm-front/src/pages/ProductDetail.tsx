@@ -171,7 +171,7 @@ const ProductDetail = () => {
   if (isLoading || !product) {
     return (
       <Layout>
-        <div className="container mx-auto px-4 py-16 text-center">
+        <div className="container mx-auto min-w-0 px-3 py-12 text-center sm:px-4 sm:py-16">
           <h1 className="text-2xl font-bold">
             {isLoading ? 'Loading product...' : 'Product not found'}
           </h1>
@@ -388,7 +388,7 @@ const ProductDetail = () => {
 
   return (
     <Layout>
-      <div className="container mx-auto px-4 py-6">
+      <div className="container mx-auto min-w-0 px-3 py-5 sm:px-4 sm:py-6">
         {/* Back Button */}
         <button
           onClick={() => navigate(-1)}
@@ -468,12 +468,12 @@ const ProductDetail = () => {
 
             {/* Thumbnails */}
             {galleryImages.length > 1 && (
-              <div className="flex gap-2">
+              <div className="-mx-1 flex gap-2 overflow-x-auto px-1 pb-1">
                 {galleryImages.map((image, index) => (
                   <button
                     key={index}
                     onClick={() => setCurrentImageIndex(index)}
-                    className={`w-20 h-20 rounded-xl overflow-hidden border-2 transition-colors ${
+                    className={`h-20 w-20 shrink-0 overflow-hidden rounded-xl border-2 transition-colors ${
                       safeImageIndex === index ? 'border-primary' : 'border-transparent'
                     }`}
                   >
@@ -501,14 +501,16 @@ const ProductDetail = () => {
               <p className="text-sm text-muted-foreground uppercase tracking-wide mb-1">
                 {product.category}
               </p>
-              <h1 className={`text-3xl font-bold text-foreground mb-2 ${currentLanguage === 'hi' ? 'font-hindi' : ''}`}>
+              <h1
+                className={`mb-2 text-2xl font-bold text-foreground sm:text-3xl ${currentLanguage === 'hi' ? 'font-hindi' : ''}`}
+              >
                 {currentLanguage === 'hi' && product.nameHindi ? product.nameHindi : product.name}
               </h1>
             </div>
 
             {/* Price */}
-            <div className="flex items-baseline gap-2 mb-6">
-              <span className="text-4xl font-bold text-primary">{formatPrice(product.price)}</span>
+            <div className="mb-6 flex min-w-0 flex-wrap items-baseline gap-2">
+              <span className="text-3xl font-bold text-primary sm:text-4xl">{formatPrice(product.price)}</span>
               <span className="text-lg text-muted-foreground">
                 {t.perUnit} {product.unit}
               </span>
@@ -547,10 +549,10 @@ const ProductDetail = () => {
               <label className={`text-sm font-medium mb-2 block ${currentLanguage === 'hi' ? 'font-hindi' : ''}`}>
                 {t.quantity} ({product.unit})
               </label>
-              <div className="flex items-center gap-4">
+              <div className="flex min-w-0 flex-wrap items-center gap-3 sm:gap-4">
                 <button
                   onClick={() => setQuantity(Math.max(product.minOrderQuantity, quantity - 1))}
-                  className="w-12 h-12 rounded-xl bg-muted flex items-center justify-center text-xl font-bold hover:bg-muted/80 transition-colors"
+                  className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-muted text-xl font-bold transition-colors hover:bg-muted/80 sm:h-12 sm:w-12"
                 >
                   -
                 </button>
@@ -558,15 +560,15 @@ const ProductDetail = () => {
                   type="number"
                   value={quantity}
                   onChange={(e) => setQuantity(Math.max(product.minOrderQuantity, parseInt(e.target.value) || 0))}
-                  className="w-24 text-center text-lg font-semibold"
+                  className="w-20 shrink-0 text-center text-base font-semibold sm:w-24 sm:text-lg"
                 />
                 <button
                   onClick={() => setQuantity(Math.min(product.availableQuantity, quantity + 1))}
-                  className="w-12 h-12 rounded-xl bg-muted flex items-center justify-center text-xl font-bold hover:bg-muted/80 transition-colors"
+                  className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-muted text-xl font-bold transition-colors hover:bg-muted/80 sm:h-12 sm:w-12"
                 >
                   +
                 </button>
-                <div className="flex-1 text-right">
+                <div className="min-w-0 flex-1 basis-full text-right sm:basis-auto">
                   <p className="text-sm text-muted-foreground">Total</p>
                   <p className="text-xl font-bold text-foreground">
                     {formatPrice(product.price * quantity)}

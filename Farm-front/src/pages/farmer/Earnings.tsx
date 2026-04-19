@@ -367,7 +367,9 @@ const Earnings = () => {
 
   return (
     <Layout>
-      <div className={`container mx-auto px-4 py-6 transition-opacity ${isLoading ? 'opacity-70' : ''}`}>
+      <div
+        className={`container mx-auto min-w-0 px-3 py-5 transition-opacity sm:px-4 sm:py-6 ${isLoading ? 'opacity-70' : ''}`}
+      >
         <div className="flex items-center justify-between mb-6">
           <div className="flex items-center gap-4">
             <button type="button" onClick={() => navigate(-1)} className="p-2 hover:bg-muted rounded-lg">

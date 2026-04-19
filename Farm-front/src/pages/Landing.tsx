@@ -352,7 +352,7 @@ const Landing = () => {
   return (
     <Layout showMobileNav={false}>
       {/* Hero — green gradient (original theme) */}
-      <section className="relative flex min-h-[90vh] items-center overflow-hidden bg-gradient-to-br from-primary via-primary/90 to-primary-dark text-primary-foreground">
+      <section className="relative flex min-h-[90vh] min-w-0 items-center overflow-x-hidden bg-gradient-to-br from-primary via-primary/90 to-primary-dark text-primary-foreground">
         <div className="absolute inset-0 bg-[url('data:image/svg+xml,%3Csvg%20width%3D%2260%22%20height%3D%2260%22%20viewBox%3D%220%200%2060%2060%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%3E%3Cg%20fill%3D%22none%22%20fill-rule%3D%22evenodd%22%3E%3Cg%20fill%3D%22%23ffffff%22%20fill-opacity%3D%220.08%22%3E%3Cpath%20d%3D%22M36%2034v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6%2034v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6%204V0H4v4H0v2h4v4h2V6h4V4H6z%22%2F%3E%3C%2Fg%3E%3C%2Fg%3E%3C%2Fsvg%3E')] opacity-40" />
 
         <div
@@ -368,19 +368,19 @@ const Landing = () => {
           style={{ animationDelay: '2s' }}
         />
 
-        <div className="container relative z-10 mx-auto px-4 py-20 md:py-32">
-          <div className="mx-auto max-w-4xl text-center">
+        <div className="container relative z-10 mx-auto min-w-0 px-3 py-16 sm:px-4 sm:py-20 md:py-32">
+          <div className="mx-auto max-w-4xl min-w-0 text-center">
             <AnimateOnScroll animation="fade-in" delay={0}>
-              <div className="mb-8 inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/15 px-5 py-2.5 shadow-lg backdrop-blur-md transition-all duration-300 hover:bg-white/20">
-                <Sparkles className="h-4 w-4 text-secondary-light" />
-                <span className="text-sm font-semibold">{trustBadgeText}</span>
-                <Award className="h-4 w-4 text-secondary-light" />
+              <div className="mb-6 inline-flex max-w-full items-center gap-2 rounded-full border border-white/20 bg-white/15 px-3 py-2 shadow-lg backdrop-blur-md transition-all duration-300 hover:bg-white/20 sm:mb-8 sm:px-5 sm:py-2.5">
+                <Sparkles className="h-4 w-4 shrink-0 text-secondary-light" />
+                <span className="text-left text-xs font-semibold leading-snug sm:text-sm">{trustBadgeText}</span>
+                <Award className="h-4 w-4 shrink-0 text-secondary-light" />
               </div>
             </AnimateOnScroll>
 
             <AnimateOnScroll animation="slide-up" delay={0.1}>
               <h1
-                className={`mb-6 text-5xl font-extrabold leading-tight md:text-7xl lg:text-8xl ${currentLanguage === 'hi' ? 'font-hindi' : ''}`}
+                className={`mb-6 text-4xl font-extrabold leading-tight sm:text-5xl md:text-7xl lg:text-8xl ${currentLanguage === 'hi' ? 'font-hindi' : ''}`}
               >
                 <span className="block">{t.hero.title}</span>
                 <span className="mt-2 block text-secondary-light drop-shadow-lg">{t.hero.subtitle}</span>
@@ -389,7 +389,7 @@ const Landing = () => {
 
             <AnimateOnScroll animation="slide-up" delay={0.2}>
               <p
-                className={`mx-auto mb-10 max-w-3xl text-xl font-medium leading-relaxed opacity-95 md:text-2xl ${currentLanguage === 'hi' ? 'font-hindi' : ''}`}
+                className={`mx-auto mb-8 max-w-3xl text-base font-medium leading-relaxed opacity-95 sm:mb-10 sm:text-xl md:text-2xl ${currentLanguage === 'hi' ? 'font-hindi' : ''}`}
               >
                 {t.hero.description}
               </p>
@@ -418,7 +418,7 @@ const Landing = () => {
             </AnimateOnScroll>
 
             <AnimateOnScroll animation="fade-in" delay={0.4}>
-              <div className="mx-auto grid max-w-2xl grid-cols-3 gap-6 border-t border-white/20 pt-8">
+              <div className="mx-auto grid max-w-2xl grid-cols-1 gap-4 border-t border-white/20 pt-6 sm:grid-cols-3 sm:gap-6 sm:pt-8">
                 {heroStrip.map((item, i) => (
                   <div key={i} className="text-center">
                     {'marketing' in item && item.marketing ? (
@@ -456,17 +456,17 @@ const Landing = () => {
 
       {/* Stats */}
       <section className="-mt-1 bg-gradient-to-b from-background to-muted/30 py-16">
-        <div className="container mx-auto px-4">
+        <div className="container mx-auto min-w-0 px-3 sm:px-4">
           <StaggerContainer
             staggerDelay={0.1}
             animation="slide-up"
             stretchGridItems
-            className="mx-auto grid max-w-6xl grid-cols-2 gap-6 md:grid-cols-4 md:items-stretch"
+            className="mx-auto grid max-w-6xl grid-cols-1 gap-4 sm:grid-cols-2 sm:gap-6 md:grid-cols-4 md:items-stretch"
           >
             {statCards.map((stat, index) => (
               <div
                 key={index}
-                className={`group flex h-full flex-col rounded-3xl border border-border/50 bg-gradient-to-br ${stat.color} p-8 text-center shadow-lg backdrop-blur-sm transition-all duration-300 hover:scale-105 hover:shadow-xl`}
+                className={`group flex h-full flex-col rounded-3xl border border-border/50 bg-gradient-to-br ${stat.color} p-5 text-center shadow-lg backdrop-blur-sm transition-all duration-300 hover:scale-105 hover:shadow-xl sm:p-8`}
               >
                 <div
                   className={`mb-4 shrink-0 animate-float-slow text-4xl transition-transform duration-300 group-hover:scale-110 ${stat.iconColor}`}
@@ -519,7 +519,7 @@ const Landing = () => {
           <div className="absolute right-0 top-0 h-96 w-96 -translate-y-1/2 translate-x-1/2 rounded-full bg-primary/5 blur-3xl" />
           <div className="absolute bottom-0 left-0 h-96 w-96 -translate-x-1/2 translate-y-1/2 rounded-full bg-secondary/5 blur-3xl" />
 
-          <div className="container relative z-10 mx-auto px-4">
+          <div className="container relative z-10 mx-auto min-w-0 px-3 sm:px-4">
             <div className="mb-16 text-center">
               <h2 className={`mb-4 text-4xl font-extrabold md:text-5xl ${currentLanguage === 'hi' ? 'font-hindi' : ''}`}>
                 {t.features.title}
@@ -571,7 +571,7 @@ const Landing = () => {
       {/* How It Works */}
       <AnimateOnScroll animation="fade-in">
         <section className="relative bg-gradient-to-b from-muted/30 to-background py-20">
-          <div className="container mx-auto px-4">
+          <div className="container mx-auto min-w-0 px-3 sm:px-4">
             <div className="mb-16 text-center">
               <h2 className={`mb-4 text-4xl font-extrabold md:text-5xl ${currentLanguage === 'hi' ? 'font-hindi' : ''}`}>
                 {t.howItWorks.title}
@@ -615,7 +615,7 @@ const Landing = () => {
           <div className="absolute left-0 top-1/2 h-96 w-96 -translate-y-1/2 rounded-full bg-primary/5 blur-3xl" />
           <div className="absolute right-0 top-1/2 h-96 w-96 -translate-y-1/2 rounded-full bg-secondary/5 blur-3xl" />
 
-          <div className="container relative z-10 mx-auto px-4">
+          <div className="container relative z-10 mx-auto min-w-0 px-3 sm:px-4">
             <div className="mb-12 flex flex-col items-center justify-between md:flex-row">
               <div>
                 <h2 className="mb-2 text-4xl font-extrabold md:text-5xl">
@@ -652,7 +652,7 @@ const Landing = () => {
           <div className="absolute left-1/4 top-0 h-72 w-72 rounded-full bg-primary/5 blur-3xl" />
           <div className="absolute bottom-0 right-1/4 h-72 w-72 rounded-full bg-secondary/5 blur-3xl" />
 
-          <div className="container relative z-10 mx-auto px-4">
+          <div className="container relative z-10 mx-auto min-w-0 px-3 sm:px-4">
             <div className="mb-16 text-center">
               <h2 className={`text-4xl font-extrabold md:text-5xl ${currentLanguage === 'hi' ? 'font-hindi' : ''}`}>
                 {t.testimonials.title}
@@ -712,7 +712,7 @@ const Landing = () => {
           <div className="absolute left-0 top-0 h-96 w-96 -translate-x-1/2 -translate-y-1/2 rounded-full bg-secondary/20 blur-3xl" />
           <div className="absolute bottom-0 right-0 h-96 w-96 translate-x-1/2 translate-y-1/2 rounded-full bg-accent/20 blur-3xl" />
 
-          <div className="container relative z-10 mx-auto px-4 text-center">
+          <div className="container relative z-10 mx-auto min-w-0 px-3 sm:px-4 text-center">
             <div className="mx-auto max-w-3xl">
               <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/15 px-4 py-2 backdrop-blur-md">
                 <Zap className="h-4 w-4 text-secondary-light" />

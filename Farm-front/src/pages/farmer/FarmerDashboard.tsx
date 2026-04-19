@@ -422,8 +422,8 @@ const FarmerDashboard = () => {
 
   return (
     <Layout>
-      <div className="min-h-screen bg-gradient-to-b from-green-50/50 to-background dark:from-background">
-        <div className="container mx-auto px-4 py-8">
+      <div className="min-h-screen min-w-0 overflow-x-hidden bg-gradient-to-b from-green-50/50 to-background dark:from-background">
+        <div className="container mx-auto min-w-0 px-3 py-6 sm:px-4 sm:py-8">
           {user ? <FarmerKycAccountBanner user={user} currentLanguage={currentLanguage} /> : null}
 
           {!initialLoading ? (

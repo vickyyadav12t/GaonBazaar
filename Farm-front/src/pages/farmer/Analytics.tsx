@@ -418,7 +418,9 @@ const Analytics = () => {
 
   return (
     <Layout>
-      <div className={`container mx-auto px-4 py-6 transition-opacity ${isLoading ? 'opacity-70' : ''}`}>
+      <div
+        className={`container mx-auto min-w-0 px-3 py-5 transition-opacity sm:px-4 sm:py-6 ${isLoading ? 'opacity-70' : ''}`}
+      >
         {/* Header */}
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between mb-6">
           <div className="flex items-center gap-4">

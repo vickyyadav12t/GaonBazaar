@@ -746,7 +746,7 @@ const NegotiationChat = () => {
   if (isLoading || !chat || !product) {
     return (
       <Layout>
-        <div className="container mx-auto px-4 py-16 text-center">
+        <div className="container mx-auto min-w-0 px-3 py-12 text-center sm:px-4 sm:py-16">
           <h1 className="text-2xl font-bold">
             {isLoading ? 'Loading chat...' : 'Chat not found'}
           </h1>
@@ -783,10 +783,10 @@ const NegotiationChat = () => {
 
   return (
     <Layout>
-      <div className="h-[calc(100vh-140px)] flex flex-col min-h-0">
+      <div className="flex h-[calc(100vh-140px)] min-h-0 min-w-0 flex-col overflow-x-hidden">
         {/* Chat Header */}
         <div className={`border-b border-border p-4 shrink-0 ${isFarmer ? 'bg-green-50/70 dark:bg-card' : 'bg-blue-50/70 dark:bg-card'}`}>
-          <div className="container mx-auto flex items-center gap-4">
+          <div className="container mx-auto flex min-w-0 items-center gap-2 px-2 sm:gap-4 sm:px-4">
             <button onClick={() => navigate(-1)} className="p-2 hover:bg-muted rounded-lg">
               <ArrowLeft className="w-5 h-5" />
             </button>
@@ -849,17 +849,17 @@ const NegotiationChat = () => {
           <div className="flex flex-1 flex-col min-h-0 min-w-0">
             {/* Product Info Bar */}
             <div className="bg-muted/50 border-b border-border p-3 shrink-0">
-              <div className="container mx-auto flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <Package className="w-4 h-4 text-muted-foreground" />
-                  <span className="text-sm">
+              <div className="container mx-auto flex min-w-0 flex-col gap-2 px-2 sm:flex-row sm:items-center sm:justify-between sm:px-4">
+                <div className="flex min-w-0 items-center gap-2 sm:gap-3">
+                  <Package className="h-4 w-4 shrink-0 text-muted-foreground" />
+                  <span className="min-w-0 text-sm break-words">
                     {currentLanguage === 'en' ? 'Original Price:' : 'मूल कीमत:'}{' '}
                     <span className="font-semibold">₹{chat.originalPrice.toLocaleString()}/{product?.unit}</span>
                   </span>
                 </div>
                 {currentOffer != null && (
-                  <div className="flex items-center gap-3 text-right">
-                    <span className="text-sm">
+                  <div className="flex min-w-0 items-center gap-2 text-left sm:gap-3 sm:text-right">
+                    <span className="min-w-0 text-sm break-words">
                       {offerPriceLabel}{' '}
                       <span className="font-semibold text-primary">
                         ₹{currentOffer.toLocaleString()}/{product?.unit}
@@ -878,7 +878,7 @@ const NegotiationChat = () => {
             </div>
 
             {/* Messages */}
-            <div className="flex-1 overflow-y-auto p-4 container mx-auto min-h-0">
+            <div className="container mx-auto min-h-0 min-w-0 flex-1 overflow-y-auto overflow-x-hidden p-3 sm:p-4">
           {messages.length === 0 && isNewChat ? (
             <div className="flex flex-col items-center justify-center h-full text-center">
               <div className="bg-muted/50 rounded-2xl p-6 max-w-md">
@@ -914,14 +914,14 @@ const NegotiationChat = () => {
             {/* Accept Offer Banner (farmer side) */}
             {isFarmer && currentOffer && negotiationStatus === 'ongoing' && (
               <div className="border-t border-border p-3 bg-accent/5 shrink-0">
-                <div className="container mx-auto flex items-center justify-between">
-                  <div className="flex items-center gap-2">
+                <div className="container mx-auto flex min-w-0 flex-col gap-3 px-2 sm:flex-row sm:items-center sm:justify-between sm:px-4">
+                  <div className="flex min-w-0 items-start gap-2 sm:items-center">
                     <Info className="w-4 h-4 text-accent" />
-                    <span className="text-sm">
+                    <span className="min-w-0 text-sm break-words">
                       {currentLanguage === 'en' ? 'Accept the offer to proceed?' : 'आगे बढ़ने के लिए प्रस्ताव स्वीकार करें?'}
                     </span>
                   </div>
-                  <div className="flex gap-2">
+                  <div className="flex shrink-0 flex-wrap gap-2">
                     <Button size="sm" variant="outline" className="gap-1" onClick={handleDeclineOffer}>
                       <X className="w-4 h-4" />
                       {currentLanguage === 'en' ? 'Decline' : 'अस्वीकार'}
@@ -936,11 +936,11 @@ const NegotiationChat = () => {
             )}
 
             {/* Input Area */}
-            <div className="border-t border-border p-4 bg-card shrink-0">
-              <div className="container mx-auto">
+            <div className="shrink-0 border-t border-border bg-card p-3 sm:p-4">
+              <div className="container mx-auto min-w-0 px-1 sm:px-0">
                 {isOfferMode ? (
-                  <div className="flex gap-2">
-                    <div className="relative flex-1">
+                  <div className="flex min-w-0 flex-col gap-2 sm:flex-row">
+                    <div className="relative min-w-0 flex-1">
                       <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">₹</span>
                       <Input
                         type="number"
@@ -951,15 +951,15 @@ const NegotiationChat = () => {
                         autoFocus
                       />
                     </div>
-                    <Button variant="outline" onClick={() => setIsOfferMode(false)}>
+                    <Button variant="outline" className="w-full sm:w-auto" onClick={() => setIsOfferMode(false)}>
                       {currentLanguage === 'en' ? 'Cancel' : 'रद्द'}
                     </Button>
-                    <Button onClick={handleSendOffer} className="btn-primary-gradient">
+                    <Button onClick={handleSendOffer} className="w-full btn-primary-gradient sm:w-auto">
                       {currentLanguage === 'en' ? 'Send Offer' : 'प्रस्ताव भेजें'}
                     </Button>
                   </div>
                 ) : (
-                  <div className="flex gap-2">
+                  <div className="flex min-w-0 gap-2">
                     <input
                       ref={imageInputRef}
                       type="file"
@@ -972,6 +972,7 @@ const NegotiationChat = () => {
                       onChange={(e) => setNewMessage(e.target.value)}
                       placeholder={currentLanguage === 'en' ? 'Type a message...' : 'संदेश लिखें...'}
                       onKeyDown={(e) => e.key === 'Enter' && handleSendMessage()}
+                      className="min-w-0 flex-1"
                     />
                     {isFarmer && (
                       <Button

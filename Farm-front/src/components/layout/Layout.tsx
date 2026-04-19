@@ -16,7 +16,7 @@ const Layout = ({ children, showFooter = true, showMobileNav = true }: LayoutPro
   const { isAuthenticated } = useAppSelector((state) => state.auth);
 
   return (
-    <div className="min-h-screen flex flex-col bg-background">
+    <div className="flex min-h-screen min-w-0 flex-col overflow-x-hidden bg-background">
       <div className="print:hidden">
         <Header />
       </div>

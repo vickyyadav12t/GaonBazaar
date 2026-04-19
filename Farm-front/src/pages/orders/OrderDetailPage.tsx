@@ -447,7 +447,7 @@ const OrderDetailPage = () => {
 
   return (
     <Layout>
-      <div className="container mx-auto px-4 py-6 max-w-4xl">
+      <div className="container mx-auto min-w-0 max-w-4xl px-3 py-5 sm:px-4 sm:py-6">
         <div className="flex items-center gap-4 mb-6">
           <button
             type="button"

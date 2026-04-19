@@ -266,7 +266,7 @@ const FarmerOrders = () => {
 
   return (
     <Layout>
-      <div className="container mx-auto px-4 py-6">
+      <div className="container mx-auto min-w-0 px-3 py-5 sm:px-4 sm:py-6">
         {/* Header */}
         <div className="flex flex-wrap items-center gap-4 mb-6">
           <button onClick={() => navigate(-1)} className="p-2 hover:bg-muted rounded-lg">
