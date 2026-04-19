@@ -2,12 +2,13 @@ const mongoose = require("mongoose");
 const Product = require("../models/Product");
 const Order = require("../models/Order");
 const { getFarmerAvgRatingMap } = require("../utils/adminUserStats");
+const { rewriteProductAssetUrls } = require("../utils/publicAssetUrl");
 
 // Helper to build a consistent product payload
 const buildProductResponse = (product) => {
   if (!product) return null;
   const plain = product.toObject ? product.toObject() : product;
-  return plain;
+  return rewriteProductAssetUrls(plain);
 };
 
 function escapeRegex(str) {

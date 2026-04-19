@@ -6,6 +6,7 @@ const User = require("../models/User");
 const { sendMail, isMailConfigured } = require("../utils/mail");
 const { LINKED_ORDER_STAGES } = require("../utils/orderLinked");
 const { prefsFromDoc, createNotificationIfAllowed } = require("../utils/notificationDispatch");
+const { rewriteDeepLocalhostUploads } = require("../utils/publicAssetUrl");
 
 const ADMIN_ORDER_LIST_MAX_LIMIT = 100;
 const ADMIN_ORDER_DEFAULT_LIMIT = 25;
@@ -208,7 +209,7 @@ async function restoreOrderStock(orderDoc) {
 const buildOrderResponse = (order) => {
   if (!order) return null;
   const plain = order.toObject ? order.toObject() : order;
-  return plain;
+  return rewriteDeepLocalhostUploads(plain);
 };
 
 /** Admin list/export: status, paymentStatus, optional createdAt range (dateFrom / dateTo ISO or date-only). */

@@ -13,6 +13,7 @@ const {
   uploadImageBuffer,
   uploadKycBuffer,
 } = require("../services/cloudinaryUpload");
+const { getUploadResponseBaseUrl } = require("../utils/publicAssetUrl");
 const {
   MIME_JPEG,
   MIME_PNG,
@@ -131,7 +132,7 @@ router.post("/kyc", auth, requireFarmer, kycUpload.single("file"), async (req, r
       }
     } else {
       const { filename } = await persistKycToDisk(file.buffer, mime);
-      const baseUrl = `${req.protocol}://${req.get("host")}`;
+      const baseUrl = getUploadResponseBaseUrl(req);
       url = `${baseUrl}/uploads/kyc/${filename}`;
     }
     return res.status(201).json({
@@ -161,7 +162,7 @@ router.post("/avatar", auth, avatarUpload.single("image"), async (req, res) => {
       }
     } else {
       const { filename } = await persistImageToDisk(file.buffer, mime);
-      const baseUrl = `${req.protocol}://${req.get("host")}`;
+      const baseUrl = getUploadResponseBaseUrl(req);
       url = `${baseUrl}/uploads/images/${filename}`;
     }
     return res.status(201).json({ url });
@@ -183,7 +184,7 @@ router.post("/images", auth, requireFarmerOrAdmin, upload.array("images", 5), as
       });
     }
     const urls = [];
-    const baseUrl = `${req.protocol}://${req.get("host")}`;
+    const baseUrl = getUploadResponseBaseUrl(req);
     const useCloud = isCloudinaryEnabled();
     for (const f of list) {
       if (!f.buffer) {

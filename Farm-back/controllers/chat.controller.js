@@ -4,6 +4,7 @@ const User = require("../models/User");
 const Notification = require("../models/Notification");
 const { sendMail, isMailConfigured } = require("../utils/mail");
 const { prefsFromDoc, loadPrefs, createNotificationIfAllowed } = require("../utils/notificationDispatch");
+const { rewriteLocalhostUploadUrl } = require("../utils/publicAssetUrl");
 
 function getFrontendBaseUrl(req) {
   const base =
@@ -119,9 +120,9 @@ const buildChatResponse = (chat, currentUserId) => {
     id: String(plain._id),
     productId: String(product._id || plain.product),
     productName: product.name || "",
-    productImage:
-      (product.images && product.images[0]) ||
-      "https://images.unsplash.com/photo-1574323347407-f5e1ad6d020b?w=600",
+    productImage: rewriteLocalhostUploadUrl(
+      (product.images && product.images[0]) || ""
+    ),
     farmerId: String(farmer._id || plain.farmer),
     farmerName: farmer.name || "",
     buyerId: String(buyer._id || plain.buyer),
