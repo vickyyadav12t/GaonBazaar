@@ -103,6 +103,15 @@ async function resetUnreadForViewer(chatDoc, userId) {
   if (changed) await chatDoc.save();
 }
 
+function isSafeHttpImageUrl(s) {
+  try {
+    const u = new URL(String(s || "").trim());
+    return u.protocol === "http:" || u.protocol === "https:";
+  } catch {
+    return false;
+  }
+}
+
 const buildChatResponse = (chat, currentUserId) => {
   if (!chat) return null;
   const plain = chat.toObject ? chat.toObject() : chat;
@@ -366,9 +375,20 @@ exports.sendMessage = async (req, res) => {
     const userId = req.user?.id;
     const role = req.user?.role;
     const { content, type, offerPrice } = req.body;
+    const msgType = type && String(type).trim() ? String(type).trim() : "text";
 
     if (!content || typeof content !== "string") {
       return res.status(400).json({ message: "Message content is required" });
+    }
+
+    if (msgType === "image") {
+      if (role !== "farmer") {
+        return res.status(403).json({ message: "Only farmers can send product photos in chat" });
+      }
+      const trimmed = String(content).trim();
+      if (!isSafeHttpImageUrl(trimmed)) {
+        return res.status(400).json({ message: "Image must be a valid http(s) URL from upload" });
+      }
     }
 
     const chat = await Chat.findById(id)
@@ -398,13 +418,13 @@ exports.sendMessage = async (req, res) => {
       sender: senderId,
       receiver: receiverId,
       senderRole: role,
-      content,
-      type: type || "text",
+      content: String(content).trim(),
+      type: msgType,
       offerPrice,
     };
 
     chat.messages.push(message);
-    chat.lastMessage = content;
+    chat.lastMessage = msgType === "image" ? "[Photo]" : String(content).trim();
     chat.lastMessageTime = new Date();
 
     // Update unread counts
@@ -447,7 +467,10 @@ exports.sendMessage = async (req, res) => {
           userId: receiverUserId,
           type: "message",
           title: `New message — ${productName}`,
-          message: `${senderName}: ${truncateText(content, 140)}`,
+          message:
+            msgType === "image"
+              ? `${senderName}: [Photo]`
+              : `${senderName}: ${truncateText(String(content).trim(), 140)}`,
           link: `/chat/${chat._id}`,
         });
       }

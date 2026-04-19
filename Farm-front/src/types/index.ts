@@ -195,7 +195,7 @@ export interface ChatMessage {
   senderRole: UserRole;
   receiverId: string;
   content: string;
-  type: 'text' | 'offer' | 'counter_offer' | 'deal_accepted' | 'deal_rejected';
+  type: 'text' | 'image' | 'offer' | 'counter_offer' | 'deal_accepted' | 'deal_rejected';
   offerPrice?: number;
   timestamp: string;
   isRead: boolean;

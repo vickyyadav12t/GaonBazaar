@@ -12,7 +12,7 @@ const chatMessageSchema = new mongoose.Schema(
     content: { type: String, required: true },
     type: {
       type: String,
-      enum: ["text", "offer", "counter_offer", "deal_accepted", "deal_rejected"],
+      enum: ["text", "image", "offer", "counter_offer", "deal_accepted", "deal_rejected"],
       default: "text",
     },
     offerPrice: { type: Number },

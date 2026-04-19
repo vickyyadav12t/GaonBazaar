@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect, useMemo } from 'react';
 import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
-import { ArrowLeft, Send, Check, X, Info, Package, Scale } from 'lucide-react';
+import { ArrowLeft, Send, Check, X, Info, Package, Scale, ImagePlus, Loader2 } from 'lucide-react';
 import { io, Socket } from 'socket.io-client';
 import Layout from '@/components/layout/Layout';
 import { Button } from '@/components/ui/button';
@@ -18,6 +18,7 @@ import { useCopilot } from '@/context/CopilotContext';
 import { getSocketOrigin } from '@/lib/resolveApiBaseUrl';
 import {
   LISTING_IMAGE_PLACEHOLDER,
+  listingHeroImageUrl,
   listingHeroImageUrlFromList,
   sanitizeImageUrlList,
 } from '@/lib/productImageUrl';
@@ -43,6 +44,8 @@ const NegotiationChat = () => {
   const [newMessage, setNewMessage] = useState('');
   const [isOfferMode, setIsOfferMode] = useState(false);
   const [offerPrice, setOfferPrice] = useState('');
+  const [imageUploading, setImageUploading] = useState(false);
+  const imageInputRef = useRef<HTMLInputElement>(null);
   const [negotiationStatus, setNegotiationStatus] = useState<'ongoing' | 'accepted' | 'rejected' | 'completed'>('ongoing');
   const [currentOffer, setCurrentOffer] = useState<number | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -68,7 +71,9 @@ const NegotiationChat = () => {
             ? 'Buyer'
             : String(m.senderRole);
       let body = (m.content || '').trim();
-      if (m.type !== 'text') {
+      if (m.type === 'image') {
+        body = '[Photo]';
+      } else if (m.type !== 'text') {
         const o = m.offerPrice != null ? ` ₹${m.offerPrice}` : '';
         body = `[${m.type}]${o}${body ? ` ${body}` : ''}`.trim();
       }
@@ -408,6 +413,66 @@ const NegotiationChat = () => {
     setCopilotContext,
   ]);
 
+  const handleSendPhoto = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    e.target.value = '';
+    if (!file || !chat || !isFarmer) return;
+    if (!file.type.startsWith('image/')) {
+      toast({
+        title: currentLanguage === 'en' ? 'Invalid file' : 'अमान्य फ़ाइल',
+        description:
+          currentLanguage === 'en' ? 'Please choose an image.' : 'कृपया एक छवि चुनें।',
+        variant: 'destructive',
+      });
+      return;
+    }
+    if (file.size > 2 * 1024 * 1024) {
+      toast({
+        title: currentLanguage === 'en' ? 'File too large' : 'फ़ाइल बहुत बड़ी',
+        description:
+          currentLanguage === 'en' ? 'Maximum size is 2MB.' : 'अधिकतम आकार 2MB है।',
+        variant: 'destructive',
+      });
+      return;
+    }
+    try {
+      setImageUploading(true);
+      const up = await apiService.uploads.uploadImages([file]);
+      const urls = (up.data?.urls || []) as string[];
+      const url = urls[0];
+      if (!url) throw new Error('No URL returned');
+      const res = await apiService.chats.sendMessage(chat.id, {
+        content: url,
+        type: 'image',
+      });
+      const updated = res.data?.chat as Chat;
+      if (updated) {
+        setChat(updated);
+        setMessages(updated.messages || []);
+        setNegotiationStatus(updated.negotiationStatus);
+        setCurrentOffer(updated.currentOffer || null);
+      }
+      toast({
+        title: currentLanguage === 'en' ? 'Photo sent' : 'फोटो भेजा गया',
+        description:
+          currentLanguage === 'en'
+            ? 'The buyer can see your product photo.'
+            : 'खरीदार आपकी उत्पाद फोटो देख सकता है।',
+      });
+    } catch (error: any) {
+      toast({
+        title: currentLanguage === 'en' ? 'Upload failed' : 'अपलोड विफल',
+        description:
+          error?.response?.data?.message ||
+          error?.message ||
+          (currentLanguage === 'en' ? 'Could not send photo.' : 'फोटो नहीं भेजी जा सकी।'),
+        variant: 'destructive',
+      });
+    } finally {
+      setImageUploading(false);
+    }
+  };
+
   const handleSendMessage = async () => {
     if (!newMessage.trim() || !chat) return;
 
@@ -623,6 +688,41 @@ const NegotiationChat = () => {
           <div className="bg-success/10 border border-success text-success rounded-2xl px-6 py-3 flex items-center gap-2">
             <Check className="w-5 h-5" />
             <span className="font-medium">{msg.content}</span>
+          </div>
+        </div>
+      );
+    }
+
+    if (msg.type === 'image') {
+      const imgSrc = listingHeroImageUrl(msg.content.trim(), 720);
+      return (
+        <div className={`flex ${isOwn ? 'justify-end' : 'justify-start'} mb-4`}>
+          <div
+            className={`max-w-[min(100%,20rem)] rounded-2xl overflow-hidden border shadow-sm ${
+              isOwn ? 'border-secondary/40' : 'border-border'
+            }`}
+          >
+            {!isOwn && (
+              <p className="text-xs font-medium px-3 pt-2 bg-muted/50 text-muted-foreground">
+                {msg.senderName}
+              </p>
+            )}
+            <a href={imgSrc} target="_blank" rel="noopener noreferrer" className="block">
+              <img
+                src={imgSrc}
+                alt={currentLanguage === 'en' ? 'Product photo from farmer' : 'किसान की उत्पाद फोटो'}
+                className="w-full max-h-72 object-cover bg-muted"
+                loading="lazy"
+                onError={(ev) => {
+                  const el = ev.currentTarget;
+                  el.onerror = null;
+                  el.src = LISTING_IMAGE_PLACEHOLDER;
+                }}
+              />
+            </a>
+            <p className="text-xs opacity-70 px-3 py-2 bg-muted/30 text-right">
+              {new Date(msg.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+            </p>
           </div>
         </div>
       );
@@ -860,12 +960,40 @@ const NegotiationChat = () => {
                   </div>
                 ) : (
                   <div className="flex gap-2">
+                    <input
+                      ref={imageInputRef}
+                      type="file"
+                      accept="image/jpeg,image/png,image/webp,image/gif"
+                      className="hidden"
+                      onChange={(e) => void handleSendPhoto(e)}
+                    />
                     <Input
                       value={newMessage}
                       onChange={(e) => setNewMessage(e.target.value)}
                       placeholder={currentLanguage === 'en' ? 'Type a message...' : 'संदेश लिखें...'}
                       onKeyDown={(e) => e.key === 'Enter' && handleSendMessage()}
                     />
+                    {isFarmer && (
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="icon"
+                        className="shrink-0"
+                        disabled={imageUploading}
+                        title={
+                          currentLanguage === 'en'
+                            ? 'Send a product photo to the buyer'
+                            : 'खरीदार को उत्पाद की फोटो भेजें'
+                        }
+                        onClick={() => imageInputRef.current?.click()}
+                      >
+                        {imageUploading ? (
+                          <Loader2 className="h-4 w-4 animate-spin" />
+                        ) : (
+                          <ImagePlus className="h-4 w-4" />
+                        )}
+                      </Button>
+                    )}
                     {canBuyerMakeOffer && (
                       <Button
                         variant="outline"
