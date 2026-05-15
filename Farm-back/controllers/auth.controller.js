@@ -1,6 +1,7 @@
 const crypto = require("crypto");
-const fs = require("fs");
 const jwt = require("jsonwebtoken");
+const { persistKycUpload, deleteLocalKycByUrl } = require("../utils/persistKycUpload");
+const { mapUploadErrorToHttp } = require("../utils/uploadFinalize");
 const { OAuth2Client } = require("google-auth-library");
 const User = require("../models/User");
 const { sanitizeUser } = require("./user.controller");
@@ -253,11 +254,11 @@ exports.sendRegistrationEmailCode = async (req, res) => {
 // POST /api/auth/register — JSON (buyer) or multipart/form-data (farmer + kycFile)
 exports.register = async (req, res) => {
   let kycFileCommitted = false;
+  let pendingKycFileUrl = null;
   const removeOrphanKycFile = () => {
-    if (kycFileCommitted || !req.file?.path) return;
-    try {
-      if (fs.existsSync(req.file.path)) fs.unlinkSync(req.file.path);
-    } catch (_) {}
+    if (kycFileCommitted || !pendingKycFileUrl) return;
+    void deleteLocalKycByUrl(pendingKycFileUrl);
+    pendingKycFileUrl = null;
   };
 
   const fail = (status, message) => {
@@ -387,8 +388,24 @@ exports.register = async (req, res) => {
     };
 
     if (resolvedRole === "farmer" && req.file) {
-      const baseUrl = `${req.protocol}://${req.get("host")}`;
-      const fileUrl = `${baseUrl}/uploads/kyc/${req.file.filename}`;
+      let fileUrl;
+      try {
+        fileUrl = await persistKycUpload(
+          req.file.buffer,
+          req.file.detectedMime,
+          req
+        );
+      } catch (e) {
+        const { status, message } = mapUploadErrorToHttp(e);
+        if (status >= 500) {
+          console.error("Register KYC persist:", e?.code || e?.message);
+        }
+        return fail(
+          status >= 400 && status < 600 ? status : 502,
+          message || "File storage temporarily unavailable."
+        );
+      }
+      pendingKycFileUrl = fileUrl;
       let docType = String(kycDocType || "aadhaar").toLowerCase();
       if (!["aadhaar", "kisan"].includes(docType)) docType = "aadhaar";
       userPayload.kycDocuments = [

@@ -8,18 +8,14 @@ const {
   finalizeUploadBuffer,
   mapUploadErrorToHttp,
 } = require("../utils/uploadFinalize");
-const {
-  isCloudinaryEnabled,
-  uploadImageBuffer,
-  uploadKycBuffer,
-} = require("../services/cloudinaryUpload");
+const { isCloudinaryEnabled, uploadImageBuffer } = require("../services/cloudinaryUpload");
 const { getUploadResponseBaseUrl } = require("../utils/publicAssetUrl");
+const { persistKycUpload } = require("../utils/persistKycUpload");
 const {
   MIME_JPEG,
   MIME_PNG,
   MIME_WEBP,
   MIME_GIF,
-  MIME_PDF,
 } = require("../utils/validateUploadedFile");
 
 const router = express.Router();
@@ -42,11 +38,6 @@ function requireFarmer(req, res, next) {
 const uploadDir = path.join(__dirname, "..", "uploads", "images");
 if (!fs.existsSync(uploadDir)) {
   fs.mkdirSync(uploadDir, { recursive: true });
-}
-
-const kycDir = path.join(__dirname, "..", "uploads", "kyc");
-if (!fs.existsSync(kycDir)) {
-  fs.mkdirSync(kycDir, { recursive: true });
 }
 
 const imageFileFilter = (_req, file, cb) => {
@@ -108,14 +99,6 @@ async function persistImageToDisk(buffer, mime) {
   return { filename };
 }
 
-async function persistKycToDisk(buffer, mime) {
-  const ext = extForMime(mime) || ".bin";
-  const filename = `kyc-${Date.now()}-${Math.round(Math.random() * 1e9)}${ext}`;
-  const destPath = path.join(kycDir, filename);
-  await fs.promises.writeFile(destPath, buffer);
-  return { filename };
-}
-
 router.post("/kyc", auth, requireFarmer, kycUpload.single("file"), async (req, res) => {
   try {
     const file = req.file;
@@ -124,16 +107,10 @@ router.post("/kyc", auth, requireFarmer, kycUpload.single("file"), async (req, r
     }
     const { mime } = await finalizeUploadBuffer(file.buffer, { allowPdf: true });
     let url;
-    if (isCloudinaryEnabled()) {
-      try {
-        url = await uploadKycBuffer(file.buffer, mime);
-      } catch {
-        return res.status(502).json({ message: "File storage temporarily unavailable." });
-      }
-    } else {
-      const { filename } = await persistKycToDisk(file.buffer, mime);
-      const baseUrl = getUploadResponseBaseUrl(req);
-      url = `${baseUrl}/uploads/kyc/${filename}`;
+    try {
+      url = await persistKycUpload(file.buffer, mime, req);
+    } catch {
+      return res.status(502).json({ message: "File storage temporarily unavailable." });
     }
     return res.status(201).json({
       url,

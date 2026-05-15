@@ -266,4 +266,11 @@ const PORT = process.env.PORT || 5000;
 
 server.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
+  const onRender = String(process.env.RENDER || "").toLowerCase() === "true";
+  const { isCloudinaryEnabled } = require("./services/cloudinaryUpload");
+  if (onRender && !isCloudinaryEnabled()) {
+    console.warn(
+      "[uploads] CLOUDINARY_* is not set on Render — KYC and listing files are stored on ephemeral disk and will 404 after redeploy. Add Cloudinary env vars for production."
+    );
+  }
 });

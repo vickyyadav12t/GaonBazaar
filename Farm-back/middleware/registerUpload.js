@@ -1,25 +1,9 @@
-const fs = require("fs");
-const path = require("path");
 const multer = require("multer");
 const { isAllowedKycMime } = require("../utils/allowedUploadMimes");
 const {
-  finalizeUploadedFile,
+  finalizeUploadBuffer,
   mapUploadErrorToHttp,
 } = require("../utils/uploadFinalize");
-
-const kycDir = path.join(__dirname, "..", "uploads", "kyc");
-if (!fs.existsSync(kycDir)) {
-  fs.mkdirSync(kycDir, { recursive: true });
-}
-
-const storage = multer.diskStorage({
-  destination: (_req, _file, cb) => cb(null, kycDir),
-  filename: (_req, file, cb) => {
-    const ext = path.extname(file.originalname || "");
-    const safeExt = ext && ext.length <= 10 ? ext : "";
-    cb(null, `kyc-${Date.now()}-${Math.round(Math.random() * 1e9)}${safeExt}`);
-  },
-});
 
 const fileFilter = (_req, file, cb) => {
   if (isAllowedKycMime(file.mimetype)) return cb(null, true);
@@ -29,7 +13,7 @@ const fileFilter = (_req, file, cb) => {
 };
 
 const upload = multer({
-  storage,
+  storage: multer.memoryStorage(),
   fileFilter,
   limits: { fileSize: 5 * 1024 * 1024, files: 1 },
 }).single("kycFile");
@@ -58,7 +42,8 @@ function registerUploadMiddleware(req, res, next) {
       return next();
     }
     try {
-      await finalizeUploadedFile(req.file, { allowPdf: true });
+      const { mime } = await finalizeUploadBuffer(req.file.buffer, { allowPdf: true });
+      req.file.detectedMime = mime;
       return next();
     } catch (e) {
       const { status, message } = mapUploadErrorToHttp(e);
