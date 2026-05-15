@@ -51,6 +51,13 @@ function openRazorpayModal(opts: {
     order_id: opts.razorpayOrderId,
     name: 'GaonBazaar',
     description: opts.description,
+    // Enable UPI "Collect" flow (manual VPA/UPI ID entry).
+    // Razorpay may still fallback to QR/Intent based on your Razorpay account settings and compliance rules.
+    upi: {
+      // Razorpay examples use a dummy VPA; user can edit/override in the UI.
+      vpa: 'success@razorpay',
+      flow: 'collect',
+    },
     prefill: {
       name: opts.user.name,
       email: opts.user.email,
