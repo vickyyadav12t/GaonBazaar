@@ -58,26 +58,26 @@ class ErrorBoundary extends Component<Props, State> {
         <Layout>
           <div className="container mx-auto px-4 py-16">
             <div className="max-w-2xl mx-auto text-center">
-              <div className="w-20 h-20 bg-destructive/10 rounded-full flex items-center justify-center mx-auto mb-6">
-                <AlertTriangle className="w-10 h-10 text-destructive" />
+              <div className="mx-auto mb-6 flex h-20 w-20 items-center justify-center rounded-full border border-[#d8b19f] bg-[#f6e1d8]">
+                <AlertTriangle className="h-10 w-10 text-[#8a4f2a]" />
               </div>
               
-              <h1 className="text-3xl font-bold mb-4">Something went wrong</h1>
-              <p className="text-muted-foreground mb-8">
+              <h1 className="mb-4 text-3xl font-bold text-[#2c4632]">Something went wrong</h1>
+              <p className="mb-8 text-[#6c5a3d]">
                 We're sorry, but something unexpected happened. Please try again.
               </p>
 
               {import.meta.env.DEV && this.state.error && (
-                <div className="mb-8 p-4 bg-muted rounded-lg text-left">
-                  <p className="font-mono text-sm text-destructive mb-2">
+                <div className="mb-8 rounded-lg border border-[#d7c7a8] bg-[#f7eddc] p-4 text-left">
+                  <p className="mb-2 font-mono text-sm text-[#8a4f2a]">
                     {this.state.error.toString()}
                   </p>
                   {this.state.errorInfo && (
                     <details className="mt-4">
-                      <summary className="cursor-pointer text-sm font-medium mb-2">
+                      <summary className="mb-2 cursor-pointer text-sm font-medium text-[#315f3b]">
                         Stack trace
                       </summary>
-                      <pre className="text-xs overflow-auto bg-background p-4 rounded">
+                      <pre className="overflow-auto rounded border border-[#e3d6ba] bg-[#fffaf0] p-4 text-xs text-[#5b4d37]">
                         {this.state.errorInfo.componentStack}
                       </pre>
                     </details>
@@ -86,11 +86,11 @@ class ErrorBoundary extends Component<Props, State> {
               )}
 
               <div className="flex gap-4 justify-center">
-                <Button onClick={this.handleReset} variant="outline">
+                <Button onClick={this.handleReset} variant="outline" className="border-[#d7c7a8] bg-[#fffaf0] text-[#315f3b] hover:bg-[#f4ead6]">
                   <RefreshCw className="w-4 h-4 mr-2" />
                   Try Again
                 </Button>
-                <Button onClick={() => (window.location.href = '/')}>
+                <Button onClick={() => (window.location.href = '/')} className="border border-[#c89b3a] bg-[#d89b2b] text-[#2f2513] hover:bg-[#c98c1d]">
                   <Home className="w-4 h-4 mr-2" />
                   Go Home
                 </Button>
@@ -106,7 +106,6 @@ class ErrorBoundary extends Component<Props, State> {
 }
 
 export default ErrorBoundary;
-
 
 
 

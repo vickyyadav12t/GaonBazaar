@@ -603,7 +603,7 @@ const OrderDetailPage = () => {
                   <div className="space-y-2 text-sm">
                     <div className="flex flex-wrap gap-2 items-center">
                       <span className="font-medium">{en ? 'Status' : 'स्थिति'}:</span>
-                      <Badge variant="secondary" className="capitalize">
+                      <Badge variant="secondary" className="capitalize bg-[#f3ebdd] text-[#6c5a3d] hover:bg-[#f3ebdd]">
                         {order.returnRequest.status.replace(/_/g, ' ')}
                       </Badge>
                     </div>
@@ -664,7 +664,7 @@ const OrderDetailPage = () => {
                         {en ? 'Approve return' : 'वापसी स्वीकारें'}
                       </Button>
                       <Button
-                        variant="destructive"
+                        className="bg-[#8a4f2a] text-[#fffaf0] hover:bg-[#784223]"
                         disabled={returnBusy}
                         onClick={() => setRespondOpen('reject')}
                       >
@@ -675,7 +675,11 @@ const OrderDetailPage = () => {
                   {user.role === 'farmer' &&
                   order.returnRequest?.status === 'approved' &&
                   (order.paymentMethod === 'cod' || order.paymentMethod === 'bank_transfer') ? (
-                    <Button disabled={returnBusy} onClick={() => void handleConfirmCodReturn()}>
+                    <Button
+                      className="border border-[#b68222] bg-[#d89b2b] text-[#2f2416] hover:bg-[#c88d22]"
+                      disabled={returnBusy}
+                      onClick={() => void handleConfirmCodReturn()}
+                    >
                       {en ? 'Confirm refund given to buyer' : 'खरीदार को रिफंड की पुष्टि'}
                     </Button>
                   ) : null}
@@ -684,7 +688,7 @@ const OrderDetailPage = () => {
             )}
 
             <Dialog open={returnDialogOpen} onOpenChange={setReturnDialogOpen}>
-              <DialogContent>
+              <DialogContent className="border-[#d7c7a8] bg-[#fffaf0]">
                 <DialogHeader>
                   <DialogTitle>{en ? 'Request return' : 'वापसी अनुरोध'}</DialogTitle>
                   <DialogDescription>
@@ -742,7 +746,7 @@ const OrderDetailPage = () => {
             </Dialog>
 
             <Dialog open={respondOpen !== null} onOpenChange={(o) => !o && setRespondOpen(null)}>
-              <DialogContent>
+              <DialogContent className="border-[#d7c7a8] bg-[#fffaf0]">
                 <DialogHeader>
                   <DialogTitle>
                     {respondOpen === 'approve'
@@ -782,8 +786,12 @@ const OrderDetailPage = () => {
                     {en ? 'Back' : 'वापस'}
                   </Button>
                   <Button
-                    variant={respondOpen === 'reject' ? 'destructive' : 'default'}
-                    className={respondOpen === 'reject' ? undefined : 'border border-[#b68222] bg-[#d89b2b] text-[#2f2416] hover:bg-[#c88d22]'}
+                    variant={respondOpen === 'reject' ? 'default' : 'default'}
+                    className={
+                      respondOpen === 'reject'
+                        ? 'bg-[#8a4f2a] text-[#fffaf0] hover:bg-[#784223]'
+                        : 'border border-[#b68222] bg-[#d89b2b] text-[#2f2416] hover:bg-[#c88d22]'
+                    }
                     disabled={returnBusy}
                     onClick={() => void handleRespondReturn()}
                   >
@@ -829,7 +837,7 @@ const OrderDetailPage = () => {
             </div>
 
             {user.role === 'admin' && order && (
-              <div className="rounded-2xl border-2 border-[#c8d8cb] bg-[#f4f8f4] p-6 shadow-[0_14px_34px_rgba(95,70,40,0.07)]">
+              <div className="rounded-2xl border border-[#d7c7a8] bg-[#fffaf0] p-6 shadow-[0_16px_40px_rgba(95,70,40,0.08)]">
                 <h2 className="mb-4 text-lg font-semibold text-[#2f3a2f]">
                   {en ? 'Admin actions' : 'एडमिन कार्रवाई'}
                 </h2>

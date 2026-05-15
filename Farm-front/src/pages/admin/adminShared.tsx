@@ -103,7 +103,7 @@ export function AdminKycPreview({ url }: { url: string }) {
   const isPdf = clean.endsWith('.pdf');
   if (isPdf) {
     return (
-      <p className="text-sm text-muted-foreground py-6 text-center border rounded-lg bg-background">
+      <p className="rounded-lg border border-[#d7c7a8] bg-[#fffaf0] py-6 text-center text-sm text-[#6c5a3d]">
         PDF file — open in a new tab to view or download.
       </p>
     );
@@ -112,7 +112,7 @@ export function AdminKycPreview({ url }: { url: string }) {
     <img
       src={url}
       alt="KYC document"
-      className="max-h-56 w-full object-contain rounded-lg border bg-background"
+      className="max-h-56 w-full rounded-lg border border-[#d7c7a8] bg-[#fffaf0] object-contain"
     />
   );
 }
@@ -234,12 +234,12 @@ export function AdminPager(props: {
   const start = total === 0 ? 0 : skip + 1;
   const end = Math.min(skip + limit, total);
   return (
-    <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between pt-4 text-sm text-muted-foreground">
+    <div className="pt-4 text-sm text-[#6c5a3d] sm:flex sm:flex-row sm:items-center sm:justify-between">
       <span>
         {start}–{end} of {total}
       </span>
       <div className="flex gap-2">
-        <Button variant="outline" size="sm" disabled={busy || skip <= 0} onClick={onPrev}>
+        <Button variant="outline" size="sm" disabled={busy || skip <= 0} onClick={onPrev} className="border-[#d7c7a8] bg-[#fffaf0] text-[#315f3b] hover:bg-[#f4ead6]">
           Previous
         </Button>
         <Button
@@ -247,6 +247,7 @@ export function AdminPager(props: {
           size="sm"
           disabled={busy || skip + limit >= total}
           onClick={onNext}
+          className="border-[#d7c7a8] bg-[#fffaf0] text-[#315f3b] hover:bg-[#f4ead6]"
         >
           Next
         </Button>
@@ -293,11 +294,11 @@ export function AdminUserActionsMenu(props: {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button type="button" variant="outline" size="icon" className="shrink-0 h-9 w-9" aria-label="User actions">
+        <Button type="button" variant="outline" size="icon" className="h-9 w-9 shrink-0 border-[#d7c7a8] bg-[#fffaf0] text-[#315f3b] hover:bg-[#f4ead6]" aria-label="User actions">
           <MoreVertical className="h-4 w-4" />
         </Button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="end" className="w-52">
+      <DropdownMenuContent align="end" className="w-52 border-[#d7c7a8] bg-[#fffaf0]">
         {user.accountStatus === 'suspended' ? (
           <DropdownMenuItem
             onClick={() =>

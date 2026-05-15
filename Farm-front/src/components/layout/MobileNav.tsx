@@ -198,9 +198,9 @@ const MobileNav = () => {
               </span>
             </button>
           </div>
-          <SheetContent side="bottom" className="rounded-t-2xl pb-8">
+          <SheetContent side="bottom" className="rounded-t-2xl border-[#d7c7a8] bg-[#fbf4e4] pb-8">
             <SheetHeader className="text-left">
-              <SheetTitle>{t('More', 'और')}</SheetTitle>
+              <SheetTitle className="text-[#274631]">{t('More', 'और')}</SheetTitle>
             </SheetHeader>
             <nav className="mt-4 flex flex-col gap-1" aria-label={t('Farmer navigation', 'किसान नेविगेशन')}>
               {farmerMoreLinks.map(({ path, icon: Icon, labelEn, labelHi }) => {
@@ -210,8 +210,10 @@ const MobileNav = () => {
                     key={path}
                     to={path}
                     onClick={() => setFarmerMoreOpen(false)}
-                    className={`flex items-center gap-3 rounded-xl px-4 py-3.5 text-left text-base font-medium transition-colors ${
-                      active ? 'bg-primary/10 text-primary' : 'text-foreground hover:bg-muted'
+                    className={`flex items-center gap-3 rounded-xl border px-4 py-3.5 text-left text-base font-medium transition-colors ${
+                      active
+                        ? 'border-[#d2b06b] bg-[#efe2bc] text-[#315f3b]'
+                        : 'border-transparent text-[#314837] hover:border-[#d7c7a8] hover:bg-[#f5ead3]'
                     }`}
                   >
                     <Icon className="h-5 w-5 shrink-0 opacity-90" />
@@ -239,9 +241,9 @@ const MobileNav = () => {
                   <span className="relative inline-flex">
                     <item.icon className={`h-6 w-6 shrink-0 ${isActive ? 'text-primary' : ''}`} />
                     {showCartBadge ? (
-                      <Badge className="absolute -right-2.5 -top-2 min-h-[1.125rem] min-w-[1.125rem] border-2 border-card px-0.5 py-0 text-[10px] font-bold leading-none text-accent-foreground">
-                        {cartItemCount > 99 ? '99+' : cartItemCount}
-                      </Badge>
+                        <Badge className="absolute -right-2.5 -top-2 min-h-[1.125rem] min-w-[1.125rem] border-2 border-card bg-[#d89b2b] px-0.5 py-0 text-[10px] font-bold leading-none text-[#2f2513]">
+                          {cartItemCount > 99 ? '99+' : cartItemCount}
+                        </Badge>
                     ) : null}
                   </span>
                   <span
@@ -267,9 +269,9 @@ const MobileNav = () => {
               </span>
             </button>
           </div>
-          <SheetContent side="bottom" className="rounded-t-2xl pb-8">
+          <SheetContent side="bottom" className="rounded-t-2xl border-[#d7c7a8] bg-[#fbf4e4] pb-8">
             <SheetHeader className="text-left">
-              <SheetTitle>{t('More', 'और')}</SheetTitle>
+              <SheetTitle className="text-[#274631]">{t('More', 'और')}</SheetTitle>
             </SheetHeader>
             <nav className="mt-4 flex flex-col gap-1" aria-label={t('Buyer navigation', 'खरीदार नेविगेशन')}>
               {buyerMoreLinks.map(({ path, icon: Icon, labelEn, labelHi }) => {
@@ -280,8 +282,10 @@ const MobileNav = () => {
                     key={path}
                     to={path}
                     onClick={() => setBuyerMoreOpen(false)}
-                    className={`flex items-center justify-between gap-3 rounded-xl px-4 py-3.5 text-left text-base font-medium transition-colors ${
-                      active ? 'bg-primary/10 text-primary' : 'text-foreground hover:bg-muted'
+                    className={`flex items-center justify-between gap-3 rounded-xl border px-4 py-3.5 text-left text-base font-medium transition-colors ${
+                      active
+                        ? 'border-[#d2b06b] bg-[#efe2bc] text-[#315f3b]'
+                        : 'border-transparent text-[#314837] hover:border-[#d7c7a8] hover:bg-[#f5ead3]'
                     }`}
                   >
                     <span className="flex min-w-0 items-center gap-3">
@@ -289,7 +293,7 @@ const MobileNav = () => {
                       <span className="truncate">{t(labelEn, labelHi)}</span>
                     </span>
                     {notifBadge > 0 ? (
-                      <Badge className="shrink-0 bg-accent px-2 py-0.5 text-xs font-bold text-accent-foreground">
+                      <Badge className="shrink-0 bg-[#d89b2b] px-2 py-0.5 text-xs font-bold text-[#2f2513]">
                         {notifBadge > 99 ? '99+' : notifBadge}
                       </Badge>
                     ) : null}

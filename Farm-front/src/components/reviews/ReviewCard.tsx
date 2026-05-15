@@ -10,13 +10,13 @@ interface ReviewCardProps {
 
 const ReviewCard = ({ review, showReply = false, onReply }: ReviewCardProps) => {
   return (
-    <div className="card-elevated p-4">
+    <div className="card-elevated border-[#d7c7a8] bg-[#fffaf0] p-4">
       <div className="flex items-start justify-between">
         <div>
           <div className="flex items-center gap-2 mb-2">
-            <h4 className="font-semibold text-foreground">{review.reviewerName}</h4>
-            <span className="text-xs text-muted-foreground">•</span>
-            <span className="text-xs text-muted-foreground">
+            <h4 className="font-semibold text-[#2c4632]">{review.reviewerName}</h4>
+            <span className="text-xs text-[#8a7a5b]">•</span>
+            <span className="text-xs text-[#8a7a5b]">
               {new Date(review.createdAt).toLocaleDateString('en-IN', {
                 day: 'numeric',
                 month: 'short',
@@ -24,22 +24,22 @@ const ReviewCard = ({ review, showReply = false, onReply }: ReviewCardProps) => 
               })}
             </span>
           </div>
-          <p className="text-sm text-muted-foreground mb-2">{review.productName}</p>
+          <p className="mb-2 text-sm text-[#6c5a3d]">{review.productName}</p>
         </div>
-        <div className="flex items-center gap-1 bg-primary/10 px-2 py-1 rounded-full">
-          <Star className="w-4 h-4 text-secondary fill-secondary" />
-          <span className="text-sm font-semibold text-foreground">{review.rating}</span>
+        <div className="flex items-center gap-1 rounded-full border border-[#d2b06b] bg-[#efe2bc] px-2 py-1">
+          <Star className="h-4 w-4 fill-[#d89b2b] text-[#d89b2b]" />
+          <span className="text-sm font-semibold text-[#2c4632]">{review.rating}</span>
         </div>
       </div>
 
-      <p className="text-foreground mt-3">{review.comment}</p>
+      <p className="mt-3 text-[#314837]">{review.comment}</p>
 
       {review.reply && (
-        <div className="mt-4 pl-4 border-l-2 border-primary/30 bg-muted/30 rounded-r-lg p-3">
-          <p className="text-sm font-medium text-primary mb-1">Reply from {review.targetName}</p>
-          <p className="text-sm text-foreground">{review.reply}</p>
+        <div className="mt-4 rounded-r-lg border-l-2 border-[#d2b06b] bg-[#f7eddc] p-3 pl-4">
+          <p className="mb-1 text-sm font-medium text-[#315f3b]">Reply from {review.targetName}</p>
+          <p className="text-sm text-[#314837]">{review.reply}</p>
           {review.replyDate && (
-            <p className="text-xs text-muted-foreground mt-2">
+            <p className="mt-2 text-xs text-[#8a7a5b]">
               {new Date(review.replyDate).toLocaleDateString('en-IN')}
             </p>
           )}
@@ -47,7 +47,7 @@ const ReviewCard = ({ review, showReply = false, onReply }: ReviewCardProps) => 
       )}
 
       {showReply && !review.reply && (
-        <Button variant="ghost" size="sm" onClick={onReply} className="mt-3 text-primary">
+        <Button variant="ghost" size="sm" onClick={onReply} className="mt-3 text-[#315f3b] hover:bg-[#f3e7cd] hover:text-[#274631]">
           <MessageCircle className="w-4 h-4 mr-1" />
           Reply to Review
         </Button>

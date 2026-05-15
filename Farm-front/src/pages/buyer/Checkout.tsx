@@ -46,6 +46,7 @@ const Checkout = () => {
 
   const platformFee = Math.round(totalAmount * 0.02);
   const grandTotal = totalAmount + platformFee;
+  const isRazorpayTestMode = String(import.meta.env.VITE_RAZORPAY_KEY || '').includes('rzp_test_');
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -370,6 +371,18 @@ const Checkout = () => {
                   ? 'Razorpay: pay now with UPI, cards, or net banking (includes 2% platform fee). COD / bank transfer: order is placed; pay the farmer when you receive goods or per their instructions.'
                   : 'Razorpay: अभी UPI/कार्ड/नेट बैंकिंग से भुगतान (2% प्लेटफॉर्म शुल्क सहित)। COD/बैंक: ऑर्डर दर्ज; सामान मिलने पर या किसान के निर्देशानुसार भुगतान करें।'}
               </p>
+              {paymentMethod === 'razorpay' && isRazorpayTestMode ? (
+                <div className="mb-4 rounded-lg border border-[#e8d4a8] bg-[#fff8eb] p-3 text-xs text-[#5c4a2a] space-y-1">
+                  <p className="font-semibold">
+                    {currentLanguage === 'en' ? 'Razorpay test mode' : 'Razorpay टेस्ट मोड'}
+                  </p>
+                  <p>
+                    {currentLanguage === 'en'
+                      ? 'If card shows “International cards are not supported”, do not use 4111… — use Indian test card 5267 3181 8797 5449 (expiry any future date, CVV 123, OTP 123456). Or pay via UPI QR on phone.'
+                      : 'कार्ड पर “International cards are not supported” आए तो 4111… न उपयोग करें — भारतीय टेस्ट कार्ड 5267 3181 8797 5449 (कोई भविष्य की expiry, CVV 123, OTP 123456)। या फोन से UPI QR स्कैन करें।'}
+                  </p>
+                </div>
+              ) : null}
               <RadioGroup value={paymentMethod} onValueChange={setPaymentMethod}>
                 <div className="space-y-3">
                   <label className={`flex cursor-pointer items-center gap-4 rounded-xl border-2 p-4 transition-all ${paymentMethod === 'razorpay' ? 'border-[#315f3b] bg-[#eef5ee]' : 'border-[#d7c7a8] bg-[#fffdf7] hover:border-[#315f3b]/60'}`}>

@@ -16,28 +16,28 @@ interface StatCardProps {
 const variantStyles = {
   default: {
     bg: 'bg-card',
-    iconBg: 'bg-muted',
-    iconColor: 'text-muted-foreground',
+    iconBg: 'bg-[#f1e7d1] border border-[#d7c7a8]',
+    iconColor: 'text-[#6c5a3d]',
   },
   primary: {
     bg: 'bg-card',
-    iconBg: 'bg-primary/10',
-    iconColor: 'text-primary',
+    iconBg: 'bg-[#efe2bc] border border-[#d2b06b]',
+    iconColor: 'text-[#315f3b]',
   },
   success: {
     bg: 'bg-card',
-    iconBg: 'bg-success/10',
-    iconColor: 'text-success',
+    iconBg: 'bg-[#e5efe4] border border-[#afc7a6]',
+    iconColor: 'text-[#315f3b]',
   },
   warning: {
     bg: 'bg-card',
-    iconBg: 'bg-warning/10',
-    iconColor: 'text-warning',
+    iconBg: 'bg-[#f8ecd0] border border-[#dfbc73]',
+    iconColor: 'text-[#8a5b22]',
   },
   accent: {
     bg: 'bg-card',
-    iconBg: 'bg-accent/10',
-    iconColor: 'text-accent',
+    iconBg: 'bg-[#f5e2d6] border border-[#d3a58a]',
+    iconColor: 'text-[#8a4f2a]',
   },
 };
 
@@ -60,18 +60,18 @@ const StatCard = ({ title, value, subtitle, icon: Icon, trend, variant = 'defaul
   };
 
   return (
-    <div className={`stat-card ${styles.bg} animate-slide-up hover:scale-[1.02] transition-all duration-300 hover:shadow-lg group`}>
+    <div className={`stat-card ${styles.bg} group animate-slide-up border-[#d7c7a8] bg-[#fffaf0] hover:scale-[1.02] hover:shadow-[0_14px_28px_rgba(74,60,37,0.08)] transition-all duration-300`}>
       <div className="flex items-start justify-between gap-2">
         <div className="min-w-0 flex-1 animate-fade-in">
-          <p className="mb-1 text-sm text-muted-foreground">{title}</p>
-          <h3 className="text-2xl font-bold text-foreground transition-transform duration-300 group-hover:scale-105">
+          <p className="mb-1 text-sm text-[#6c5a3d]">{title}</p>
+          <h3 className="text-2xl font-bold text-[#2c4632] transition-transform duration-300 group-hover:scale-105">
             {formatValue(value)}
           </h3>
           {subtitle != null && subtitle !== '' && (
-            <div className="mt-1 break-words text-xs text-muted-foreground sm:text-sm">{subtitle}</div>
+            <div className="mt-1 break-words text-xs text-[#7a6a4f] sm:text-sm">{subtitle}</div>
           )}
           {trend && (
-            <p className={`text-sm mt-2 animate-slide-fade ${trend.isPositive ? 'text-success' : 'text-destructive'}`}>
+            <p className={`mt-2 text-sm animate-slide-fade ${trend.isPositive ? 'text-[#315f3b]' : 'text-[#8a4f2a]'}`}>
               {trend.isPositive ? '↑' : '↓'} {Math.abs(trend.value)}% from last month
             </p>
           )}

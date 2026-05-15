@@ -21,13 +21,13 @@ export default function AdminAuditTab() {
   return (
     <div className="space-y-6">
   <AnimateOnScroll animation="slide-up">
-    <Card className="border-2 shadow-lg">
+    <Card className="border-[#d7c7a8] bg-[#fffaf0] shadow-[0_16px_40px_rgba(95,70,40,0.08)]">
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
-          <History className="w-5 h-5 text-primary" />
+          <History className="w-5 h-5 text-[#315f3b]" />
           Audit log
         </CardTitle>
-        <CardDescription>
+        <CardDescription className="text-[#6f6552]">
           Filter by resource type, exact action, or search within action text. Newest first.
         </CardDescription>
       </CardHeader>
@@ -35,7 +35,7 @@ export default function AdminAuditTab() {
         <div className="flex flex-col gap-4 mb-6">
           <div className="flex flex-col lg:flex-row flex-wrap gap-4 lg:items-end">
             <div className="space-y-1.5 min-w-[180px]">
-              <Label htmlFor="audit-resource-type" className="text-xs text-muted-foreground">
+              <Label htmlFor="audit-resource-type" className="text-xs text-[#6f6552]">
                 Resource type
               </Label>
               <Select
@@ -44,7 +44,7 @@ export default function AdminAuditTab() {
                   vm.setAuditResourceFilter(v === AUDIT_FILTER_ALL ? '' : v)
                 }
               >
-                <SelectTrigger id="audit-resource-type" className="w-full lg:w-[200px]">
+                <SelectTrigger id="audit-resource-type" className="w-full border-[#d7c7a8] bg-[#fffdf7] text-[#2f3a2f] lg:w-[200px]">
                   <SelectValue placeholder="Resource" />
                 </SelectTrigger>
                 <SelectContent>
@@ -58,7 +58,7 @@ export default function AdminAuditTab() {
               </Select>
             </div>
             <div className="space-y-1.5 min-w-[200px]">
-              <Label htmlFor="audit-action" className="text-xs text-muted-foreground">
+              <Label htmlFor="audit-action" className="text-xs text-[#6f6552]">
                 Action
               </Label>
               <Select
@@ -67,7 +67,7 @@ export default function AdminAuditTab() {
                   vm.setAuditActionFilter(v === AUDIT_FILTER_ALL ? '' : v)
                 }
               >
-                <SelectTrigger id="audit-action" className="w-full lg:w-[220px]">
+                <SelectTrigger id="audit-action" className="w-full border-[#d7c7a8] bg-[#fffdf7] text-[#2f3a2f] lg:w-[220px]">
                   <SelectValue placeholder="Action" />
                 </SelectTrigger>
                 <SelectContent>
@@ -81,7 +81,7 @@ export default function AdminAuditTab() {
               </Select>
             </div>
             <div className="space-y-1.5 flex-1 min-w-[200px] max-w-md">
-              <Label htmlFor="audit-action-search" className="text-xs text-muted-foreground">
+              <Label htmlFor="audit-action-search" className="text-xs text-[#6f6552]">
                 Search in action
               </Label>
               <Input
@@ -90,14 +90,14 @@ export default function AdminAuditTab() {
                 value={vm.auditActionSearchInput}
                 onChange={(e) => vm.setAuditActionSearchInput(e.target.value)}
                 disabled={Boolean(vm.auditActionFilter)}
-                className="w-full"
+                className="w-full border-[#d7c7a8] bg-[#fffdf7] text-[#2f3a2f] placeholder:text-[#8b816f] focus-visible:ring-[#315f3b]"
               />
               {vm.auditActionFilter ? (
-                <p className="text-[11px] text-muted-foreground">
+                <p className="text-[11px] text-[#6f6552]">
                   Clear “Action” to use text search.
                 </p>
               ) : (
-                <p className="text-[11px] text-muted-foreground">
+                <p className="text-[11px] text-[#6f6552]">
                   Case-insensitive substring when no specific action is selected.
                 </p>
               )}
@@ -106,7 +106,7 @@ export default function AdminAuditTab() {
               type="button"
               variant="outline"
               size="sm"
-              className="lg:mb-0.5 shrink-0"
+              className="shrink-0 border-[#d7c7a8] bg-[#fffdf7] text-[#315f3b] hover:bg-[#f3ebdd] hover:text-[#315f3b] lg:mb-0.5"
               disabled={
                 !vm.auditResourceFilter && !vm.auditActionFilter && !vm.auditActionSearchInput
               }
@@ -123,16 +123,16 @@ export default function AdminAuditTab() {
           </div>
         </div>
         {vm.auditLoading && (
-          <div className="flex items-center gap-2 text-sm text-muted-foreground mb-4">
+          <div className="mb-4 flex items-center gap-2 text-sm text-[#6f6552]">
             <Loader2 className="h-4 w-4 animate-spin shrink-0" />
             Loading…
           </div>
         )}
-        <div className="rounded-xl border border-border overflow-hidden">
+        <div className="overflow-hidden rounded-xl border border-[#d7c7a8] bg-[#fffdf7]">
           <div className="overflow-x-auto max-h-[min(70vh,560px)] overflow-y-auto">
             <table className="w-full text-sm">
               <thead>
-                <tr className="bg-muted/50 border-b text-left sticky top-0 z-10">
+                <tr className="sticky top-0 z-10 border-b border-[#e2d4b7] bg-[#f6eddc] text-left">
                   <th className="p-3 font-semibold whitespace-nowrap">When</th>
                   <th className="p-3 font-semibold whitespace-nowrap">Actor</th>
                   <th className="p-3 font-semibold whitespace-nowrap">Action</th>
@@ -151,8 +151,8 @@ export default function AdminAuditTab() {
                     detailsStr = '';
                   }
                   return (
-                    <tr key={row.id} className="border-b border-border/80 align-top hover:bg-muted/20">
-                      <td className="p-3 whitespace-nowrap text-muted-foreground text-xs">
+                    <tr key={row.id} className="align-top border-b border-[#eee2c8] hover:bg-[#f6eddc]">
+                      <td className="p-3 whitespace-nowrap text-xs text-[#6f6552]">
                         {row.createdAt
                           ? new Date(row.createdAt).toLocaleString('en-IN', {
                               dateStyle: 'short',
@@ -162,24 +162,24 @@ export default function AdminAuditTab() {
                       </td>
                       <td className="p-3">
                         <p className="font-medium">{row.actor?.name || '—'}</p>
-                        <p className="text-xs text-muted-foreground break-all">{row.actor?.email || ''}</p>
+                        <p className="break-all text-xs text-[#6f6552]">{row.actor?.email || ''}</p>
                       </td>
                       <td className="p-3 font-mono text-xs">{row.action}</td>
                       <td className="p-3">
-                        <span className="text-xs text-muted-foreground">{row.resourceType}</span>
+                        <span className="text-xs text-[#6f6552]">{row.resourceType}</span>
                         <p className="font-mono text-[11px] break-all mt-0.5">{row.resourceId}</p>
                       </td>
                       <td className="p-3 text-xs">
                         {row.targetUser ? (
                           <>
                             <p className="font-medium">{row.targetUser.name}</p>
-                            <p className="text-muted-foreground break-all">{row.targetUser.email}</p>
+                            <p className="break-all text-[#6f6552]">{row.targetUser.email}</p>
                           </>
                         ) : (
-                          <span className="text-muted-foreground">—</span>
+                          <span className="text-[#6f6552]">—</span>
                         )}
                       </td>
-                      <td className="p-3 text-xs text-muted-foreground font-mono break-all">
+                      <td className="p-3 break-all font-mono text-xs text-[#6f6552]">
                         {detailsStr || '—'}
                       </td>
                     </tr>
@@ -189,7 +189,7 @@ export default function AdminAuditTab() {
             </table>
           </div>
           {!vm.auditLoading && vm.auditLogs.length === 0 && (
-            <p className="text-sm text-muted-foreground py-10 text-center border-t">
+            <p className="border-t border-[#e2d4b7] py-10 text-center text-sm text-[#6f6552]">
               {vm.auditFiltersActive
                 ? 'No audit entries match the current filters.'
                 : 'No audit entries yet. Actions you take (KYC, vm.listings, etc.) will appear here.'}

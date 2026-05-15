@@ -217,15 +217,15 @@
 
   /* Navigation */
   .nav-item {
-    @apply flex flex-col items-center gap-1 p-3 rounded-xl transition-all duration-200 text-muted-foreground;
+    @apply flex flex-col items-center gap-1 rounded-xl border border-transparent p-3 text-muted-foreground transition-all duration-200;
   }
 
   .nav-item:hover {
-    @apply bg-muted text-foreground;
+    @apply border-[#d7c7a8] bg-[#f6ecd8] text-[#2c4632];
   }
 
   .nav-item.active {
-    @apply bg-primary/10 text-primary;
+    @apply border-[#caa04b] bg-[#efe2bc] text-[#315f3b];
   }
 
   /* Form Elements */
@@ -262,7 +262,10 @@
 
   /* Mobile Bottom Nav */
   .mobile-nav {
-    @apply fixed bottom-0 left-0 right-0 bg-card border-t border-border shadow-lg z-50;
+    @apply fixed bottom-0 left-0 right-0 z-50 border-t shadow-lg;
+    background-color: hsl(var(--card));
+    border-color: #d7c7a8;
+    box-shadow: 0 -10px 28px rgba(66, 53, 31, 0.08);
   }
 
   /* Dashboard Stats Card */

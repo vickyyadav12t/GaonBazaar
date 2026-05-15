@@ -13,11 +13,11 @@ interface OrderCardProps {
 }
 
 const statusConfig = {
-  pending: { label: 'Pending', color: 'bg-warning/10 text-warning', icon: Clock },
-  processing: { label: 'Processing', color: 'bg-secondary/10 text-secondary', icon: Package },
-  shipped: { label: 'Shipped', color: 'bg-primary/10 text-primary', icon: Truck },
-  delivered: { label: 'Delivered', color: 'bg-success/10 text-success', icon: CheckCircle },
-  cancelled: { label: 'Cancelled', color: 'bg-destructive/10 text-destructive', icon: XCircle },
+  pending: { label: 'Pending', color: 'border border-[#dfbc73] bg-[#f8ecd0] text-[#8a5b22]', icon: Clock },
+  processing: { label: 'Processing', color: 'border border-[#d3a58a] bg-[#f5e2d6] text-[#8a4f2a]', icon: Package },
+  shipped: { label: 'Shipped', color: 'border border-[#d2b06b] bg-[#efe2bc] text-[#315f3b]', icon: Truck },
+  delivered: { label: 'Delivered', color: 'border border-[#afc7a6] bg-[#e5efe4] text-[#315f3b]', icon: CheckCircle },
+  cancelled: { label: 'Cancelled', color: 'border border-[#d8b19f] bg-[#f6e1d8] text-[#8a4f2a]', icon: XCircle },
 };
 
 const OrderCard = ({ order, userRole, onAccept, onReject, onViewDetails }: OrderCardProps) => {
@@ -34,10 +34,10 @@ const OrderCard = ({ order, userRole, onAccept, onReject, onViewDetails }: Order
   };
 
   return (
-    <div className="card-elevated p-4">
+    <div className="card-elevated border-[#d7c7a8] bg-[#fffaf0] p-4">
       <div className="flex gap-4">
         {/* Product Image */}
-        <div className="w-20 h-20 rounded-xl overflow-hidden shrink-0">
+        <div className="h-20 w-20 shrink-0 overflow-hidden rounded-xl border border-[#d7c7a8] bg-[#f7eddc]">
           <img 
             src={order.productImage} 
             alt={order.productName}
@@ -49,8 +49,8 @@ const OrderCard = ({ order, userRole, onAccept, onReject, onViewDetails }: Order
         <div className="flex-1 min-w-0">
           <div className="flex items-start justify-between gap-2">
             <div>
-              <h4 className="font-semibold text-foreground line-clamp-1">{order.productName}</h4>
-              <p className="text-sm text-muted-foreground">
+              <h4 className="line-clamp-1 font-semibold text-[#2c4632]">{order.productName}</h4>
+              <p className="text-sm text-[#6c5a3d]">
                 {userRole === 'farmer' ? `Buyer: ${order.buyerName}` : `Seller: ${order.farmerName}`}
               </p>
             </div>
@@ -61,10 +61,10 @@ const OrderCard = ({ order, userRole, onAccept, onReject, onViewDetails }: Order
           </div>
 
           <div className="flex items-center gap-4 mt-2 text-sm">
-            <span className="text-muted-foreground">
+            <span className="text-[#7a6a4f]">
               {order.quantity} {order.unit}
             </span>
-            <span className="font-semibold text-foreground">
+            <span className="font-semibold text-[#315f3b]">
               {formatPrice(order.totalAmount)}
             </span>
           </div>
@@ -72,16 +72,16 @@ const OrderCard = ({ order, userRole, onAccept, onReject, onViewDetails }: Order
           {/* Actions */}
           {order.status === 'pending' && userRole === 'farmer' && onAccept && onReject && (
             <div className="flex gap-2 mt-3">
-              <Button size="sm" onClick={onAccept} className="bg-success hover:bg-success/90">
+              <Button size="sm" onClick={onAccept} className="border border-[#c89b3a] bg-[#d89b2b] text-[#2f2513] hover:bg-[#c98c1d]">
                 Accept
               </Button>
-              <Button size="sm" variant="outline" onClick={onReject} className="text-destructive border-destructive hover:bg-destructive/10">
+              <Button size="sm" variant="outline" onClick={onReject} className="border-[#d8b19f] text-[#8a4f2a] hover:bg-[#f6e1d8]">
                 Reject
               </Button>
             </div>
           )}
 
-          <Button size="sm" variant="ghost" asChild className="mt-2 text-primary px-0">
+          <Button size="sm" variant="ghost" asChild className="mt-2 px-0 text-[#315f3b] hover:bg-transparent hover:text-[#274631]">
             <Link to={`/${userRole}/orders/${order.id}`}>
               View order →
             </Link>
@@ -90,9 +90,9 @@ const OrderCard = ({ order, userRole, onAccept, onReject, onViewDetails }: Order
       </div>
 
       {/* Order Info */}
-      <div className="flex items-center justify-between mt-4 pt-4 border-t border-border text-sm">
-        <span className="text-muted-foreground">Order #{order.id.slice(-6)}</span>
-        <span className="text-muted-foreground">
+      <div className="mt-4 flex items-center justify-between border-t border-[#eadfc8] pt-4 text-sm">
+        <span className="text-[#8a7a5b]">Order #{order.id.slice(-6)}</span>
+        <span className="text-[#8a7a5b]">
           {new Date(order.createdAt).toLocaleDateString('en-IN', { 
             day: 'numeric', 
             month: 'short', 
