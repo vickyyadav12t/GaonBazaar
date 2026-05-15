@@ -3,6 +3,7 @@ import authReducer from './slices/authSlice';
 import cartReducer, { CART_STORAGE_KEY } from './slices/cartSlice';
 import languageReducer from './slices/languageSlice';
 import wishlistReducer, { WISHLIST_STORAGE_KEY } from './slices/wishlistSlice';
+import { LANGUAGE_STORAGE_KEY } from '@/lib/i18n';
 
 export const store = configureStore({
   reducer: {
@@ -20,6 +21,8 @@ if (typeof window !== 'undefined') {
       localStorage.setItem(CART_STORAGE_KEY, JSON.stringify({ items: cart.items }));
       const wishlist = store.getState().wishlist;
       localStorage.setItem(WISHLIST_STORAGE_KEY, JSON.stringify({ items: wishlist.items }));
+      const lang = store.getState().language.currentLanguage;
+      localStorage.setItem(LANGUAGE_STORAGE_KEY, lang);
     } catch {
       /* ignore quota / private mode */
     }

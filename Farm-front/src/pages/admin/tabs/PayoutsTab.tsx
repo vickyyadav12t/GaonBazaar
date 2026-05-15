@@ -14,20 +14,20 @@ export default function AdminPayoutsTab() {
   return (
     <div className="space-y-6">
   <AnimateOnScroll animation="slide-up">
-    <Card className="border-2 shadow-lg">
-      <CardHeader className="bg-gradient-to-r from-accent/10 to-primary/5 border-b">
+    <Card className="border-[#d7c7a8] bg-[#fffaf0] shadow-[0_16px_40px_rgba(95,70,40,0.08)]">
+      <CardHeader className="border-b border-[#e2d4b7] bg-[#f6eddc]">
         <CardTitle className="flex items-center gap-2">
-          <Wallet className="w-5 h-5 text-accent" />
+          <Wallet className="w-5 h-5 text-[#8a4f2a]" />
           Farmer vm.withdrawals
         </CardTitle>
-        <CardDescription>
+        <CardDescription className="text-[#6f6552]">
           Mark requests as processing, completed (paid), or rejected. Farmers are notified automatically.
         </CardDescription>
       </CardHeader>
       <CardContent>
         <div className="flex flex-wrap gap-4 mb-6 items-center">
           <Select value={vm.withdrawalFilter} onValueChange={vm.setWithdrawalFilter}>
-            <SelectTrigger className="w-48">
+            <SelectTrigger className="w-48 border-[#d7c7a8] bg-[#fffdf7] text-[#2f3a2f]">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
@@ -42,6 +42,7 @@ export default function AdminPayoutsTab() {
             type="button"
             variant="outline"
             size="sm"
+            className="border-[#d7c7a8] bg-[#fffdf7] text-[#315f3b] hover:bg-[#f3ebdd] hover:text-[#315f3b]"
             disabled={vm.csvExporting === 'payouts'}
             onClick={() => void vm.handleExportWithdrawalsCsv()}
           >
@@ -55,7 +56,7 @@ export default function AdminPayoutsTab() {
         </div>
 
         {vm.payoutsLoading && (
-          <div className="flex items-center gap-2 text-sm text-muted-foreground mb-4">
+          <div className="mb-4 flex items-center gap-2 text-sm text-[#6f6552]">
             <Loader2 className="h-4 w-4 animate-spin shrink-0" />
             Loading vm.withdrawals…
           </div>
@@ -69,53 +70,53 @@ export default function AdminPayoutsTab() {
                 return (
                   <div
                     key={w.id}
-                    className="card-elevated p-5 border-2 border-border rounded-xl space-y-3"
+                    className="space-y-3 rounded-xl border border-[#d7c7a8] bg-[#fffdf7] p-5"
                   >
                     <div className="flex flex-wrap items-start justify-between gap-3">
                       <div>
                         <p className="font-semibold text-lg">{w.farmerName}</p>
-                        <p className="text-sm text-muted-foreground">
+                        <p className="text-sm text-[#6f6552]">
                           {w.farmerPhone || '—'} · {w.farmerEmail || '—'}
                         </p>
-                        <p className="text-xl font-bold text-primary mt-2">
+                        <p className="mt-2 text-xl font-bold text-[#315f3b]">
                           ₹{w.amount.toLocaleString('en-IN')}
                         </p>
                       </div>
                       <Badge
                         className={
                           w.status === 'completed'
-                            ? 'bg-success/15 text-success'
+                            ? 'bg-[#eaf5ec] text-[#315f3b]'
                             : w.status === 'rejected'
-                              ? 'bg-destructive/15 text-destructive'
+                              ? 'bg-[#f6e5dc] text-[#8a4f2a]'
                               : w.status === 'processing'
-                                ? 'bg-primary/15 text-primary'
-                                : 'bg-warning/15 text-warning'
+                                ? 'bg-[#eef5ee] text-[#58774e]'
+                                : 'bg-[#fff4dd] text-[#9a6b12]'
                         }
                       >
                         {w.status}
                       </Badge>
                     </div>
-                    <div className="text-sm rounded-lg bg-muted/50 p-3 space-y-1">
+                    <div className="space-y-1 rounded-lg bg-[#f3ebdd] p-3 text-sm">
                       <p>
-                        <span className="text-muted-foreground">Bank:</span>{' '}
+                        <span className="text-[#6f6552]">Bank:</span>{' '}
                         {w.bankAccount.bankName || '—'}
                       </p>
                       <p>
-                        <span className="text-muted-foreground">Account:</span>{' '}
+                        <span className="text-[#6f6552]">Account:</span>{' '}
                         {w.bankAccount.accountHolderName || '—'} · ****
                         {w.bankAccount.accountNumber?.slice(-4) || '—'}
                       </p>
                       <p>
-                        <span className="text-muted-foreground">IFSC:</span>{' '}
+                        <span className="text-[#6f6552]">IFSC:</span>{' '}
                         {w.bankAccount.ifscCode || '—'}
                       </p>
-                      <p className="text-xs text-muted-foreground pt-1">
+                      <p className="pt-1 text-xs text-[#6f6552]">
                         Requested {new Date(w.requestedAt).toLocaleString()}
                         {w.processedAt &&
                           ` · Processed ${new Date(w.processedAt).toLocaleString()}`}
                       </p>
                       {w.rejectionReason && (
-                        <p className="text-xs text-destructive pt-1">{w.rejectionReason}</p>
+                        <p className="pt-1 text-xs text-[#8a4f2a]">{w.rejectionReason}</p>
                       )}
                     </div>
                     {canAct && (
@@ -124,6 +125,7 @@ export default function AdminPayoutsTab() {
                           <Button
                             size="sm"
                             variant="outline"
+                            className="border-[#d7c7a8] bg-[#fffaf0] text-[#315f3b] hover:bg-[#f3ebdd] hover:text-[#315f3b]"
                             disabled={busy}
                             onClick={() => void vm.handleWithdrawalStatus(w, 'processing')}
                           >
@@ -132,7 +134,7 @@ export default function AdminPayoutsTab() {
                         )}
                         <Button
                           size="sm"
-                          className="bg-success hover:bg-success/90"
+                          className="border border-[#315f3b] bg-[#315f3b] text-[#fffaf0] hover:bg-[#284e31]"
                           disabled={busy}
                           onClick={() => void vm.handleWithdrawalStatus(w, 'completed')}
                         >
@@ -140,7 +142,7 @@ export default function AdminPayoutsTab() {
                         </Button>
                         <Button
                           size="sm"
-                          variant="destructive"
+                          className="bg-[#8a4f2a] text-[#fffaf0] hover:bg-[#784223]"
                           disabled={busy}
                           onClick={() => vm.setRejectTarget(w)}
                         >
@@ -153,8 +155,8 @@ export default function AdminPayoutsTab() {
               })
           ) : (
             <div className="text-center py-12">
-              <Wallet className="w-16 h-16 text-muted-foreground mx-auto mb-4" />
-              <p className="text-muted-foreground">No vm.withdrawals in this filter</p>
+              <Wallet className="mx-auto mb-4 h-16 w-16 text-[#8b816f]" />
+              <p className="text-[#6f6552]">No vm.withdrawals in this filter</p>
             </div>
           )}
         </div>

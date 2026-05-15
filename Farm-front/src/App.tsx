@@ -18,6 +18,7 @@ import AdminRoute from "@/components/auth/AdminRoute";
 
 // Error Boundary
 import ErrorBoundary from "@/components/ErrorBoundary";
+import LanguageSync from "@/components/LanguageSync";
 
 // Scroll to Top
 import ScrollToTop from "@/components/ScrollToTop";
@@ -120,6 +121,7 @@ const AppInner = () => (
         <CopilotProvider>
         <ErrorBoundary>
           <AuthBootstrap />
+          <LanguageSync />
           <Toaster />
           <Sonner />
             <ScrollToTop />

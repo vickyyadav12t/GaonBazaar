@@ -212,16 +212,17 @@ const Checkout = () => {
     const paid = placedPaymentStatus === 'paid';
     return (
       <Layout>
-        <div className="container mx-auto min-w-0 px-3 py-10 sm:px-4 sm:py-12">
-          <div className="max-w-md mx-auto text-center">
+        <div className="min-h-screen bg-[linear-gradient(rgba(251,247,235,0.96),rgba(251,247,235,0.96)),linear-gradient(rgba(138,79,42,0.08)_1px,transparent_1px),linear-gradient(90deg,rgba(138,79,42,0.08)_1px,transparent_1px)] bg-[size:auto,26px_26px,26px_26px]">
+          <div className="container mx-auto min-w-0 px-3 py-10 sm:px-4 sm:py-12">
+          <div className="mx-auto max-w-md text-center">
             <div
-              className={`w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-6 animate-scale-in ${
-                paid ? 'bg-success/20' : 'bg-primary/15'
+              className={`mx-auto mb-6 flex h-20 w-20 items-center justify-center rounded-full border animate-scale-in ${
+                paid ? 'border-[#a9c8ae] bg-[#eaf5ec]' : 'border-[#d7c7a8] bg-[#fff4dd]'
               }`}
             >
-              <Check className={`w-10 h-10 ${paid ? 'text-success' : 'text-primary'}`} />
+              <Check className={`h-10 w-10 ${paid ? 'text-[#315f3b]' : 'text-[#d89b2b]'}`} />
             </div>
-            <h2 className={`text-2xl font-bold mb-2 ${paid ? 'text-success' : 'text-foreground'}`}>
+            <h2 className={`mb-2 text-2xl font-bold ${paid ? 'text-[#315f3b]' : 'text-[#2f3a2f]'}`}>
               {paid
                 ? currentLanguage === 'en'
                   ? 'Payment received'
@@ -230,7 +231,7 @@ const Checkout = () => {
                   ? 'Order placed'
                   : 'ऑर्डर दर्ज हो गया'}
             </h2>
-            <p className="text-muted-foreground mb-4">
+            <p className="mb-4 text-[#6f6552]">
               {paid
                 ? currentLanguage === 'en'
                   ? 'Your order is confirmed. You will receive updates in My Orders.'
@@ -239,16 +240,17 @@ const Checkout = () => {
                   ? 'Your order is saved. For cash on delivery or bank transfer, pay the farmer as agreed. You can track status in My Orders.'
                   : 'आपका ऑर्डर सहेजा गया है। COD या बैंक ट्रांसफर पर किसान से तय अनुसार भुगतान करें। स्थिति «मेरे ऑर्डर» में देखें।'}
             </p>
-            <div className="card-elevated p-4 mb-6 text-left">
-              <p className="text-sm text-muted-foreground mb-1">
+            <div className="mb-6 rounded-2xl border border-[#d7c7a8] bg-[#fffaf0] p-4 text-left shadow-[0_16px_40px_rgba(95,70,40,0.08)]">
+              <p className="mb-1 text-sm text-[#6f6552]">
                 {currentLanguage === 'en' ? 'Order ID' : 'ऑर्डर आईडी'}
               </p>
-              <p className="font-mono font-bold break-all">{placedOrderId || '—'}</p>
+              <p className="break-all font-mono font-bold text-[#2f3a2f]">{placedOrderId || '—'}</p>
             </div>
-            <p className="text-sm text-muted-foreground">
+            <p className="text-sm text-[#6f6552]">
               {currentLanguage === 'en' ? 'Redirecting to My Orders…' : 'मेरे ऑर्डर पर भेजा जा रहा है…'}
             </p>
           </div>
+        </div>
         </div>
       </Layout>
     );
@@ -261,13 +263,17 @@ const Checkout = () => {
 
   return (
     <Layout>
-      <div className="container mx-auto min-w-0 px-3 py-5 sm:px-4 sm:py-6">
+      <div className="min-h-screen bg-[linear-gradient(rgba(251,247,235,0.97),rgba(251,247,235,0.97)),linear-gradient(rgba(138,79,42,0.07)_1px,transparent_1px),linear-gradient(90deg,rgba(138,79,42,0.07)_1px,transparent_1px)] bg-[size:auto,24px_24px,24px_24px]">
+        <div className="container mx-auto min-w-0 px-3 py-5 sm:px-4 sm:py-6">
         {/* Header */}
         <div className="flex items-center gap-4 mb-6">
-          <button onClick={() => navigate(-1)} className="p-2 hover:bg-muted rounded-lg">
+          <button
+            onClick={() => navigate(-1)}
+            className="rounded-lg border border-[#d7c7a8] bg-[#fffaf0] p-2 text-[#315f3b] transition hover:bg-[#f6eddc]"
+          >
             <ArrowLeft className="w-5 h-5" />
           </button>
-          <h1 className="text-2xl font-bold">
+          <h1 className="text-2xl font-bold text-[#2f3a2f]">
             {currentLanguage === 'en' ? 'Checkout' : 'चेकआउट'}
           </h1>
         </div>
@@ -276,16 +282,17 @@ const Checkout = () => {
           {/* Checkout Form */}
           <div className="lg:col-span-2 space-y-6">
             {/* Delivery Address */}
-            <div className="card-elevated p-6">
-              <h2 className="text-lg font-semibold mb-4 flex items-center gap-2">
-                <MapPin className="w-5 h-5 text-primary" />
+            <div className="rounded-2xl border border-[#d7c7a8] bg-[#fffaf0] p-6 shadow-[0_16px_40px_rgba(95,70,40,0.08)]">
+              <h2 className="mb-4 flex items-center gap-2 text-lg font-semibold text-[#2f3a2f]">
+                <MapPin className="w-5 h-5 text-[#315f3b]" />
                 {currentLanguage === 'en' ? 'Delivery Address' : 'डिलीवरी पता'}
               </h2>
               <div className="grid gap-4">
                 <div className="grid sm:grid-cols-2 gap-4">
                   <div>
-                    <Label htmlFor="name">{currentLanguage === 'en' ? 'Full Name' : 'पूरा नाम'}</Label>
+                    <Label htmlFor="name" className="text-[#5c513f]">{currentLanguage === 'en' ? 'Full Name' : 'पूरा नाम'}</Label>
                     <Input
+                      className="mt-2 border-[#d7c7a8] bg-[#fffdf7] text-[#2f3a2f] placeholder:text-[#8b816f] focus-visible:ring-[#315f3b]"
                       id="name"
                       name="name"
                       value={formData.name}
@@ -294,8 +301,9 @@ const Checkout = () => {
                     />
                   </div>
                   <div>
-                    <Label htmlFor="phone">{currentLanguage === 'en' ? 'Phone Number' : 'फोन नंबर'}</Label>
+                    <Label htmlFor="phone" className="text-[#5c513f]">{currentLanguage === 'en' ? 'Phone Number' : 'फोन नंबर'}</Label>
                     <Input
+                      className="mt-2 border-[#d7c7a8] bg-[#fffdf7] text-[#2f3a2f] placeholder:text-[#8b816f] focus-visible:ring-[#315f3b]"
                       id="phone"
                       name="phone"
                       value={formData.phone}
@@ -305,8 +313,9 @@ const Checkout = () => {
                   </div>
                 </div>
                 <div>
-                  <Label htmlFor="address">{currentLanguage === 'en' ? 'Address' : 'पता'}</Label>
+                  <Label htmlFor="address" className="text-[#5c513f]">{currentLanguage === 'en' ? 'Address' : 'पता'}</Label>
                   <Textarea
+                    className="mt-2 border-[#d7c7a8] bg-[#fffdf7] text-[#2f3a2f] placeholder:text-[#8b816f] focus-visible:ring-[#315f3b]"
                     id="address"
                     name="address"
                     value={formData.address}
@@ -317,8 +326,9 @@ const Checkout = () => {
                 </div>
                 <div className="grid sm:grid-cols-3 gap-4">
                   <div>
-                    <Label htmlFor="city">{currentLanguage === 'en' ? 'City' : 'शहर'}</Label>
+                    <Label htmlFor="city" className="text-[#5c513f]">{currentLanguage === 'en' ? 'City' : 'शहर'}</Label>
                     <Input
+                      className="mt-2 border-[#d7c7a8] bg-[#fffdf7] text-[#2f3a2f] placeholder:text-[#8b816f] focus-visible:ring-[#315f3b]"
                       id="city"
                       name="city"
                       value={formData.city}
@@ -326,8 +336,9 @@ const Checkout = () => {
                     />
                   </div>
                   <div>
-                    <Label htmlFor="state">{currentLanguage === 'en' ? 'State' : 'राज्य'}</Label>
+                    <Label htmlFor="state" className="text-[#5c513f]">{currentLanguage === 'en' ? 'State' : 'राज्य'}</Label>
                     <Input
+                      className="mt-2 border-[#d7c7a8] bg-[#fffdf7] text-[#2f3a2f] placeholder:text-[#8b816f] focus-visible:ring-[#315f3b]"
                       id="state"
                       name="state"
                       value={formData.state}
@@ -335,8 +346,9 @@ const Checkout = () => {
                     />
                   </div>
                   <div>
-                    <Label htmlFor="pincode">{currentLanguage === 'en' ? 'PIN Code' : 'पिन कोड'}</Label>
+                    <Label htmlFor="pincode" className="text-[#5c513f]">{currentLanguage === 'en' ? 'PIN Code' : 'पिन कोड'}</Label>
                     <Input
+                      className="mt-2 border-[#d7c7a8] bg-[#fffdf7] text-[#2f3a2f] placeholder:text-[#8b816f] focus-visible:ring-[#315f3b]"
                       id="pincode"
                       name="pincode"
                       value={formData.pincode}
@@ -348,51 +360,51 @@ const Checkout = () => {
             </div>
 
             {/* Payment Method */}
-            <div className="card-elevated p-6">
-              <h2 className="text-lg font-semibold mb-4 flex items-center gap-2">
-                <CreditCard className="w-5 h-5 text-primary" />
+            <div className="rounded-2xl border border-[#d7c7a8] bg-[#fffaf0] p-6 shadow-[0_16px_40px_rgba(95,70,40,0.08)]">
+              <h2 className="mb-4 flex items-center gap-2 text-lg font-semibold text-[#2f3a2f]">
+                <CreditCard className="w-5 h-5 text-[#315f3b]" />
                 {currentLanguage === 'en' ? 'Payment Method' : 'भुगतान विधि'}
               </h2>
-              <p className="text-sm text-muted-foreground mb-4">
+              <p className="mb-4 text-sm text-[#6f6552]">
                 {currentLanguage === 'en'
                   ? 'Razorpay: pay now with UPI, cards, or net banking (includes 2% platform fee). COD / bank transfer: order is placed; pay the farmer when you receive goods or per their instructions.'
                   : 'Razorpay: अभी UPI/कार्ड/नेट बैंकिंग से भुगतान (2% प्लेटफॉर्म शुल्क सहित)। COD/बैंक: ऑर्डर दर्ज; सामान मिलने पर या किसान के निर्देशानुसार भुगतान करें।'}
               </p>
               <RadioGroup value={paymentMethod} onValueChange={setPaymentMethod}>
                 <div className="space-y-3">
-                  <label className={`flex items-center gap-4 p-4 rounded-xl border-2 cursor-pointer transition-all ${paymentMethod === 'razorpay' ? 'border-primary bg-primary/5' : 'border-border hover:border-primary/50'}`}>
+                  <label className={`flex cursor-pointer items-center gap-4 rounded-xl border-2 p-4 transition-all ${paymentMethod === 'razorpay' ? 'border-[#315f3b] bg-[#eef5ee]' : 'border-[#d7c7a8] bg-[#fffdf7] hover:border-[#315f3b]/60'}`}>
                     <RadioGroupItem value="razorpay" />
                     <div className="w-10 h-10 bg-[#3395FF]/10 rounded-lg flex items-center justify-center">
                       <Smartphone className="w-5 h-5 text-[#3395FF]" />
                     </div>
                     <div className="flex-1">
-                      <p className="font-medium">Razorpay</p>
-                      <p className="text-sm text-muted-foreground">UPI, Cards, Net Banking</p>
+                      <p className="font-medium text-[#2f3a2f]">Razorpay</p>
+                      <p className="text-sm text-[#6f6552]">UPI, Cards, Net Banking</p>
                     </div>
                     <img src="https://razorpay.com/assets/razorpay-logo.svg" alt="Razorpay" className="h-6" />
                   </label>
 
-                  <label className={`flex items-center gap-4 p-4 rounded-xl border-2 cursor-pointer transition-all ${paymentMethod === 'bank' ? 'border-primary bg-primary/5' : 'border-border hover:border-primary/50'}`}>
+                  <label className={`flex cursor-pointer items-center gap-4 rounded-xl border-2 p-4 transition-all ${paymentMethod === 'bank' ? 'border-[#315f3b] bg-[#eef5ee]' : 'border-[#d7c7a8] bg-[#fffdf7] hover:border-[#315f3b]/60'}`}>
                     <RadioGroupItem value="bank" />
-                    <div className="w-10 h-10 bg-primary/10 rounded-lg flex items-center justify-center">
-                      <Building className="w-5 h-5 text-primary" />
+                    <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-[#315f3b]/10">
+                      <Building className="w-5 h-5 text-[#315f3b]" />
                     </div>
                     <div className="flex-1">
-                      <p className="font-medium">{currentLanguage === 'en' ? 'Bank Transfer' : 'बैंक ट्रांसफर'}</p>
-                      <p className="text-sm text-muted-foreground">
+                      <p className="font-medium text-[#2f3a2f]">{currentLanguage === 'en' ? 'Bank Transfer' : 'बैंक ट्रांसफर'}</p>
+                      <p className="text-sm text-[#6f6552]">
                         {currentLanguage === 'en' ? 'Direct bank transfer' : 'सीधा बैंक ट्रांसफर'}
                       </p>
                     </div>
                   </label>
 
-                  <label className={`flex items-center gap-4 p-4 rounded-xl border-2 cursor-pointer transition-all ${paymentMethod === 'cod' ? 'border-primary bg-primary/5' : 'border-border hover:border-primary/50'}`}>
+                  <label className={`flex cursor-pointer items-center gap-4 rounded-xl border-2 p-4 transition-all ${paymentMethod === 'cod' ? 'border-[#315f3b] bg-[#eef5ee]' : 'border-[#d7c7a8] bg-[#fffdf7] hover:border-[#315f3b]/60'}`}>
                     <RadioGroupItem value="cod" />
-                    <div className="w-10 h-10 bg-accent/10 rounded-lg flex items-center justify-center">
-                      <Truck className="w-5 h-5 text-accent" />
+                    <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-[#d89b2b]/12">
+                      <Truck className="w-5 h-5 text-[#d89b2b]" />
                     </div>
                     <div className="flex-1">
-                      <p className="font-medium">{currentLanguage === 'en' ? 'Cash on Delivery' : 'कैश ऑन डिलीवरी'}</p>
-                      <p className="text-sm text-muted-foreground">
+                      <p className="font-medium text-[#2f3a2f]">{currentLanguage === 'en' ? 'Cash on Delivery' : 'कैश ऑन डिलीवरी'}</p>
+                      <p className="text-sm text-[#6f6552]">
                         {currentLanguage === 'en' ? 'Pay when you receive' : 'मिलने पर भुगतान करें'}
                       </p>
                     </div>
@@ -404,8 +416,8 @@ const Checkout = () => {
 
           {/* Order Summary */}
           <div className="lg:col-span-1">
-            <div className="card-elevated p-6 sticky top-24">
-              <h2 className="text-lg font-semibold mb-4">
+            <div className="sticky top-24 rounded-2xl border border-[#d7c7a8] bg-[#fffaf0] p-6 shadow-[0_16px_40px_rgba(95,70,40,0.08)]">
+              <h2 className="mb-4 text-lg font-semibold text-[#2f3a2f]">
                 {currentLanguage === 'en' ? 'Order Summary' : 'ऑर्डर सारांश'}
               </h2>
 
@@ -416,48 +428,48 @@ const Checkout = () => {
                     <img
                       src={optimizeListingImageUrl(item.product.images[0], 120)}
                       alt={item.product.name}
-                      className="w-12 h-12 rounded-lg object-cover"
+                      className="h-12 w-12 rounded-lg border border-[#e2d4b7] object-cover"
                     />
                     <div className="flex-1 min-w-0">
-                      <p className="text-sm font-medium truncate">{item.product.name}</p>
-                      <p className="text-xs text-muted-foreground">
+                      <p className="truncate text-sm font-medium text-[#2f3a2f]">{item.product.name}</p>
+                      <p className="text-xs text-[#6f6552]">
                         {item.quantity} {item.product.unit} × ₹{(item.negotiatedPrice || item.product.price).toLocaleString()}
                       </p>
                     </div>
-                    <p className="text-sm font-medium">
+                    <p className="text-sm font-medium text-[#315f3b]">
                       ₹{((item.negotiatedPrice || item.product.price) * item.quantity).toLocaleString()}
                     </p>
                   </div>
                 ))}
               </div>
 
-              <div className="space-y-3 border-t border-border pt-4">
+              <div className="space-y-3 border-t border-[#e2d4b7] pt-4">
                 <div className="flex justify-between text-sm">
-                  <span className="text-muted-foreground">{currentLanguage === 'en' ? 'Subtotal' : 'उप-योग'}</span>
-                  <span>₹{totalAmount.toLocaleString()}</span>
+                  <span className="text-[#6f6552]">{currentLanguage === 'en' ? 'Subtotal' : 'उप-योग'}</span>
+                  <span className="text-[#2f3a2f]">₹{totalAmount.toLocaleString()}</span>
                 </div>
                 <div className="flex justify-between text-sm">
-                  <span className="text-muted-foreground">{currentLanguage === 'en' ? 'Delivery' : 'डिलीवरी'}</span>
-                  <span className="text-success">{currentLanguage === 'en' ? 'Free' : 'मुफ्त'}</span>
+                  <span className="text-[#6f6552]">{currentLanguage === 'en' ? 'Delivery' : 'डिलीवरी'}</span>
+                  <span className="text-[#315f3b]">{currentLanguage === 'en' ? 'Free' : 'मुफ्त'}</span>
                 </div>
                 <div className="flex justify-between text-sm">
-                  <span className="text-muted-foreground">{currentLanguage === 'en' ? 'Platform Fee' : 'प्लेटफॉर्म शुल्क'}</span>
-                  <span>₹{platformFee.toLocaleString()}</span>
+                  <span className="text-[#6f6552]">{currentLanguage === 'en' ? 'Platform Fee' : 'प्लेटफॉर्म शुल्क'}</span>
+                  <span className="text-[#2f3a2f]">₹{platformFee.toLocaleString()}</span>
                 </div>
-                <div className="border-t border-border pt-3 flex justify-between font-bold text-lg">
-                  <span>{currentLanguage === 'en' ? 'Total' : 'कुल'}</span>
-                  <span className="text-primary">₹{grandTotal.toLocaleString()}</span>
+                <div className="flex justify-between border-t border-[#e2d4b7] pt-3 text-lg font-bold">
+                  <span className="text-[#2f3a2f]">{currentLanguage === 'en' ? 'Total' : 'कुल'}</span>
+                  <span className="text-[#315f3b]">₹{grandTotal.toLocaleString()}</span>
                 </div>
               </div>
 
               <Button
                 onClick={handlePayment}
                 disabled={isProcessing || !isFormValid}
-                className="w-full btn-primary-gradient mt-6"
+                className="mt-6 w-full border border-[#b68222] bg-[#d89b2b] text-[#2f2416] shadow-[0_10px_24px_rgba(216,155,43,0.2)] transition hover:bg-[#c88d22] disabled:border-[#d5c7ad] disabled:bg-[#e8dcc4] disabled:text-[#8d7b5f]"
               >
                 {isProcessing ? (
                   <span className="flex items-center gap-2">
-                    <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                    <div className="h-4 w-4 animate-spin rounded-full border-2 border-[#5b471f]/30 border-t-[#5b471f]" />
                     {currentLanguage === 'en' ? 'Processing...' : 'प्रोसेसिंग...'}
                   </span>
                 ) : (
@@ -474,7 +486,7 @@ const Checkout = () => {
                 )}
               </Button>
 
-              <p className="text-xs text-center text-muted-foreground mt-4">
+              <p className="mt-4 text-center text-xs text-[#6f6552]">
                 {currentLanguage === 'en' 
                   ? 'Your payment is secured with 256-bit encryption' 
                   : 'आपका भुगतान 256-बिट एन्क्रिप्शन से सुरक्षित है'}
@@ -482,6 +494,7 @@ const Checkout = () => {
             </div>
           </div>
         </div>
+      </div>
       </div>
     </Layout>
   );

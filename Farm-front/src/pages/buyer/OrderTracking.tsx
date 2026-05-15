@@ -173,13 +173,13 @@ const OrderTracking = () => {
   const getStatusColor = (status: string) => {
     switch (status) {
       case 'delivered':
-        return 'text-success bg-success/10';
+        return 'border border-[#a9c8ae] bg-[#eaf5ec] text-[#315f3b]';
       case 'shipped':
-        return 'text-primary bg-primary/10';
+        return 'border border-[#c8d8cb] bg-[#edf4ee] text-[#315f3b]';
       case 'cancelled':
-        return 'text-destructive bg-destructive/10';
+        return 'border border-[#dfc0af] bg-[#f6e5dc] text-[#8a4f2a]';
       default:
-        return 'text-warning bg-warning/10';
+        return 'border border-[#ead5a6] bg-[#fff4dd] text-[#9a6b12]';
     }
   };
 
@@ -197,17 +197,22 @@ const OrderTracking = () => {
 
   return (
     <Layout>
-      <div className="container mx-auto min-w-0 max-w-2xl px-3 py-5 sm:px-4 sm:py-6">
+      <div className="min-h-screen bg-[linear-gradient(rgba(251,247,235,0.97),rgba(251,247,235,0.97)),linear-gradient(rgba(138,79,42,0.07)_1px,transparent_1px),linear-gradient(90deg,rgba(138,79,42,0.07)_1px,transparent_1px)] bg-[size:auto,24px_24px,24px_24px]">
+        <div className="container mx-auto min-w-0 max-w-2xl px-3 py-5 sm:px-4 sm:py-6">
         <div className="flex flex-wrap items-center gap-4 mb-6">
-          <button type="button" onClick={() => navigate(-1)} className="p-2 hover:bg-muted rounded-lg">
+          <button
+            type="button"
+            onClick={() => navigate(-1)}
+            className="rounded-lg border border-[#d7c7a8] bg-[#fffaf0] p-2 text-[#315f3b] transition hover:bg-[#f6eddc]"
+          >
             <ArrowLeft className="w-5 h-5" />
           </button>
-          <h1 className="text-2xl font-bold flex-1 min-w-0">{en ? 'My orders' : 'मेरे ऑर्डर'}</h1>
+          <h1 className="min-w-0 flex-1 text-2xl font-bold text-[#2f3a2f]">{en ? 'My orders' : 'मेरे ऑर्डर'}</h1>
           <Button
             type="button"
             variant="outline"
             size="sm"
-            className="shrink-0"
+            className="shrink-0 border-[#d7c7a8] bg-[#fffdf7] text-[#315f3b] hover:bg-[#f3ebdd] hover:text-[#315f3b]"
             disabled={exportingCsv}
             onClick={() => void handleExportOrdersCsv()}
           >
@@ -221,14 +226,14 @@ const OrderTracking = () => {
         </div>
 
         {isLoading ? (
-          <div className="text-center py-12 text-muted-foreground">
+          <div className="py-12 text-center text-[#6f6552]">
             {en ? 'Loading orders…' : 'ऑर्डर लोड हो रहे हैं…'}
           </div>
         ) : orders.length === 0 ? (
-          <div className="text-center py-12 text-muted-foreground">
-            <Package className="w-14 h-14 mx-auto mb-4 opacity-50" />
+          <div className="rounded-2xl border border-dashed border-[#d7c7a8] bg-[#fffaf0] py-12 text-center text-[#6f6552]">
+            <Package className="mx-auto mb-4 h-14 w-14 text-[#315f3b]/55" />
             <p className="mb-4">{en ? 'No orders yet.' : 'अभी तक कोई ऑर्डर नहीं।'}</p>
-            <Button asChild>
+            <Button asChild className="border border-[#b68222] bg-[#d89b2b] text-[#2f2416] hover:bg-[#c88d22]">
               <Link to="/marketplace">{en ? 'Browse marketplace' : 'बाज़ार देखें'}</Link>
             </Button>
           </div>
@@ -236,7 +241,7 @@ const OrderTracking = () => {
           <>
             <div className="flex flex-col gap-3 sm:flex-row sm:items-center mb-6">
               <Select value={filterStatus} onValueChange={setFilterStatus}>
-                <SelectTrigger className="w-full sm:w-[200px]">
+                <SelectTrigger className="w-full border-[#d7c7a8] bg-[#fffaf0] text-[#2f3a2f] sm:w-[200px]">
                   <Filter className="w-4 h-4 mr-2 shrink-0" />
                   <SelectValue placeholder={en ? 'Order status' : 'ऑर्डर स्थिति'} />
                 </SelectTrigger>
@@ -253,7 +258,7 @@ const OrderTracking = () => {
                 value={paymentFilterValue}
                 onValueChange={(v) => setPaymentFilter(v as 'all' | 'pending')}
               >
-                <SelectTrigger className="w-full sm:w-[200px]">
+                <SelectTrigger className="w-full border-[#d7c7a8] bg-[#fffaf0] text-[#2f3a2f] sm:w-[200px]">
                   <SelectValue placeholder={en ? 'Payment' : 'भुगतान'} />
                 </SelectTrigger>
                 <SelectContent>
@@ -266,11 +271,11 @@ const OrderTracking = () => {
             </div>
 
             {filteredOrders.length === 0 ? (
-              <div className="text-center py-10 text-muted-foreground rounded-xl border border-dashed">
+              <div className="rounded-2xl border border-dashed border-[#d7c7a8] bg-[#fffaf0] py-10 text-center text-[#6f6552]">
                 <p className="mb-4">
                   {en ? 'No orders match this filter.' : 'इस फ़िल्टर से कोई ऑर्डर नहीं मिला।'}
                 </p>
-                <Button type="button" variant="outline" size="sm" asChild>
+                <Button type="button" variant="outline" size="sm" asChild className="border-[#d7c7a8] bg-[#fffdf7] text-[#315f3b] hover:bg-[#f3ebdd] hover:text-[#315f3b]">
                   <Link to="/buyer/orders">{en ? 'Clear filters' : 'फ़िल्टर हटाएं'}</Link>
                 </Button>
               </div>
@@ -280,27 +285,27 @@ const OrderTracking = () => {
                   <li key={order.id}>
                     <Link
                       to={`/buyer/orders/${order.id}`}
-                      className="block card-elevated p-4 transition-all hover:ring-2 hover:ring-primary/30"
+                      className="block rounded-2xl border border-[#d7c7a8] bg-[#fffaf0] p-4 shadow-[0_16px_40px_rgba(95,70,40,0.08)] transition-all hover:border-[#315f3b]/45 hover:shadow-[0_18px_42px_rgba(95,70,40,0.12)]"
                     >
                       <div className="flex gap-4">
                         <img
                           src={order.productImage}
                           alt=""
-                          className="w-16 h-16 rounded-lg object-cover shrink-0"
+                          className="h-16 w-16 shrink-0 rounded-xl border border-[#e2d4b7] object-cover"
                         />
                         <div className="flex-1 min-w-0">
-                          <p className="font-medium truncate">{order.productName}</p>
-                          <p className="text-sm text-muted-foreground">
+                          <p className="truncate font-medium text-[#2f3a2f]">{order.productName}</p>
+                          <p className="text-sm text-[#6f6552]">
                             {order.quantity} {order.unit} · {en ? 'Seller' : 'विक्रेता'}:{' '}
                             {order.farmerName}
                           </p>
                           <div className="flex flex-wrap items-center gap-2 mt-2">
                             <span
-                              className={`text-xs px-2 py-0.5 rounded-full capitalize ${getStatusColor(order.status)}`}
+                              className={`rounded-full px-2 py-0.5 text-xs capitalize ${getStatusColor(order.status)}`}
                             >
                               {order.status}
                             </span>
-                            <span className="text-sm font-semibold text-primary">
+                            <span className="text-sm font-semibold text-[#315f3b]">
                               ₹{order.totalAmount.toLocaleString('en-IN')}
                             </span>
                           </div>
@@ -316,6 +321,7 @@ const OrderTracking = () => {
                 <Button
                   type="button"
                   variant="outline"
+                  className="border-[#d7c7a8] bg-[#fffdf7] text-[#315f3b] hover:bg-[#f3ebdd] hover:text-[#315f3b]"
                   disabled={loadingMore}
                   onClick={() => void loadMoreOrders()}
                 >
@@ -331,6 +337,7 @@ const OrderTracking = () => {
             )}
           </>
         )}
+      </div>
       </div>
     </Layout>
   );

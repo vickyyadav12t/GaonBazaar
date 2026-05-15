@@ -310,7 +310,8 @@ exports.getUsers = async (req, res) => {
         User.countDocuments(filter),
         q.clone().skip(skipNum).limit(limitNum).lean(),
       ]);
-      const users = wantStats ? await attachAdminUserStats(usersRaw) : usersRaw;
+      const enriched = wantStats ? await attachAdminUserStats(usersRaw) : usersRaw;
+      const users = enriched.map((u) => sanitizeUser(u));
       return res.json({
         users,
         total,
@@ -320,7 +321,8 @@ exports.getUsers = async (req, res) => {
     }
 
     const usersRaw = await q.lean();
-    const users = wantStats ? await attachAdminUserStats(usersRaw) : usersRaw;
+    const enriched = wantStats ? await attachAdminUserStats(usersRaw) : usersRaw;
+    const users = enriched.map((u) => sanitizeUser(u));
     return res.json({ users });
   } catch (err) {
     console.error("Admin getUsers error:", err);

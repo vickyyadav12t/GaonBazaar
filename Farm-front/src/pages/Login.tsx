@@ -15,6 +15,7 @@ import { AnimateOnScroll } from '@/components/animations';
 import { apiService, setAuthToken } from '@/services/api';
 import { mapApiUserToAuth } from '@/lib/mapAuthUser';
 import { ROUTES } from '@/constants';
+import { enHi, scriptFontClass, toNewsApiLang } from '@/lib/i18n';
 
 const Login = () => {
   const navigate = useNavigate();
@@ -86,7 +87,7 @@ const Login = () => {
     },
   };
 
-  const t = content[currentLanguage];
+  const t = content[toNewsApiLang(currentLanguage)];
 
   const GoogleGlyph = () => (
     <svg className="w-5 h-5 mr-3 shrink-0" viewBox="0 0 24 24" aria-hidden>
@@ -243,15 +244,15 @@ const Login = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-background via-muted/20 to-background flex overflow-x-hidden">
+    <div className="flex min-h-screen overflow-x-hidden bg-[#fbf7eb] text-[#213525]">
       {/* Left Side - Branding */}
-      <div className="hidden lg:flex lg:w-1/2 bg-gradient-to-br from-primary via-primary/90 to-primary-dark text-primary-foreground p-12 flex-col justify-start gap-12 relative overflow-hidden">
+      <div className="relative hidden flex-col justify-start gap-12 overflow-hidden bg-[#315f3b] p-12 text-[#fff8e8] lg:flex lg:w-1/2">
         {/* Background Pattern */}
-        <div className="absolute inset-0 bg-[url('data:image/svg+xml,%3Csvg%20width%3D%2260%22%20height%3D%2260%22%20viewBox%3D%220%200%2060%2060%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%3E%3Cg%20fill%3D%22none%22%20fill-rule%3D%22evenodd%22%3E%3Cg%20fill%3D%22%23ffffff%22%20fill-opacity%3D%220.08%22%3E%3Cpath%20d%3D%22M36%2034v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6%2034v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6%204V0H4v4H0v2h4v4h2V6h4V4H6z%22%2F%3E%3C%2Fg%3E%3C%2Fg%3E%3C%2Fsvg%3E')] opacity-40" />
+        <div className="absolute inset-0 opacity-20 [background-image:linear-gradient(rgba(255,248,232,0.16)_1px,transparent_1px),linear-gradient(90deg,rgba(255,248,232,0.16)_1px,transparent_1px)] [background-size:42px_42px]" />
         
         {/* Floating Elements */}
-        <div className="absolute top-20 right-20 w-32 h-32 bg-secondary/20 rounded-full blur-2xl" />
-        <div className="absolute bottom-40 left-20 w-40 h-40 bg-accent/20 rounded-full blur-3xl" />
+        <div className="absolute right-16 top-20 h-32 w-32 rounded-full border border-[#d89b2b]/25 bg-[#d89b2b]/10" />
+        <div className="absolute bottom-40 left-16 h-40 w-40 rotate-6 border border-[#fff8e8]/15 bg-[#fff8e8]/5" />
         
         <div className="relative z-10 isolate">
           <Link to="/" className="mb-12 block group" aria-label="GaonBazaar home">
@@ -265,7 +266,7 @@ const Login = () => {
         </div>
 
         <div className="relative z-10">
-          <div className="inline-flex items-center gap-2 bg-white/15 backdrop-blur-md px-4 py-2 rounded-full mb-6 border border-white/20">
+          <div className="mb-6 inline-flex items-center gap-2 rounded-md border border-[#fff8e8]/25 bg-[#fff8e8]/10 px-4 py-2">
             <Shield className="w-4 h-4" />
             <span className="text-sm font-semibold">Secure Login</span>
           </div>
@@ -300,18 +301,18 @@ const Login = () => {
 
           <AnimateOnScroll animation="slide-up" delay={0.1}>
             <div className="mb-8 text-center sm:mb-10">
-              <div className="inline-flex items-center gap-2 bg-primary/10 px-4 py-2 rounded-full mb-4">
-                <Shield className="w-4 h-4 text-primary" />
-                <span className="text-sm font-semibold text-primary">
-                  {currentLanguage === 'en' ? 'Secure Login' : 'सुरक्षित लॉगिन'}
+              <div className="mb-4 inline-flex items-center gap-2 rounded-md border border-[#315f3b]/20 bg-[#315f3b]/10 px-4 py-2">
+                <Shield className="w-4 h-4 text-[#315f3b]" />
+                <span className="text-sm font-semibold text-[#315f3b]">
+                  {enHi(currentLanguage, 'Secure Login', 'सुरक्षित लॉगिन')}
                 </span>
               </div>
               <h1
-                className={`mb-3 text-3xl font-extrabold text-foreground sm:text-4xl md:text-5xl ${currentLanguage === 'hi' ? 'font-hindi' : ''}`}
+                className={`mb-3 text-3xl font-extrabold text-foreground sm:text-4xl md:text-5xl ${scriptFontClass(currentLanguage)}`}
               >
                 {t.title}
               </h1>
-              <p className={`text-lg text-muted-foreground ${currentLanguage === 'hi' ? 'font-hindi' : ''}`}>
+              <p className={`text-lg text-muted-foreground ${scriptFontClass(currentLanguage)}`}>
                 {t.subtitle}
               </p>
             </div>
@@ -319,15 +320,15 @@ const Login = () => {
 
           {/* Login Method Toggle */}
           <AnimateOnScroll animation="slide-up" delay={0.2}>
-            <Card className="mb-6 border-2">
+            <Card className="mb-6 rounded-lg border-2 border-[#d7c7a8] bg-[#fffaf0] shadow-sm">
               <CardContent className="p-2">
-                <div className="flex rounded-lg bg-muted p-1">
+                <div className="flex rounded-md bg-[#f1e5cc] p-1">
                   <button
                     onClick={() => setLoginMethod('phone')}
                     type="button"
-                    className={`flex flex-1 items-center justify-center gap-1.5 rounded-lg py-2.5 text-xs font-semibold transition-all duration-300 sm:gap-2 sm:py-3 sm:text-sm ${
+                    className={`flex flex-1 items-center justify-center gap-1.5 rounded-md py-2.5 text-xs font-semibold transition-all duration-300 sm:gap-2 sm:py-3 sm:text-sm ${
                       loginMethod === 'phone'
-                        ? 'bg-primary text-primary-foreground shadow-lg sm:scale-105'
+                        ? 'bg-[#315f3b] text-[#fff8e8] shadow-sm sm:scale-[1.02]'
                         : 'text-muted-foreground hover:text-foreground'
                     }`}
                   >
@@ -337,9 +338,9 @@ const Login = () => {
                   <button
                     type="button"
                     onClick={() => setLoginMethod('email')}
-                    className={`flex flex-1 items-center justify-center gap-1.5 rounded-lg py-2.5 text-xs font-semibold transition-all duration-300 sm:gap-2 sm:py-3 sm:text-sm ${
+                    className={`flex flex-1 items-center justify-center gap-1.5 rounded-md py-2.5 text-xs font-semibold transition-all duration-300 sm:gap-2 sm:py-3 sm:text-sm ${
                       loginMethod === 'email'
-                        ? 'bg-primary text-primary-foreground shadow-lg sm:scale-105'
+                        ? 'bg-[#315f3b] text-[#fff8e8] shadow-sm sm:scale-[1.02]'
                         : 'text-muted-foreground hover:text-foreground'
                     }`}
                   >
@@ -353,16 +354,19 @@ const Login = () => {
 
           {/* Login Form */}
           <AnimateOnScroll animation="slide-up" delay={0.3}>
-            <Card className="border-2 shadow-lg mb-6">
+            <Card className="mb-6 rounded-lg border-2 border-[#d7c7a8] bg-[#fffaf0] shadow-sm">
               <CardContent className="p-4 sm:p-6">
                 <div className="space-y-5">
                   {loginMethod === 'phone' ? (
                     <div>
-                      <Label htmlFor="phone" className={`text-sm font-semibold mb-2 block ${currentLanguage === 'hi' ? 'font-hindi' : ''}`}>
+                      <Label
+                        htmlFor="phone"
+                        className={`text-sm font-semibold mb-2 block ${scriptFontClass(currentLanguage)}`}
+                      >
                         {t.phone}
                       </Label>
                       <div className="flex min-w-0 gap-2">
-                        <div className="flex shrink-0 items-center rounded-xl border-2 border-input bg-muted px-3 font-medium sm:px-4">
+                        <div className="flex shrink-0 items-center rounded-md border-2 border-[#d7c7a8] bg-[#f1e5cc] px-3 font-medium sm:px-4">
                           <span className="text-sm text-foreground">+91</span>
                         </div>
                         <Input
@@ -371,13 +375,16 @@ const Login = () => {
                           placeholder="98765 43210"
                           value={phone}
                           onChange={(e) => setPhone(e.target.value)}
-                          className="min-w-0 flex-1 border-2 py-5 focus:border-primary sm:py-6"
+                          className="min-w-0 flex-1 rounded-md border-2 border-[#d7c7a8] bg-[#fffdf7] py-5 focus:border-[#315f3b] sm:py-6"
                         />
                       </div>
                     </div>
                   ) : (
                     <div>
-                      <Label htmlFor="email" className={`text-sm font-semibold mb-2 block ${currentLanguage === 'hi' ? 'font-hindi' : ''}`}>
+                      <Label
+                        htmlFor="email"
+                        className={`text-sm font-semibold mb-2 block ${scriptFontClass(currentLanguage)}`}
+                      >
                         {t.email}
                       </Label>
                       <Input
@@ -386,7 +393,7 @@ const Login = () => {
                         placeholder="your@email.com"
                         value={email}
                         onChange={(e) => setEmail(e.target.value)}
-                        className="border-2 py-5 focus:border-primary sm:py-6"
+                        className="rounded-md border-2 border-[#d7c7a8] bg-[#fffdf7] py-5 focus:border-[#315f3b] sm:py-6"
                       />
                     </div>
                   )}
@@ -395,13 +402,13 @@ const Login = () => {
                     <div className="mb-2 flex flex-col gap-1.5 sm:flex-row sm:items-center sm:justify-between sm:gap-2">
                       <Label
                         htmlFor="password"
-                        className={`text-sm font-semibold block ${currentLanguage === 'hi' ? 'font-hindi' : ''}`}
+                        className={`text-sm font-semibold block ${scriptFontClass(currentLanguage)}`}
                       >
                         {t.password}
                       </Label>
                       <Link
                         to="/forgot-password"
-                        className={`self-start text-sm font-medium text-primary hover:underline sm:self-auto ${currentLanguage === 'hi' ? 'font-hindi' : ''}`}
+                        className={`self-start text-sm font-medium text-[#315f3b] hover:underline sm:self-auto ${scriptFontClass(currentLanguage)}`}
                       >
                         {t.forgotPassword}
                       </Link>
@@ -411,13 +418,11 @@ const Login = () => {
                         id="password"
                         type={showPassword ? 'text' : 'password'}
                         placeholder={
-                          currentLanguage === 'en'
-                            ? 'Enter your password'
-                            : 'अपना पासवर्ड दर्ज करें'
+                          enHi(currentLanguage, 'Enter your password', 'अपना पासवर्ड दर्ज करें')
                         }
                         value={password}
                         onChange={(e) => setPassword(e.target.value)}
-                        className="border-2 py-5 pr-12 focus:border-primary sm:py-6"
+                        className="rounded-md border-2 border-[#d7c7a8] bg-[#fffdf7] py-5 pr-12 focus:border-[#315f3b] sm:py-6"
                       />
                       <button
                         type="button"
@@ -434,7 +439,7 @@ const Login = () => {
                   </div>
 
                   <Button
-                    className="w-full py-6 text-base font-semibold shadow-lg transition-transform btn-primary-gradient sm:py-7 sm:text-lg sm:hover:scale-[1.02]"
+                    className="w-full rounded-md bg-[#d89b2b] py-6 text-base font-bold text-[#24170c] shadow-md transition-transform hover:bg-[#c8871f] sm:py-7 sm:text-lg sm:hover:scale-[1.02]"
                     onClick={handleLogin}
                     disabled={
                       isLoading ||
@@ -445,8 +450,8 @@ const Login = () => {
                   >
                     {isLoading ? (
                       <>
-                        <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin mr-2" />
-                        {currentLanguage === 'en' ? 'Processing...' : 'प्रोसेसिंग...'}
+                        <div className="mr-2 h-5 w-5 animate-spin rounded-full border-2 border-[#24170c]/30 border-t-[#24170c]" />
+                        {enHi(currentLanguage, 'Processing...', 'प्रोसेसिंग...')}
                       </>
                     ) : (
                       <>
@@ -463,18 +468,18 @@ const Login = () => {
 
           {/* Google sign-in — below password login */}
           <AnimateOnScroll animation="slide-up" delay={0.35}>
-            <Card className="mt-6 border-2 shadow-md">
+            <Card className="mt-6 rounded-lg border-2 border-[#d7c7a8] bg-[#fffaf0] shadow-sm">
               <CardContent className="p-4 sm:p-5 space-y-3">
                 <p
-                  className={`text-center text-sm font-medium text-muted-foreground ${currentLanguage === 'hi' ? 'font-hindi' : ''}`}
+                  className={`text-center text-sm font-medium text-muted-foreground ${scriptFontClass(currentLanguage)}`}
                 >
                   {t.orContinue}
                 </p>
                 <div className="flex min-h-[44px] w-full flex-col items-center justify-center">
                   {googleLoading ? (
                     <div className="flex items-center justify-center gap-2 py-3 text-muted-foreground text-sm">
-                      <div className="w-5 h-5 border-2 border-primary/30 border-t-primary rounded-full animate-spin" />
-                      {currentLanguage === 'en' ? 'Signing in…' : 'साइन इन…'}
+                      <div className="h-5 w-5 animate-spin rounded-full border-2 border-[#315f3b]/30 border-t-[#315f3b]" />
+                      {enHi(currentLanguage, 'Signing in…', 'साइन इन…')}
                     </div>
                   ) : googleEnabled ? (
                     <div className="mx-auto flex w-full max-w-full justify-center overflow-x-hidden">
@@ -484,9 +489,7 @@ const Login = () => {
                           toast({
                             title: t.googleFailed,
                             description:
-                              currentLanguage === 'en'
-                                ? 'Try again or use email or phone.'
-                                : 'पुनः प्रयास करें या ईमेल/फोन से लॉगिन करें।',
+                              enHi(currentLanguage, 'Try again or use email or phone.', 'पुनः प्रयास करें या ईमेल/फोन से लॉगिन करें।'),
                             variant: 'destructive',
                           })
                         }
@@ -494,14 +497,14 @@ const Login = () => {
                         shape="rectangular"
                         size="large"
                         width={googleBtnWidth}
-                        locale={currentLanguage === 'hi' ? 'hi' : 'en'}
+                        locale={toNewsApiLang(currentLanguage)}
                       />
                     </div>
                   ) : (
                     <Button
                       type="button"
                       variant="outline"
-                      className="h-12 w-full max-w-sm text-base font-medium border-2 bg-card hover:bg-muted/60 sm:max-w-md"
+                      className="h-12 w-full max-w-sm rounded-md border-2 border-[#d7c7a8] bg-[#fffdf7] text-base font-medium hover:bg-[#f1e5cc] sm:max-w-md"
                       onClick={() =>
                         toast({
                           title: t.googleNotConfiguredTitle,
@@ -525,9 +528,9 @@ const Login = () => {
 
           {/* Register Link */}
           <AnimateOnScroll animation="fade-in" delay={0.5}>
-            <p className={`text-center mt-8 text-muted-foreground ${currentLanguage === 'hi' ? 'font-hindi' : ''}`}>
+            <p className={`text-center mt-8 text-muted-foreground ${scriptFontClass(currentLanguage)}`}>
               {t.noAccount}{' '}
-              <Link to="/register" className="text-primary font-semibold hover:underline hover:text-primary/80 transition-colors">
+              <Link to="/register" className="font-semibold text-[#315f3b] transition-colors hover:text-[#8a4f2a] hover:underline">
                 {t.register}
               </Link>
             </p>

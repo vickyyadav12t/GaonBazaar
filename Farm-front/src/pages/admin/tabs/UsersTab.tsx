@@ -14,39 +14,39 @@ export default function AdminUsersTab() {
   return (
     <div className="space-y-6">
   <AnimateOnScroll animation="slide-up">
-    <Card className="border-2 shadow-lg">
+    <Card className="border-[#d7c7a8] bg-[#fffaf0] shadow-[0_16px_40px_rgba(95,70,40,0.08)]">
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
-          <Users className="w-5 h-5 text-primary" />
+          <Users className="w-5 h-5 text-[#315f3b]" />
           User Management
         </CardTitle>
-        <CardDescription>
+        <CardDescription className="text-[#6f6552]">
           Manage farmers and buyers. Search matches name, phone, or email on the server (updates after you stop typing).
         </CardDescription>
       </CardHeader>
       <CardContent>
         <div className="flex flex-col sm:flex-row gap-4 mb-6">
           <div className="relative flex-1">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#8b816f]" />
             <Input
               placeholder="Search by name, phone, or email…"
               value={vm.searchQuery}
               onChange={(e) => vm.setSearchQuery(e.target.value)}
-              className="pl-10"
+              className="border-[#d7c7a8] bg-[#fffdf7] pl-10 text-[#2f3a2f] placeholder:text-[#8b816f] focus-visible:ring-[#315f3b]"
               aria-busy={vm.isUserSearchLoading}
             />
           </div>
         </div>
 
         {vm.isUserSearchLoading && vm.usersSearchActive && (
-          <div className="flex items-center gap-2 text-sm text-muted-foreground mb-4">
+          <div className="mb-4 flex items-center gap-2 text-sm text-[#6f6552]">
             <Loader2 className="w-4 h-4 animate-spin shrink-0" />
             Searching users…
           </div>
         )}
 
         {vm.usersSearchEmpty && (
-          <p className="text-sm text-muted-foreground mb-6 py-4 text-center border border-dashed rounded-lg">
+          <p className="mb-6 rounded-lg border border-dashed border-[#d7c7a8] bg-[#fffdf7] py-4 text-center text-sm text-[#6f6552]">
             No farmers or buyers match &ldquo;{vm.debouncedUserSearch}&rdquo;. Try another name, phone, or email.
           </p>
         )}
@@ -54,12 +54,12 @@ export default function AdminUsersTab() {
         <div className="space-y-6">
           <div>
             <h3 className="font-semibold text-lg mb-4 flex items-center gap-2">
-              <Package className="w-5 h-5 text-success" />
+              <Package className="w-5 h-5 text-[#315f3b]" />
               Farmers (
               {vm.usersSearchActive ? `${vm.usersTabFarmers.length} matched` : `${vm.totalFarmersUsers} total`})
             </h3>
             {vm.usersTabLoading && !vm.usersSearchActive && (
-              <div className="flex items-center gap-2 text-sm text-muted-foreground mb-3">
+              <div className="mb-3 flex items-center gap-2 text-sm text-[#6f6552]">
                 <Loader2 className="h-4 w-4 animate-spin shrink-0" />
                 Loading page…
               </div>
@@ -68,12 +68,12 @@ export default function AdminUsersTab() {
               {vm.usersTabFarmers.map((farmer) => (
                 <div
                   key={farmer.id}
-                  className="card-elevated p-4 flex flex-col gap-4 sm:flex-row sm:items-center hover:shadow-lg transition-shadow border-2 border-border"
+                  className="flex flex-col gap-4 rounded-lg border border-[#d7c7a8] bg-[#fffdf7] p-4 transition-all hover:border-[#c8b38b] hover:shadow-[0_16px_40px_rgba(95,70,40,0.12)] sm:flex-row sm:items-center"
                 >
                   <img
                     src={resolveBackendAssetUrl(farmer.avatar)}
                     alt={farmer.name}
-                    className="w-14 h-14 rounded-full object-cover border-2 border-success/20 shrink-0"
+                    className="h-14 w-14 shrink-0 rounded-full border-2 border-[#bfd2bf] object-cover"
                     loading="lazy"
                     decoding="async"
                     onError={(e) => {
@@ -87,20 +87,20 @@ export default function AdminUsersTab() {
                       <p className="font-semibold text-base">{farmer.name}</p>
                       {vm.getKycBadge(farmer.kycStatus)}
                       {farmer.accountStatus === 'suspended' ? (
-                        <Badge variant="destructive" className="text-xs">
+                        <Badge className="text-xs bg-[#f6e5dc] text-[#8a4f2a] hover:bg-[#f6e5dc]">
                           Suspended
                         </Badge>
                       ) : null}
                       {farmer.emailVerified ? (
-                        <Badge variant="outline" className="text-xs border-success/40 text-success">
+                        <Badge variant="outline" className="text-xs border-[#bfd2bf] bg-[#eaf5ec] text-[#315f3b]">
                           Email verified
                         </Badge>
                       ) : null}
                     </div>
-                    <p className="text-sm text-muted-foreground">
+                    <p className="text-sm text-[#6f6552]">
                       {farmer.email || '—'} • {farmer.phone}
                     </p>
-                    <p className="text-sm text-muted-foreground">
+                    <p className="text-sm text-[#6f6552]">
                       {[farmer.location?.district, farmer.location?.state]
                         .filter(Boolean)
                         .join(', ') || '—'}
@@ -109,22 +109,22 @@ export default function AdminUsersTab() {
                   <div className="flex flex-row sm:flex-col items-center sm:items-end justify-between gap-3 shrink-0">
                     <div className="text-right">
                       <div className="flex items-center justify-end gap-1 mb-1">
-                        <Star className="w-4 h-4 text-warning fill-warning" />
+                        <Star className="h-4 w-4 fill-[#d89b2b] text-[#d89b2b]" />
                         <p className="text-sm font-semibold">
                           {farmer.rating != null && farmer.rating > 0
                             ? farmer.rating
                             : '—'}
                         </p>
                       </div>
-                      <p className="text-xs text-muted-foreground">
+                      <p className="text-xs text-[#6f6552]">
                         {farmer.reviewCount != null && farmer.reviewCount > 0
                           ? `${farmer.reviewCount} review${farmer.reviewCount === 1 ? '' : 's'}`
                           : 'No reviews'}
                       </p>
-                      <p className="text-sm text-muted-foreground">
+                      <p className="text-sm text-[#6f6552]">
                         {farmer.totalSales} delivered order{farmer.totalSales === 1 ? '' : 's'}
                       </p>
-                      <p className="text-sm text-muted-foreground">Farm: {farmer.farmSize}</p>
+                      <p className="text-sm text-[#6f6552]">Farm: {farmer.farmSize}</p>
                     </div>
                     <AdminUserActionsMenu
                       user={{
@@ -156,12 +156,12 @@ export default function AdminUsersTab() {
 
           <div>
             <h3 className="font-semibold text-lg mb-4 flex items-center gap-2">
-              <ShoppingCart className="w-5 h-5 text-accent" />
+              <ShoppingCart className="w-5 h-5 text-[#8a4f2a]" />
               Buyers (
               {vm.usersSearchActive ? `${vm.usersTabBuyers.length} matched` : `${vm.totalBuyersUsers} total`})
             </h3>
             {vm.usersTabLoading && !vm.usersSearchActive && (
-              <div className="flex items-center gap-2 text-sm text-muted-foreground mb-3">
+              <div className="mb-3 flex items-center gap-2 text-sm text-[#6f6552]">
                 <Loader2 className="h-4 w-4 animate-spin shrink-0" />
                 Loading page…
               </div>
@@ -170,12 +170,12 @@ export default function AdminUsersTab() {
               {vm.usersTabBuyers.map((buyer) => (
                 <div
                   key={buyer.id}
-                  className="card-elevated p-4 flex flex-col gap-4 sm:flex-row sm:items-center hover:shadow-lg transition-shadow border-2 border-border"
+                  className="flex flex-col gap-4 rounded-lg border border-[#d7c7a8] bg-[#fffdf7] p-4 transition-all hover:border-[#c8b38b] hover:shadow-[0_16px_40px_rgba(95,70,40,0.12)] sm:flex-row sm:items-center"
                 >
                   <img
                     src={resolveBackendAssetUrl(buyer.avatar)}
                     alt={buyer.name}
-                    className="w-14 h-14 rounded-full object-cover border-2 border-accent/20 shrink-0"
+                    className="h-14 w-14 shrink-0 rounded-full border-2 border-[#d8b0a0] object-cover"
                     loading="lazy"
                     decoding="async"
                     onError={(e) => {
@@ -189,20 +189,20 @@ export default function AdminUsersTab() {
                       <p className="font-semibold text-base">{buyer.name}</p>
                       {vm.getKycBadge(buyer.kycStatus)}
                       {buyer.accountStatus === 'suspended' ? (
-                        <Badge variant="destructive" className="text-xs">
+                        <Badge className="text-xs bg-[#f6e5dc] text-[#8a4f2a] hover:bg-[#f6e5dc]">
                           Suspended
                         </Badge>
                       ) : null}
                       {buyer.emailVerified ? (
-                        <Badge variant="outline" className="text-xs border-success/40 text-success">
+                        <Badge variant="outline" className="text-xs border-[#bfd2bf] bg-[#eaf5ec] text-[#315f3b]">
                           Email verified
                         </Badge>
                       ) : null}
                     </div>
-                    <p className="text-sm text-muted-foreground">
+                    <p className="text-sm text-[#6f6552]">
                       {buyer.businessName} • {buyer.businessType}
                     </p>
-                    <p className="text-sm text-muted-foreground">
+                    <p className="text-sm text-[#6f6552]">
                       {[buyer.location?.district, buyer.location?.state]
                         .filter(Boolean)
                         .join(', ') || '—'}

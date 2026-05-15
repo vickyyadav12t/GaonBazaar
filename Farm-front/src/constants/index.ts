@@ -118,7 +118,7 @@ export const TICKET_PRIORITY = {
   HIGH: 'high',
 } as const;
 
-// Languages
+// Languages (codes mirror @/types Language)
 export const LANGUAGES = {
   ENGLISH: 'en',
   HINDI: 'hi',
@@ -189,7 +189,6 @@ export const FARM_CHAT_UNREAD_CHANGED_EVENT = 'farm:chat-unread-changed';
 
 /** Window event: in-app notification read state changed (mark read / delete / clear). */
 export const FARM_NOTIFICATION_UNREAD_CHANGED_EVENT = 'farm:notification-unread-changed';
-
 
 
 

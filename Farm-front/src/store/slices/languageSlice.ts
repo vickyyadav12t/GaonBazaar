@@ -1,12 +1,24 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
-import { Language } from '@/types';
+import type { Language } from '@/types';
+import { isLanguage, LANGUAGE_STORAGE_KEY } from '@/lib/i18n';
+
+function readStoredLanguage(): Language {
+  if (typeof window === 'undefined') return 'en';
+  try {
+    const raw = window.localStorage.getItem(LANGUAGE_STORAGE_KEY);
+    if (raw && isLanguage(raw)) return raw;
+  } catch {
+    /* ignore */
+  }
+  return 'en';
+}
 
 interface LanguageState {
   currentLanguage: Language;
 }
 
 const initialState: LanguageState = {
-  currentLanguage: 'en',
+  currentLanguage: readStoredLanguage(),
 };
 
 const languageSlice = createSlice({
@@ -16,11 +28,8 @@ const languageSlice = createSlice({
     setLanguage: (state, action: PayloadAction<Language>) => {
       state.currentLanguage = action.payload;
     },
-    toggleLanguage: (state) => {
-      state.currentLanguage = state.currentLanguage === 'en' ? 'hi' : 'en';
-    },
   },
 });
 
-export const { setLanguage, toggleLanguage } = languageSlice.actions;
+export const { setLanguage } = languageSlice.actions;
 export default languageSlice.reducer;

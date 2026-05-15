@@ -21,8 +21,9 @@ import {
   LineChart, Line, BarChart, Bar, PieChart, Pie, Cell, 
   XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend, AreaChart, Area
 } from 'recharts';
+import { enHi, scriptFontClass, toNewsApiLang } from '@/lib/i18n';
 
-const PIE_COLORS = ['#22c55e', '#3b82f6', '#f59e0b', '#a855f7', '#ec4899', '#14b8a6', '#64748b'];
+const PIE_COLORS = ['#315f3b', '#d89b2b', '#8a4f2a', '#6c5a3d', '#a78d63', '#58774e', '#8b816f'];
 
 const Analytics = () => {
   const navigate = useNavigate();
@@ -386,26 +387,24 @@ const Analytics = () => {
     },
   };
 
-  const t = content[currentLanguage];
+  const t = content[toNewsApiLang(currentLanguage)];
 
   const handleExportOrdersCsv = async () => {
     try {
       setIsExportingOrdersCsv(true);
       await saveCsvFromApi(() => apiService.orders.exportCsv(), 'orders.csv');
       toast({
-        title: currentLanguage === 'en' ? 'Export started' : 'निर्यात शुरू',
+        title: enHi(currentLanguage, 'Export started', 'निर्यात शुरू'),
         description:
-          currentLanguage === 'en'
-            ? 'Your orders CSV is downloading.'
-            : 'आपका ऑर्डर CSV डाउनलोड हो रहा है।',
+          enHi(currentLanguage, 'Your orders CSV is downloading.', 'आपका ऑर्डर CSV डाउनलोड हो रहा है।'),
       });
     } catch (e: unknown) {
       const msg = e instanceof Error ? e.message : '';
       toast({
-        title: currentLanguage === 'en' ? 'Export failed' : 'निर्यात विफल',
+        title: enHi(currentLanguage, 'Export failed', 'निर्यात विफल'),
         description:
           msg ||
-          (currentLanguage === 'en' ? 'Could not download CSV.' : 'CSV डाउनलोड नहीं हो सका।'),
+          enHi(currentLanguage, 'Could not download CSV.', 'CSV डाउनलोड नहीं हो सका।'),
         variant: 'destructive',
       });
     } finally {
@@ -419,19 +418,24 @@ const Analytics = () => {
   return (
     <Layout>
       <div
-        className={`container mx-auto min-w-0 px-3 py-5 transition-opacity sm:px-4 sm:py-6 ${isLoading ? 'opacity-70' : ''}`}
+        className={`min-h-screen bg-[#f6f1e7] bg-[linear-gradient(rgba(138,79,42,0.05)_1px,transparent_1px),linear-gradient(90deg,rgba(138,79,42,0.05)_1px,transparent_1px)] bg-[size:24px_24px] transition-opacity ${isLoading ? 'opacity-70' : ''}`}
       >
+        <div className="container mx-auto min-w-0 px-3 py-5 sm:px-4 sm:py-6">
         {/* Header */}
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between mb-6">
           <div className="flex items-center gap-4">
-            <button type="button" onClick={() => navigate(-1)} className="p-2 hover:bg-muted rounded-lg">
+            <button
+              type="button"
+              onClick={() => navigate(-1)}
+              className="rounded-lg border border-[#d7c7a8] bg-[#fffaf0] p-2 text-[#315f3b] transition hover:bg-[#f6eddc]"
+            >
               <ArrowLeft className="w-5 h-5" />
             </button>
             <div>
-              <h1 className={`text-2xl font-bold ${currentLanguage === 'hi' ? 'font-hindi' : ''}`}>
+              <h1 className={`text-2xl font-bold text-[#2f3a2f] ${scriptFontClass(currentLanguage)}`}>
                 {t.title}
               </h1>
-              <p className={`text-muted-foreground ${currentLanguage === 'hi' ? 'font-hindi' : ''}`}>
+              <p className={`text-[#6f6552] ${scriptFontClass(currentLanguage)}`}>
                 {t.subtitle}
               </p>
             </div>
@@ -445,11 +449,12 @@ const Analytics = () => {
               onClick={() => void loadAnalytics()}
               disabled={isLoading}
               title={t.refresh}
+              className="border-[#d7c7a8] bg-[#fffaf0] text-[#315f3b] hover:bg-[#f3ebdd] hover:text-[#315f3b]"
             >
               <RefreshCw className={`w-4 h-4 ${isLoading ? 'animate-spin' : ''}`} />
             </Button>
             <Select value={timePeriod} onValueChange={(v: 'week' | 'month' | 'quarter' | 'year') => setTimePeriod(v)}>
-              <SelectTrigger className="w-40">
+              <SelectTrigger className="w-40 border-[#d7c7a8] bg-[#fffaf0] text-[#2f3a2f]">
                 <Filter className="w-4 h-4 mr-2" />
                 <SelectValue />
               </SelectTrigger>
@@ -461,7 +466,12 @@ const Analytics = () => {
               </SelectContent>
             </Select>
             
-            <Button type="button" variant="outline" onClick={handleDownload}>
+            <Button
+              type="button"
+              variant="outline"
+              onClick={handleDownload}
+              className="border-[#d7c7a8] bg-[#fffaf0] text-[#315f3b] hover:bg-[#f3ebdd] hover:text-[#315f3b]"
+            >
               <Download className="w-4 h-4 mr-2" />
               {t.download}
             </Button>
@@ -470,6 +480,7 @@ const Analytics = () => {
               variant="outline"
               disabled={isExportingOrdersCsv}
               onClick={() => void handleExportOrdersCsv()}
+              className="border border-[#b68222] bg-[#d89b2b] text-[#2f2416] hover:bg-[#c88d22]"
             >
               {isExportingOrdersCsv ? (
                 <Loader2 className="w-4 h-4 mr-2 animate-spin" />
@@ -483,72 +494,72 @@ const Analytics = () => {
 
         {/* Key Metrics Cards */}
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-          <Card>
+          <Card className="border-[#d7c7a8] bg-[#fffaf0] shadow-[0_16px_40px_rgba(95,70,40,0.08)]">
             <CardHeader className="pb-3">
-              <CardDescription>{t.totalRevenue}</CardDescription>
-              <CardTitle className="text-2xl">{formatPrice(metrics.totalRevenue)}</CardTitle>
+              <CardDescription className="text-[#6f6552]">{t.totalRevenue}</CardDescription>
+              <CardTitle className="text-2xl text-[#2f3a2f]">{formatPrice(metrics.totalRevenue)}</CardTitle>
             </CardHeader>
             <CardContent>
               {filteredOrders.length > 0 ? (
                 <div
-                  className={`flex items-center gap-1 text-sm ${revGrowthPositive ? 'text-success' : 'text-destructive'}`}
+                  className={`flex items-center gap-1 text-sm ${revGrowthPositive ? 'text-[#315f3b]' : 'text-[#8a4f2a]'}`}
                 >
                   {revGrowthPositive ? <TrendingUp className="w-4 h-4" /> : <TrendingDown className="w-4 h-4" />}
                   <span>
                     {revGrowthPositive ? '+' : ''}
                     {metrics.revenueGrowth.toFixed(1)}%{' '}
-                    <span className="text-muted-foreground font-normal">{t.splitPeriodNote}</span>
+                    <span className="font-normal text-[#6f6552]">{t.splitPeriodNote}</span>
                   </span>
                 </div>
               ) : (
-                <p className="text-sm text-muted-foreground">—</p>
+                <p className="text-sm text-[#6f6552]">—</p>
               )}
             </CardContent>
           </Card>
 
-          <Card>
+          <Card className="border-[#d7c7a8] bg-[#fffaf0] shadow-[0_16px_40px_rgba(95,70,40,0.08)]">
             <CardHeader className="pb-3">
-              <CardDescription>{t.totalOrders}</CardDescription>
-              <CardTitle className="text-2xl">{metrics.totalOrders}</CardTitle>
+              <CardDescription className="text-[#6f6552]">{t.totalOrders}</CardDescription>
+              <CardTitle className="text-2xl text-[#2f3a2f]">{metrics.totalOrders}</CardTitle>
             </CardHeader>
             <CardContent>
               {filteredOrders.length > 0 ? (
                 <div
-                  className={`flex items-center gap-1 text-sm ${ordGrowthPositive ? 'text-success' : 'text-destructive'}`}
+                  className={`flex items-center gap-1 text-sm ${ordGrowthPositive ? 'text-[#315f3b]' : 'text-[#8a4f2a]'}`}
                 >
                   {ordGrowthPositive ? <TrendingUp className="w-4 h-4" /> : <TrendingDown className="w-4 h-4" />}
                   <span>
                     {ordGrowthPositive ? '+' : ''}
                     {metrics.orderGrowth.toFixed(1)}%{' '}
-                    <span className="text-muted-foreground font-normal">{t.splitPeriodNote}</span>
+                    <span className="font-normal text-[#6f6552]">{t.splitPeriodNote}</span>
                   </span>
                 </div>
               ) : (
-                <p className="text-sm text-muted-foreground">—</p>
+                <p className="text-sm text-[#6f6552]">—</p>
               )}
             </CardContent>
           </Card>
 
-          <Card>
+          <Card className="border-[#d7c7a8] bg-[#fffaf0] shadow-[0_16px_40px_rgba(95,70,40,0.08)]">
             <CardHeader className="pb-3">
-              <CardDescription>{t.avgOrderValue}</CardDescription>
-              <CardTitle className="text-2xl">{formatPrice(metrics.averageOrderValue)}</CardTitle>
+              <CardDescription className="text-[#6f6552]">{t.avgOrderValue}</CardDescription>
+              <CardTitle className="text-2xl text-[#2f3a2f]">{formatPrice(metrics.averageOrderValue)}</CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="flex items-center gap-1 text-muted-foreground text-sm">
+              <div className="flex items-center gap-1 text-sm text-[#6f6552]">
                 <ShoppingCart className="w-4 h-4" />
                 <span>{currentLanguage === 'en' ? 'Per order' : 'प्रति ऑर्डर'}</span>
               </div>
             </CardContent>
           </Card>
 
-          <Card>
+          <Card className="border-[#d7c7a8] bg-[#fffaf0] shadow-[0_16px_40px_rgba(95,70,40,0.08)]">
             <CardHeader className="pb-3">
-              <CardDescription>{t.conversionRate}</CardDescription>
-              <CardTitle className="text-2xl">{metrics.conversionRate}%</CardTitle>
+              <CardDescription className="text-[#6f6552]">{t.conversionRate}</CardDescription>
+              <CardTitle className="text-2xl text-[#2f3a2f]">{metrics.conversionRate}%</CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="flex items-center gap-1 text-primary text-sm">
+              <div className="flex items-center gap-1 text-sm text-[#315f3b]">
                 <BarChart3 className="w-4 h-4" />
                 <span>{currentLanguage === 'en' ? 'View to order' : 'देखें से ऑर्डर'}</span>
               </div>
@@ -559,10 +570,10 @@ const Analytics = () => {
         {/* Charts Row 1 */}
         <div className="grid lg:grid-cols-2 gap-6 mb-6">
           {/* Sales Trend */}
-          <Card>
+          <Card className="border-[#d7c7a8] bg-[#fffaf0] shadow-[0_16px_40px_rgba(95,70,40,0.08)]">
             <CardHeader>
-              <CardTitle>{t.salesTrend}</CardTitle>
-              <CardDescription>{currentLanguage === 'en' ? 'Revenue and orders over time' : 'समय के साथ राजस्व और ऑर्डर'}</CardDescription>
+              <CardTitle className="text-[#2f3a2f]">{t.salesTrend}</CardTitle>
+              <CardDescription className="text-[#6f6552]">{currentLanguage === 'en' ? 'Revenue and orders over time' : 'समय के साथ राजस्व और ऑर्डर'}</CardDescription>
             </CardHeader>
             <CardContent>
               <div className="h-64">
@@ -579,7 +590,7 @@ const Analytics = () => {
                     <YAxis className="text-xs" />
                     <Tooltip 
                       formatter={(value: any) => formatPrice(value)}
-                      contentStyle={{ borderRadius: '8px' }}
+                      contentStyle={{ borderRadius: '8px', border: '1px solid #d7c7a8', backgroundColor: '#fffaf0' }}
                     />
                     <Legend />
                     <Area 
@@ -603,10 +614,10 @@ const Analytics = () => {
           </Card>
 
           {/* Revenue by Category */}
-          <Card>
+          <Card className="border-[#d7c7a8] bg-[#fffaf0] shadow-[0_16px_40px_rgba(95,70,40,0.08)]">
             <CardHeader>
-              <CardTitle>{t.revenueByCategory}</CardTitle>
-              <CardDescription>{currentLanguage === 'en' ? 'Breakdown by crop category' : 'फसल श्रेणी द्वारा विवरण'}</CardDescription>
+              <CardTitle className="text-[#2f3a2f]">{t.revenueByCategory}</CardTitle>
+              <CardDescription className="text-[#6f6552]">{currentLanguage === 'en' ? 'Breakdown by crop category' : 'फसल श्रेणी द्वारा विवरण'}</CardDescription>
             </CardHeader>
             <CardContent>
               <div className="h-64">
@@ -626,7 +637,7 @@ const Analytics = () => {
                         <Cell key={`cell-${index}`} fill={entry.color} />
                       ))}
                     </Pie>
-                    <Tooltip formatter={(value: any) => formatPrice(value)} />
+                    <Tooltip formatter={(value: any) => formatPrice(value)} contentStyle={{ borderRadius: '8px', border: '1px solid #d7c7a8', backgroundColor: '#fffaf0' }} />
                   </PieChart>
                 </ResponsiveContainer>
               </div>
@@ -634,13 +645,13 @@ const Analytics = () => {
               {/* Legend */}
               <div className="grid grid-cols-2 gap-2 mt-4">
                 {revenueByCategory.map((category) => (
-                  <div key={category.name} className="flex items-center gap-2">
+                  <div key={category.name} className="flex items-center gap-2 rounded-lg border border-[#e2d4b7] bg-[#fffdf7] px-3 py-2">
                     <div 
                       className="w-3 h-3 rounded-full" 
                       style={{ backgroundColor: category.color }}
                     />
-                    <span className="text-sm">{category.name}</span>
-                    <span className="text-sm font-medium ml-auto">{formatPrice(category.value)}</span>
+                    <span className="text-sm text-[#2f3a2f]">{category.name}</span>
+                    <span className="ml-auto text-sm font-medium text-[#315f3b]">{formatPrice(category.value)}</span>
                   </div>
                 ))}
               </div>
@@ -651,10 +662,10 @@ const Analytics = () => {
         {/* Charts Row 2 */}
         <div className="grid lg:grid-cols-2 gap-6 mb-6">
           {/* Monthly Comparison */}
-          <Card>
+          <Card className="border-[#d7c7a8] bg-[#fffaf0] shadow-[0_16px_40px_rgba(95,70,40,0.08)]">
             <CardHeader>
-              <CardTitle>{t.monthlyComparison}</CardTitle>
-              <CardDescription>{t.monthlyComparisonHint}</CardDescription>
+              <CardTitle className="text-[#2f3a2f]">{t.monthlyComparison}</CardTitle>
+              <CardDescription className="text-[#6f6552]">{t.monthlyComparisonHint}</CardDescription>
             </CardHeader>
             <CardContent>
               <div className="h-64">
@@ -669,11 +680,11 @@ const Analytics = () => {
                     <CartesianGrid strokeDasharray="3 3" className="opacity-30" />
                     <XAxis dataKey="month" className="text-xs" />
                     <YAxis className="text-xs" />
-                    <Tooltip formatter={(value: any) => formatPrice(value)} />
+                    <Tooltip formatter={(value: any) => formatPrice(value)} contentStyle={{ borderRadius: '8px', border: '1px solid #d7c7a8', backgroundColor: '#fffaf0' }} />
                     <Legend />
                     <Bar
                       dataKey="revenue"
-                      fill="hsl(var(--primary))"
+                      fill="#315f3b"
                       radius={[4, 4, 0, 0]}
                       name={t.revenue}
                     />
@@ -684,10 +695,10 @@ const Analytics = () => {
           </Card>
 
           {/* Daily Sales */}
-          <Card>
+          <Card className="border-[#d7c7a8] bg-[#fffaf0] shadow-[0_16px_40px_rgba(95,70,40,0.08)]">
             <CardHeader>
-              <CardTitle>{t.dailySales}</CardTitle>
-              <CardDescription>{currentLanguage === 'en' ? 'Sales by day of week' : 'सप्ताह के दिन के अनुसार बिक्री'}</CardDescription>
+              <CardTitle className="text-[#2f3a2f]">{t.dailySales}</CardTitle>
+              <CardDescription className="text-[#6f6552]">{currentLanguage === 'en' ? 'Sales by day of week' : 'सप्ताह के दिन के अनुसार बिक्री'}</CardDescription>
             </CardHeader>
             <CardContent>
               <div className="h-64">
@@ -696,13 +707,13 @@ const Analytics = () => {
                     <CartesianGrid strokeDasharray="3 3" className="opacity-30" />
                     <XAxis dataKey="day" className="text-xs" />
                     <YAxis className="text-xs" />
-                    <Tooltip formatter={(value: any) => formatPrice(value)} />
+                    <Tooltip formatter={(value: any) => formatPrice(value)} contentStyle={{ borderRadius: '8px', border: '1px solid #d7c7a8', backgroundColor: '#fffaf0' }} />
                     <Line 
                       type="monotone" 
                       dataKey="sales" 
-                      stroke="hsl(var(--accent))" 
+                      stroke="#d89b2b" 
                       strokeWidth={2}
-                      dot={{ fill: 'hsl(var(--accent))', r: 4 }}
+                      dot={{ fill: '#d89b2b', r: 4 }}
                     />
                   </LineChart>
                 </ResponsiveContainer>
@@ -714,30 +725,30 @@ const Analytics = () => {
         {/* Top Products and Performance */}
         <div className="grid lg:grid-cols-2 gap-6">
           {/* Top Selling Products */}
-          <Card>
+          <Card className="border-[#d7c7a8] bg-[#fffaf0] shadow-[0_16px_40px_rgba(95,70,40,0.08)]">
             <CardHeader>
-              <CardTitle>{t.topProducts}</CardTitle>
-              <CardDescription>{currentLanguage === 'en' ? 'Best performing products' : 'सर्वश्रेष्ठ प्रदर्शन करने वाले उत्पाद'}</CardDescription>
+              <CardTitle className="text-[#2f3a2f]">{t.topProducts}</CardTitle>
+              <CardDescription className="text-[#6f6552]">{currentLanguage === 'en' ? 'Best performing products' : 'सर्वश्रेष्ठ प्रदर्शन करने वाले उत्पाद'}</CardDescription>
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
                 {topProducts.map((product, index) => (
-                  <div key={`${product.name}-${index}`} className="flex items-center justify-between p-3 bg-muted/50 rounded-lg">
+                  <div key={`${product.name}-${index}`} className="flex items-center justify-between rounded-lg border border-[#e2d4b7] bg-[#fffdf7] p-3">
                     <div className="flex items-center gap-3">
-                      <div className="w-8 h-8 bg-primary/10 rounded-lg flex items-center justify-center">
-                        <span className="text-sm font-bold text-primary">#{index + 1}</span>
+                      <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-[#f3ebdd]">
+                        <span className="text-sm font-bold text-[#315f3b]">#{index + 1}</span>
                       </div>
                       <div>
-                        <p className="font-medium text-sm">{product.name}</p>
-                        <p className="text-xs text-muted-foreground">
+                        <p className="text-sm font-medium text-[#2f3a2f]">{product.name}</p>
+                        <p className="text-xs text-[#6f6552]">
                           {product.orders} {currentLanguage === 'en' ? 'orders' : 'ऑर्डर'}
                         </p>
                       </div>
                     </div>
                     <div className="text-right">
-                      <p className="font-bold">{formatPrice(product.sales)}</p>
+                      <p className="font-bold text-[#315f3b]">{formatPrice(product.sales)}</p>
                       <div className={`flex items-center gap-1 text-xs ${
-                        product.growth >= 0 ? 'text-success' : 'text-destructive'
+                        product.growth >= 0 ? 'text-[#315f3b]' : 'text-[#8a4f2a]'
                       }`}>
                         {product.growth >= 0 ? (
                           <TrendingUp className="w-3 h-3" />
@@ -754,39 +765,39 @@ const Analytics = () => {
           </Card>
 
           {/* Performance Metrics */}
-          <Card>
+          <Card className="border-[#d7c7a8] bg-[#fffaf0] shadow-[0_16px_40px_rgba(95,70,40,0.08)]">
             <CardHeader>
-              <CardTitle>{t.performance}</CardTitle>
-              <CardDescription>{currentLanguage === 'en' ? 'Key business metrics' : 'मुख्य व्यापार मेट्रिक्स'}</CardDescription>
+              <CardTitle className="text-[#2f3a2f]">{t.performance}</CardTitle>
+              <CardDescription className="text-[#6f6552]">{currentLanguage === 'en' ? 'Key business metrics' : 'मुख्य व्यापार मेट्रिक्स'}</CardDescription>
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
-                <div className="flex items-center justify-between p-3 bg-muted/50 rounded-lg">
+                <div className="flex items-center justify-between rounded-lg border border-[#e2d4b7] bg-[#fffdf7] p-3">
                   <div className="flex items-center gap-3">
-                    <Award className="w-5 h-5 text-primary" />
-                    <span className="text-sm font-medium">{t.topCustomer}</span>
+                    <Award className="w-5 h-5 text-[#315f3b]" />
+                    <span className="text-sm font-medium text-[#2f3a2f]">{t.topCustomer}</span>
                   </div>
-                  <span className="font-medium">{metrics.topCustomer}</span>
+                  <span className="font-medium text-[#2f3a2f]">{metrics.topCustomer}</span>
                 </div>
 
-                <div className="flex items-center justify-between p-3 bg-muted/50 rounded-lg">
+                <div className="flex items-center justify-between rounded-lg border border-[#e2d4b7] bg-[#fffdf7] p-3">
                   <div className="flex items-center gap-3">
-                    <Package className="w-5 h-5 text-success" />
-                    <span className="text-sm font-medium">{t.bestProduct}</span>
+                    <Package className="w-5 h-5 text-[#8a4f2a]" />
+                    <span className="text-sm font-medium text-[#2f3a2f]">{t.bestProduct}</span>
                   </div>
-                  <span className="font-medium text-sm">{metrics.bestSellingProduct}</span>
+                  <span className="text-sm font-medium text-[#2f3a2f]">{metrics.bestSellingProduct}</span>
                 </div>
 
-                <div className="flex items-center justify-between p-3 bg-muted/50 rounded-lg">
+                <div className="flex items-center justify-between rounded-lg border border-[#e2d4b7] bg-[#fffdf7] p-3">
                   <div className="flex items-center gap-3">
-                    <TrendingUp className="w-5 h-5 text-accent" />
-                    <span className="text-sm font-medium">{t.revenueGrowth}</span>
+                    <TrendingUp className="w-5 h-5 text-[#d89b2b]" />
+                    <span className="text-sm font-medium text-[#2f3a2f]">{t.revenueGrowth}</span>
                   </div>
                   <Badge
                     className={
                       metrics.revenueGrowth >= 0
-                        ? 'bg-success/10 text-success'
-                        : 'bg-destructive/10 text-destructive'
+                        ? 'bg-[#eaf5ec] text-[#315f3b]'
+                        : 'bg-[#f6e5dc] text-[#8a4f2a]'
                     }
                   >
                     {metrics.revenueGrowth >= 0 ? '+' : ''}
@@ -794,16 +805,16 @@ const Analytics = () => {
                   </Badge>
                 </div>
 
-                <div className="flex items-center justify-between p-3 bg-muted/50 rounded-lg">
+                <div className="flex items-center justify-between rounded-lg border border-[#e2d4b7] bg-[#fffdf7] p-3">
                   <div className="flex items-center gap-3">
-                    <ShoppingCart className="w-5 h-5 text-primary" />
-                    <span className="text-sm font-medium">{t.orderGrowth}</span>
+                    <ShoppingCart className="w-5 h-5 text-[#315f3b]" />
+                    <span className="text-sm font-medium text-[#2f3a2f]">{t.orderGrowth}</span>
                   </div>
                   <Badge
                     className={
                       metrics.orderGrowth >= 0
-                        ? 'bg-success/10 text-success'
-                        : 'bg-destructive/10 text-destructive'
+                        ? 'bg-[#eaf5ec] text-[#315f3b]'
+                        : 'bg-[#f6e5dc] text-[#8a4f2a]'
                     }
                   >
                     {metrics.orderGrowth >= 0 ? '+' : ''}
@@ -811,12 +822,12 @@ const Analytics = () => {
                   </Badge>
                 </div>
 
-                <div className="flex items-center justify-between p-3 bg-muted/50 rounded-lg">
+                <div className="flex items-center justify-between rounded-lg border border-[#e2d4b7] bg-[#fffdf7] p-3">
                   <div className="flex items-center gap-3">
-                    <BarChart3 className="w-5 h-5 text-warning" />
-                    <span className="text-sm font-medium">{t.customerRetention}</span>
+                    <BarChart3 className="w-5 h-5 text-[#d89b2b]" />
+                    <span className="text-sm font-medium text-[#2f3a2f]">{t.customerRetention}</span>
                   </div>
-                  <Badge className="bg-primary/10 text-primary">
+                  <Badge className="bg-[#f3ebdd] text-[#315f3b]">
                     {metrics.customerRetention}%
                   </Badge>
                 </div>
@@ -824,13 +835,13 @@ const Analytics = () => {
             </CardContent>
           </Card>
         </div>
+        </div>
       </div>
     </Layout>
   );
 };
 
 export default Analytics;
-
 
 
 

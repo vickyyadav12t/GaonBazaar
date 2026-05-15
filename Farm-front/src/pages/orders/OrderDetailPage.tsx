@@ -431,13 +431,13 @@ const OrderDetailPage = () => {
   const statusBadgeClass = (status: string) => {
     switch (status) {
       case 'delivered':
-        return 'text-success bg-success/10';
+        return 'border border-[#a9c8ae] bg-[#eaf5ec] text-[#315f3b]';
       case 'shipped':
-        return 'text-primary bg-primary/10';
+        return 'border border-[#c8d8cb] bg-[#edf4ee] text-[#315f3b]';
       case 'cancelled':
-        return 'text-destructive bg-destructive/10';
+        return 'border border-[#dfc0af] bg-[#f6e5dc] text-[#8a4f2a]';
       default:
-        return 'text-warning bg-warning/10';
+        return 'border border-[#ead5a6] bg-[#fff4dd] text-[#9a6b12]';
     }
   };
 
@@ -447,52 +447,57 @@ const OrderDetailPage = () => {
 
   return (
     <Layout>
-      <div className="container mx-auto min-w-0 max-w-4xl px-3 py-5 sm:px-4 sm:py-6">
+      <div className="min-h-screen bg-[linear-gradient(rgba(251,247,235,0.97),rgba(251,247,235,0.97)),linear-gradient(rgba(138,79,42,0.07)_1px,transparent_1px),linear-gradient(90deg,rgba(138,79,42,0.07)_1px,transparent_1px)] bg-[size:auto,24px_24px,24px_24px]">
+        <div className="container mx-auto min-w-0 max-w-4xl px-3 py-5 sm:px-4 sm:py-6">
         <div className="flex items-center gap-4 mb-6">
           <button
             type="button"
             onClick={() => navigate(listPath)}
-            className="p-2 hover:bg-muted rounded-lg"
+            className="rounded-lg border border-[#d7c7a8] bg-[#fffaf0] p-2 text-[#315f3b] transition hover:bg-[#f6eddc]"
           >
             <ArrowLeft className="w-5 h-5" />
           </button>
           <div>
-            <h1 className="text-2xl font-bold">
+            <h1 className="text-2xl font-bold text-[#2f3a2f]">
               {en ? 'Order details' : 'ऑर्डर विवरण'}
             </h1>
-            <p className="text-sm text-muted-foreground font-mono">#{orderId.slice(-8)}</p>
+            <p className="font-mono text-sm text-[#6f6552]">#{orderId.slice(-8)}</p>
           </div>
         </div>
 
         {loading ? (
-          <div className="flex justify-center py-20 text-muted-foreground gap-2">
+          <div className="flex justify-center gap-2 py-20 text-[#6f6552]">
             <Loader2 className="w-6 h-6 animate-spin" />
             {en ? 'Loading…' : 'लोड हो रहा है…'}
           </div>
         ) : !order ? (
-          <div className="card-elevated p-8 text-center text-muted-foreground">
+          <div className="rounded-2xl border border-[#d7c7a8] bg-[#fffaf0] p-8 text-center text-[#6f6552] shadow-[0_16px_40px_rgba(95,70,40,0.08)]">
             {en ? 'Order not found or you do not have access.' : 'ऑर्डर नहीं मिला या पहुंच नहीं है।'}
             <div className="mt-4">
-              <Button variant="outline" onClick={() => navigate(listPath)}>
+              <Button
+                variant="outline"
+                className="border-[#d7c7a8] bg-[#fffdf7] text-[#315f3b] hover:bg-[#f3ebdd] hover:text-[#315f3b]"
+                onClick={() => navigate(listPath)}
+              >
                 {en ? 'Back to orders' : 'ऑर्डर पर वापस'}
               </Button>
             </div>
           </div>
         ) : (
           <div className="space-y-6">
-            <div className="card-elevated p-6 flex flex-wrap items-start justify-between gap-4">
+            <div className="flex flex-wrap items-start justify-between gap-4 rounded-2xl border border-[#d7c7a8] bg-[#fffaf0] p-6 shadow-[0_16px_40px_rgba(95,70,40,0.08)]">
               <div>
-                <p className="text-sm text-muted-foreground">
+                <p className="text-sm text-[#6f6552]">
                   {en ? 'Placed on' : 'दिनांक'}
                 </p>
-                <p className="font-medium">
+                <p className="font-medium text-[#2f3a2f]">
                   {new Date(order.createdAt).toLocaleString(
                     en ? 'en-IN' : 'hi-IN',
                     { dateStyle: 'medium', timeStyle: 'short' }
                   )}
                 </p>
                 {order.updatedAt !== order.createdAt && (
-                  <p className="text-xs text-muted-foreground mt-1">
+                  <p className="mt-1 text-xs text-[#6f6552]">
                     {en ? 'Updated' : 'अपडेट'}:{' '}
                     {new Date(order.updatedAt).toLocaleString(en ? 'en-IN' : 'hi-IN', {
                       dateStyle: 'short',
@@ -507,22 +512,22 @@ const OrderDetailPage = () => {
                 >
                   {order.status}
                 </span>
-                <span className="px-3 py-1 rounded-full text-sm font-medium bg-muted text-muted-foreground">
+                <span className="rounded-full border border-[#d7c7a8] bg-[#fffdf7] px-3 py-1 text-sm font-medium text-[#6f6552]">
                   {paymentLineLabel(order.paymentStatus, order.paymentMethod, en)}
                 </span>
-                <span className="px-3 py-1 rounded-full text-sm font-medium bg-muted/80 text-muted-foreground">
+                <span className="rounded-full border border-[#e2d4b7] bg-[#f9f2e6] px-3 py-1 text-sm font-medium text-[#6f6552]">
                   {paymentMethodLabel(order.paymentMethod, en)} ·{' '}
                   {paymentStatusLabel(order.paymentStatus, en)}
                 </span>
               </div>
             </div>
 
-            <div className="card-elevated p-6">
-              <h2 className="text-lg font-semibold mb-4">
+            <div className="rounded-2xl border border-[#d7c7a8] bg-[#fffaf0] p-6 shadow-[0_16px_40px_rgba(95,70,40,0.08)]">
+              <h2 className="mb-4 text-lg font-semibold text-[#2f3a2f]">
                 {en ? 'Items' : 'वस्तुएँ'} ({order.items.length})
               </h2>
               {order.negotiatedPricePerUnit != null && (
-                <p className="text-sm text-muted-foreground mb-4">
+                <p className="mb-4 text-sm text-[#6f6552]">
                   {en ? 'Negotiated price per unit' : 'प्रति इकाई सौदा मूल्य'}:{' '}
                   {formatInr(order.negotiatedPricePerUnit)}
                 </p>
@@ -531,39 +536,39 @@ const OrderDetailPage = () => {
                 {order.items.map((line, i) => (
                   <li
                     key={`${line.productId}-${i}`}
-                    className="flex gap-4 p-4 rounded-xl border border-border bg-muted/20"
+                    className="flex gap-4 rounded-xl border border-[#e2d4b7] bg-[#fffdf7] p-4"
                   >
                     <img
                       src={line.image}
                       alt=""
-                      className="w-20 h-20 rounded-lg object-cover shrink-0"
+                      className="h-20 w-20 shrink-0 rounded-lg border border-[#eadfc8] object-cover"
                     />
                     <div className="flex-1 min-w-0">
-                      <p className="font-semibold">{line.name}</p>
-                      <p className="text-sm text-muted-foreground">
+                      <p className="font-semibold text-[#2f3a2f]">{line.name}</p>
+                      <p className="text-sm text-[#6f6552]">
                         {line.quantity} {line.unit} × {formatInr(line.pricePerUnit)}
                       </p>
                     </div>
-                    <p className="font-bold text-primary shrink-0">{formatInr(line.lineTotal)}</p>
+                    <p className="shrink-0 font-bold text-[#315f3b]">{formatInr(line.lineTotal)}</p>
                   </li>
                 ))}
               </ul>
-              <div className="mt-6 pt-4 border-t border-border space-y-2 text-sm">
-                <div className="flex justify-between text-muted-foreground">
+              <div className="mt-6 space-y-2 border-t border-[#e2d4b7] pt-4 text-sm">
+                <div className="flex justify-between text-[#6f6552]">
                   <span>{en ? 'Items subtotal' : 'वस्तुओं का योग'}</span>
                   <span>{formatInr(order.totalAmount)}</span>
                 </div>
                 {(order.platformFee ?? 0) > 0 && (
-                  <div className="flex justify-between text-muted-foreground">
+                  <div className="flex justify-between text-[#6f6552]">
                     <span>{en ? 'Platform fee (2%)' : 'प्लेटफॉर्म शुल्क (2%)'}</span>
                     <span>{formatInr(order.platformFee ?? 0)}</span>
                   </div>
                 )}
-                <div className="flex justify-between items-center pt-2 border-t border-border">
-                  <span className="text-lg font-semibold">
+                <div className="flex items-center justify-between border-t border-[#e2d4b7] pt-2">
+                  <span className="text-lg font-semibold text-[#2f3a2f]">
                     {en ? 'Buyer pays' : 'खरीदार कुल'}
                   </span>
-                  <span className="text-xl font-bold text-primary">
+                  <span className="text-xl font-bold text-[#315f3b]">
                     {formatInr(order.totalAmount + (order.platformFee ?? 0))}
                   </span>
                 </div>
@@ -585,11 +590,11 @@ const OrderDetailPage = () => {
                 order.returnRequest?.status === 'approved' &&
                 (order.paymentMethod === 'cod' || order.paymentMethod === 'bank_transfer')) ||
               (user.role === 'admin' && order.returnRequest)) && (
-              <div className="card-elevated p-6 border-2 border-amber-500/20 bg-amber-500/5">
-                <h2 className="text-lg font-semibold mb-2">
+              <div className="rounded-2xl border-2 border-[#ead5a6] bg-[#fff7e8] p-6 shadow-[0_12px_30px_rgba(138,79,42,0.06)]">
+                <h2 className="mb-2 text-lg font-semibold text-[#2f3a2f]">
                   {en ? 'Return & refund' : 'वापसी और रिफंड'}
                 </h2>
-                <p className="text-sm text-muted-foreground mb-4">
+                <p className="mb-4 text-sm text-[#6f6552]">
                   {en
                     ? `If the item is not satisfactory, you can request a return within ${RETURN_WINDOW_DAYS} days of delivery (paid orders only). The seller approves or declines; online payments are refunded automatically when approved.`
                     : `डिलीवरी के ${RETURN_WINDOW_DAYS} दिनों के भीतर (केवल भुगतान किए ऑर्डर) वापसी का अनुरोध करें। विक्रेता स्वीकार/अस्वीकार करता है; ऑनलाइन भुगतान स्वीकृति पर स्वतः रिफंड होता है।`}
@@ -617,7 +622,7 @@ const OrderDetailPage = () => {
                       </p>
                     ) : null}
                     {order.returnRequest.requestedAt ? (
-                      <p className="text-muted-foreground text-xs">
+                      <p className="text-xs text-[#6f6552]">
                         {en ? 'Requested' : 'अनुरोध'}:{' '}
                         {new Date(order.returnRequest.requestedAt).toLocaleString(
                           en ? 'en-IN' : 'hi-IN',
@@ -626,14 +631,14 @@ const OrderDetailPage = () => {
                       </p>
                     ) : null}
                     {order.returnRequest.resolutionNote ? (
-                      <p className="pt-2 border-t border-border">
+                      <p className="border-t border-[#e2d4b7] pt-2">
                         <span className="font-medium">{en ? 'Note' : 'टिप्पणी'}: </span>
                         {order.returnRequest.resolutionNote}
                       </p>
                     ) : null}
                     {order.returnRequest.refundAmount != null &&
                     order.returnRequest.status === 'refunded' ? (
-                      <p className="text-primary font-medium">
+                      <p className="font-medium text-[#315f3b]">
                         {en ? 'Refund amount' : 'रिफंड राशि'}: {formatInr(order.returnRequest.refundAmount)}
                       </p>
                     ) : null}
@@ -641,14 +646,18 @@ const OrderDetailPage = () => {
                 ) : null}
                 <div className="mt-4 flex flex-wrap gap-2">
                   {user.role === 'buyer' && canBuyerRequestReturn(order) ? (
-                    <Button variant="outline" onClick={() => setReturnDialogOpen(true)}>
+                    <Button
+                      variant="outline"
+                      className="border-[#d7c7a8] bg-[#fffdf7] text-[#315f3b] hover:bg-[#f3ebdd] hover:text-[#315f3b]"
+                      onClick={() => setReturnDialogOpen(true)}
+                    >
                       {en ? 'Request return / refund' : 'वापसी / रिफंड अनुरोध'}
                     </Button>
                   ) : null}
                   {user.role === 'farmer' && order.returnRequest?.status === 'requested' ? (
                     <>
                       <Button
-                        className="bg-success hover:bg-success/90"
+                        className="bg-[#315f3b] text-white hover:bg-[#274d30]"
                         disabled={returnBusy}
                         onClick={() => setRespondOpen('approve')}
                       >
@@ -688,7 +697,7 @@ const OrderDetailPage = () => {
                   <div className="space-y-2">
                     <Label>{en ? 'Reason' : 'कारण'}</Label>
                     <Select value={returnReason} onValueChange={setReturnReason}>
-                      <SelectTrigger>
+                      <SelectTrigger className="border-[#d7c7a8] bg-[#fffdf7] text-[#2f3a2f]">
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
@@ -703,6 +712,7 @@ const OrderDetailPage = () => {
                   <div className="space-y-2">
                     <Label>{en ? 'More details (optional)' : 'अधिक विवरण (वैकल्पिक)'}</Label>
                     <Textarea
+                      className="border-[#d7c7a8] bg-[#fffdf7] text-[#2f3a2f] placeholder:text-[#8b816f] focus-visible:ring-[#315f3b]"
                       value={returnDetails}
                       onChange={(e) => setReturnDetails(e.target.value)}
                       rows={4}
@@ -712,10 +722,18 @@ const OrderDetailPage = () => {
                   </div>
                 </div>
                 <DialogFooter>
-                  <Button variant="outline" onClick={() => setReturnDialogOpen(false)}>
+                  <Button
+                    variant="outline"
+                    className="border-[#d7c7a8] bg-[#fffdf7] text-[#315f3b] hover:bg-[#f3ebdd] hover:text-[#315f3b]"
+                    onClick={() => setReturnDialogOpen(false)}
+                  >
                     {en ? 'Cancel' : 'रद्द'}
                   </Button>
-                  <Button disabled={returnBusy} onClick={() => void handleRequestReturn()}>
+                  <Button
+                    className="border border-[#b68222] bg-[#d89b2b] text-[#2f2416] hover:bg-[#c88d22]"
+                    disabled={returnBusy}
+                    onClick={() => void handleRequestReturn()}
+                  >
                     {returnBusy ? <Loader2 className="w-4 h-4 animate-spin" /> : null}
                     {en ? 'Submit' : 'जमा करें'}
                   </Button>
@@ -748,7 +766,7 @@ const OrderDetailPage = () => {
                 <div className="py-2">
                   <Label>{en ? 'Note to buyer (optional)' : 'खरीदार को नोट'}</Label>
                   <Textarea
-                    className="mt-2"
+                    className="mt-2 border-[#d7c7a8] bg-[#fffdf7] text-[#2f3a2f] focus-visible:ring-[#315f3b]"
                     value={respondNote}
                     onChange={(e) => setRespondNote(e.target.value)}
                     rows={3}
@@ -756,11 +774,16 @@ const OrderDetailPage = () => {
                   />
                 </div>
                 <DialogFooter>
-                  <Button variant="outline" onClick={() => setRespondOpen(null)}>
+                  <Button
+                    variant="outline"
+                    className="border-[#d7c7a8] bg-[#fffdf7] text-[#315f3b] hover:bg-[#f3ebdd] hover:text-[#315f3b]"
+                    onClick={() => setRespondOpen(null)}
+                  >
                     {en ? 'Back' : 'वापस'}
                   </Button>
                   <Button
                     variant={respondOpen === 'reject' ? 'destructive' : 'default'}
+                    className={respondOpen === 'reject' ? undefined : 'border border-[#b68222] bg-[#d89b2b] text-[#2f2416] hover:bg-[#c88d22]'}
                     disabled={returnBusy}
                     onClick={() => void handleRespondReturn()}
                   >
@@ -771,34 +794,34 @@ const OrderDetailPage = () => {
               </DialogContent>
             </Dialog>
 
-            <div className="card-elevated p-6">
-              <h2 className="text-lg font-semibold mb-4 flex items-center gap-2">
-                <MapPin className="w-5 h-5 text-muted-foreground" />
+            <div className="rounded-2xl border border-[#d7c7a8] bg-[#fffaf0] p-6 shadow-[0_16px_40px_rgba(95,70,40,0.08)]">
+              <h2 className="mb-4 flex items-center gap-2 text-lg font-semibold text-[#2f3a2f]">
+                <MapPin className="w-5 h-5 text-[#315f3b]" />
                 {en ? 'Delivery' : 'डिलीवरी'}
               </h2>
-              <p className="text-foreground whitespace-pre-wrap">
+              <p className="whitespace-pre-wrap text-[#2f3a2f]">
                 {order.deliveryAddress || (en ? 'No address on file.' : 'पता उपलब्ध नहीं।')}
               </p>
-              <div className="mt-4 text-sm text-muted-foreground space-y-1">
+              <div className="mt-4 space-y-1 text-sm text-[#6f6552]">
                 {user.role === 'admin' ? (
                   <>
                     <div>
-                      <span className="font-medium text-foreground">{en ? 'Buyer' : 'खरीदार'}: </span>
+                      <span className="font-medium text-[#2f3a2f]">{en ? 'Buyer' : 'खरीदार'}: </span>
                       {order.buyerName}
                     </div>
                     <div>
-                      <span className="font-medium text-foreground">{en ? 'Farmer' : 'किसान'}: </span>
+                      <span className="font-medium text-[#2f3a2f]">{en ? 'Farmer' : 'किसान'}: </span>
                       {order.farmerName}
                     </div>
                   </>
                 ) : user.role === 'buyer' ? (
                   <>
-                    <span className="font-medium text-foreground">{en ? 'Seller' : 'विक्रेता'}: </span>
+                    <span className="font-medium text-[#2f3a2f]">{en ? 'Seller' : 'विक्रेता'}: </span>
                     {order.farmerName}
                   </>
                 ) : (
                   <>
-                    <span className="font-medium text-foreground">{en ? 'Buyer' : 'खरीदार'}: </span>
+                    <span className="font-medium text-[#2f3a2f]">{en ? 'Buyer' : 'खरीदार'}: </span>
                     {order.buyerName}
                   </>
                 )}
@@ -806,11 +829,11 @@ const OrderDetailPage = () => {
             </div>
 
             {user.role === 'admin' && order && (
-              <div className="card-elevated p-6 border-2 border-primary/20">
-                <h2 className="text-lg font-semibold mb-4">
+              <div className="rounded-2xl border-2 border-[#c8d8cb] bg-[#f4f8f4] p-6 shadow-[0_14px_34px_rgba(95,70,40,0.07)]">
+                <h2 className="mb-4 text-lg font-semibold text-[#2f3a2f]">
                   {en ? 'Admin actions' : 'एडमिन कार्रवाई'}
                 </h2>
-                <p className="text-sm text-muted-foreground mb-4">
+                <p className="mb-4 text-sm text-[#6f6552]">
                   {en
                     ? 'Update fulfilment or payment status. Buyers and farmers are notified when status changes.'
                     : 'पूर्ति या भुगतान स्थिति अपडेट करें।'}
@@ -819,7 +842,7 @@ const OrderDetailPage = () => {
                   <div className="space-y-2">
                     <Label>{en ? 'Order status' : 'ऑर्डर स्थिति'}</Label>
                     <Select value={adminOrderStatus || order.status} onValueChange={setAdminOrderStatus}>
-                      <SelectTrigger>
+                      <SelectTrigger className="border-[#d7c7a8] bg-[#fffdf7] text-[#2f3a2f]">
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
@@ -837,7 +860,7 @@ const OrderDetailPage = () => {
                       value={adminPaymentStatus || order.paymentStatus}
                       onValueChange={setAdminPaymentStatus}
                     >
-                      <SelectTrigger>
+                      <SelectTrigger className="border-[#d7c7a8] bg-[#fffdf7] text-[#2f3a2f]">
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
@@ -850,7 +873,7 @@ const OrderDetailPage = () => {
                   </div>
                 </div>
                 <Button
-                  className="mt-4"
+                  className="mt-4 border border-[#b68222] bg-[#d89b2b] text-[#2f2416] hover:bg-[#c88d22]"
                   disabled={
                     acting ||
                     (adminOrderStatus || order.status) === order.status &&
@@ -869,7 +892,7 @@ const OrderDetailPage = () => {
               order.paymentStatus === 'pending' &&
               order.status !== 'cancelled' && (
                 <Button
-                  className="btn-primary-gradient"
+                  className="border border-[#b68222] bg-[#d89b2b] text-[#2f2416] hover:bg-[#c88d22]"
                   disabled={payingOnline}
                   onClick={() => void handlePayOnline()}
                 >
@@ -886,6 +909,7 @@ const OrderDetailPage = () => {
               order.status !== 'cancelled' && (
                 <Button
                   variant="secondary"
+                  className="border border-[#c8d8cb] bg-[#eef5ee] text-[#315f3b] hover:bg-[#e3eee4]"
                   disabled={acting}
                   onClick={() => void handleFarmerMarkPaid()}
                 >
@@ -896,7 +920,7 @@ const OrderDetailPage = () => {
             {user.role === 'farmer' && order.status === 'pending' && (
               <div className="flex flex-wrap gap-2">
                 <Button
-                  className="bg-success hover:bg-success/90"
+                  className="bg-[#315f3b] text-white hover:bg-[#274d30]"
                   disabled={acting}
                   onClick={() => void handleFarmerAccept()}
                 >
@@ -905,7 +929,7 @@ const OrderDetailPage = () => {
                 </Button>
                 <Button
                   variant="outline"
-                  className="text-destructive border-destructive"
+                  className="border-[#dfc0af] bg-[#fff8f4] text-[#8a4f2a] hover:bg-[#f6e5dc] hover:text-[#8a4f2a]"
                   disabled={acting}
                   onClick={() => void handleFarmerReject()}
                 >
@@ -917,7 +941,7 @@ const OrderDetailPage = () => {
 
             {user.role === 'farmer' && order.status === 'processing' && (
               <Button
-                className="btn-primary-gradient"
+                className="border border-[#b68222] bg-[#d89b2b] text-[#2f2416] hover:bg-[#c88d22]"
                 disabled={acting}
                 onClick={() => void handleStatus('shipped')}
               >
@@ -928,7 +952,7 @@ const OrderDetailPage = () => {
 
             {user.role === 'farmer' && order.status === 'shipped' && (
               <Button
-                className="bg-success hover:bg-success/90"
+                className="bg-[#315f3b] text-white hover:bg-[#274d30]"
                 disabled={acting}
                 onClick={() => void handleStatus('delivered')}
               >
@@ -951,14 +975,14 @@ const OrderDetailPage = () => {
                   to={user.role === 'farmer' ? '/farmer/chats' : '/buyer/chats'}
                   className="flex-1 min-w-[140px]"
                 >
-                  <Button variant="outline" className="w-full">
+                  <Button variant="outline" className="w-full border-[#d7c7a8] bg-[#fffdf7] text-[#315f3b] hover:bg-[#f3ebdd] hover:text-[#315f3b]">
                     <MessageCircle className="w-4 h-4 mr-2" />
                     {en ? 'Chats' : 'चैट'}
                   </Button>
                 </Link>
                 {user.role === 'buyer' && order.status === 'delivered' && (
                   <Link to="/buyer/reviews" className="flex-1 min-w-[140px]">
-                    <Button className="w-full btn-primary-gradient">
+                    <Button className="w-full border border-[#b68222] bg-[#d89b2b] text-[#2f2416] hover:bg-[#c88d22]">
                       <Star className="w-4 h-4 mr-2" />
                       {en ? 'Reviews' : 'समीक्षा'}
                     </Button>
@@ -968,6 +992,7 @@ const OrderDetailPage = () => {
             )}
           </div>
         )}
+      </div>
       </div>
     </Layout>
   );

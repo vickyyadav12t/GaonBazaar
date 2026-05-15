@@ -32,6 +32,7 @@ import { formatPrice, formatDate, formatRelativeTime } from '@/lib/format';
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { apiService } from '@/services/api';
 import { saveCsvFromApi } from '@/lib/downloadCsv';
+import { enHi, scriptFontClass, toNewsApiLang } from '@/lib/i18n';
 
 const emptySummary: EarningsSummary = {
   totalEarnings: 0,
@@ -90,13 +91,11 @@ const Earnings = () => {
     } catch (error: any) {
       console.error('Failed to load earnings', error);
       toast({
-        title: currentLanguage === 'en' ? 'Error' : 'त्रुटि',
+        title: enHi(currentLanguage, 'Error', 'त्रुटि'),
         description:
           error?.response?.data?.message ||
           error?.message ||
-          (currentLanguage === 'en'
-            ? 'Failed to load earnings.'
-            : 'कमाई लोड करने में विफल।'),
+          enHi(currentLanguage, 'Failed to load earnings.', 'कमाई लोड करने में विफल।'),
         variant: 'destructive',
       });
     } finally {
@@ -129,9 +128,8 @@ const Earnings = () => {
 
     if (!amount || amount <= 0) {
       toast({
-        title: currentLanguage === 'en' ? 'Invalid Amount' : 'अमान्य राशि',
-        description:
-          currentLanguage === 'en' ? 'Please enter a valid amount' : 'कृपया एक वैध राशि दर्ज करें',
+        title: enHi(currentLanguage, 'Invalid Amount', 'अमान्य राशि'),
+        description: enHi(currentLanguage, 'Please enter a valid amount', 'कृपया एक वैध राशि दर्ज करें'),
         variant: 'destructive',
       });
       return;
@@ -139,11 +137,12 @@ const Earnings = () => {
 
     if (amount > summary.availableBalance) {
       toast({
-        title: currentLanguage === 'en' ? 'Insufficient Balance' : 'अपर्याप्त शेष',
-        description:
-          currentLanguage === 'en'
-            ? "You don't have enough available balance"
-            : 'आपके पास पर्याप्त उपलब्ध शेष नहीं है',
+        title: enHi(currentLanguage, 'Insufficient Balance', 'अपर्याप्त शेष'),
+        description: enHi(
+          currentLanguage,
+          "You don't have enough available balance",
+          'आपके पास पर्याप्त उपलब्ध शेष नहीं है',
+        ),
         variant: 'destructive',
       });
       return;
@@ -151,11 +150,12 @@ const Earnings = () => {
 
     if (amount < 1000) {
       toast({
-        title: currentLanguage === 'en' ? 'Minimum Amount' : 'न्यूनतम राशि',
-        description:
-          currentLanguage === 'en'
-            ? 'Minimum withdrawal amount is ₹1,000'
-            : 'न्यूनतम निकासी राशि ₹1,000 है',
+        title: enHi(currentLanguage, 'Minimum Amount', 'न्यूनतम राशि'),
+        description: enHi(
+          currentLanguage,
+          'Minimum withdrawal amount is ₹1,000',
+          'न्यूनतम निकासी राशि ₹1,000 है',
+        ),
         variant: 'destructive',
       });
       return;
@@ -171,24 +171,23 @@ const Earnings = () => {
         accountHolderName: bankForm.accountHolderName.trim() || undefined,
       });
       toast({
-        title: currentLanguage === 'en' ? 'Withdrawal Requested' : 'निकासी अनुरोध',
-        description:
-          currentLanguage === 'en'
-            ? `Request for ${formatPrice(amount)} submitted. It will be reviewed for payout.`
-            : `${formatPrice(amount)} का अनुरोध जमा हुआ। भुगतान की समीक्षा होगी।`,
+        title: enHi(currentLanguage, 'Withdrawal Requested', 'निकासी अनुरोध'),
+        description: enHi(
+          currentLanguage,
+          `Request for ${formatPrice(amount)} submitted. It will be reviewed for payout.`,
+          `${formatPrice(amount)} का अनुरोध जमा हुआ। भुगतान की समीक्षा होगी।`,
+        ),
       });
       setWithdrawalAmount('');
       setIsWithdrawalDialogOpen(false);
       await loadEarnings();
     } catch (error: any) {
       toast({
-        title: currentLanguage === 'en' ? 'Error' : 'त्रुटि',
+        title: enHi(currentLanguage, 'Error', 'त्रुटि'),
         description:
           error?.response?.data?.message ||
           error?.message ||
-          (currentLanguage === 'en'
-            ? 'Could not submit withdrawal.'
-            : 'निकासी जमा नहीं हो सकी।'),
+          enHi(currentLanguage, 'Could not submit withdrawal.', 'निकासी जमा नहीं हो सकੀ।'),
         variant: 'destructive',
       });
     } finally {
@@ -199,39 +198,39 @@ const Earnings = () => {
   const getTransactionIcon = (type: Transaction['type']) => {
     switch (type) {
       case 'order_payment':
-        return <TrendingUp className="w-5 h-5 text-success" />;
+        return <TrendingUp className="w-5 h-5 text-[#315f3b]" />;
       case 'withdrawal':
-        return <ArrowDownToLine className="w-5 h-5 text-destructive" />;
+        return <ArrowDownToLine className="w-5 h-5 text-[#8a4f2a]" />;
       case 'platform_fee':
-        return <IndianRupee className="w-5 h-5 text-muted-foreground" />;
+        return <IndianRupee className="w-5 h-5 text-[#8b816f]" />;
       case 'bonus':
-        return <CheckCircle className="w-5 h-5 text-accent" />;
+        return <CheckCircle className="w-5 h-5 text-[#d89b2b]" />;
       default:
-        return <Wallet className="w-5 h-5 text-primary" />;
+        return <Wallet className="w-5 h-5 text-[#315f3b]" />;
     }
   };
 
   const getTransactionBadge = (status: Transaction['status']) => {
     switch (status) {
       case 'completed':
-        return <Badge className="bg-success/10 text-success">{currentLanguage === 'en' ? 'Completed' : 'पूर्ण'}</Badge>;
+        return <Badge className="bg-[#eaf5ec] text-[#315f3b]">{currentLanguage === 'en' ? 'Completed' : 'पूर्ण'}</Badge>;
       case 'pending':
-        return <Badge className="bg-warning/10 text-warning">{currentLanguage === 'en' ? 'Pending' : 'लंबित'}</Badge>;
+        return <Badge className="bg-[#fff4dd] text-[#9a6b12]">{currentLanguage === 'en' ? 'Pending' : 'लंबित'}</Badge>;
       case 'failed':
-        return <Badge className="bg-destructive/10 text-destructive">{currentLanguage === 'en' ? 'Failed' : 'असफल'}</Badge>;
+        return <Badge className="bg-[#f6e5dc] text-[#8a4f2a]">{currentLanguage === 'en' ? 'Failed' : 'असफल'}</Badge>;
     }
   };
 
   const getWithdrawalBadge = (status: Withdrawal['status']) => {
     switch (status) {
       case 'completed':
-        return <Badge className="bg-success/10 text-success">{currentLanguage === 'en' ? 'Completed' : 'पूर्ण'}</Badge>;
+        return <Badge className="bg-[#eaf5ec] text-[#315f3b]">{currentLanguage === 'en' ? 'Completed' : 'पूर्ण'}</Badge>;
       case 'pending':
-        return <Badge className="bg-warning/10 text-warning">{currentLanguage === 'en' ? 'Pending' : 'लंबित'}</Badge>;
+        return <Badge className="bg-[#fff4dd] text-[#9a6b12]">{currentLanguage === 'en' ? 'Pending' : 'लंबित'}</Badge>;
       case 'processing':
-        return <Badge className="bg-primary/10 text-primary">{currentLanguage === 'en' ? 'Processing' : 'प्रसंस्करण'}</Badge>;
+        return <Badge className="bg-[#eef5ee] text-[#315f3b]">{currentLanguage === 'en' ? 'Processing' : 'प्रसंस्करण'}</Badge>;
       case 'rejected':
-        return <Badge className="bg-destructive/10 text-destructive">{currentLanguage === 'en' ? 'Rejected' : 'अस्वीकृत'}</Badge>;
+        return <Badge className="bg-[#f6e5dc] text-[#8a4f2a]">{currentLanguage === 'en' ? 'Rejected' : 'अस्वीकृत'}</Badge>;
     }
   };
 
@@ -334,7 +333,7 @@ const Earnings = () => {
     },
   };
 
-  const t = content[currentLanguage];
+  const t = content[toNewsApiLang(currentLanguage)];
 
   const handleExportPayoutsCsv = async () => {
     try {
@@ -368,18 +367,19 @@ const Earnings = () => {
   return (
     <Layout>
       <div
-        className={`container mx-auto min-w-0 px-3 py-5 transition-opacity sm:px-4 sm:py-6 ${isLoading ? 'opacity-70' : ''}`}
+        className={`min-h-screen bg-[linear-gradient(rgba(251,247,235,0.97),rgba(251,247,235,0.97)),linear-gradient(rgba(138,79,42,0.07)_1px,transparent_1px),linear-gradient(90deg,rgba(138,79,42,0.07)_1px,transparent_1px)] bg-[size:auto,24px_24px,24px_24px] ${isLoading ? 'opacity-70' : ''}`}
       >
-        <div className="flex items-center justify-between mb-6">
+        <div className="container mx-auto min-w-0 px-3 py-5 sm:px-4 sm:py-6">
+        <div className="mb-6 flex items-center justify-between">
           <div className="flex items-center gap-4">
-            <button type="button" onClick={() => navigate(-1)} className="p-2 hover:bg-muted rounded-lg">
+            <button type="button" onClick={() => navigate(-1)} className="rounded-lg border border-[#d7c7a8] bg-[#fffaf0] p-2 text-[#315f3b] transition hover:bg-[#f6eddc]">
               <ArrowLeft className="w-5 h-5" />
             </button>
             <div>
-              <h1 className={`text-2xl font-bold ${currentLanguage === 'hi' ? 'font-hindi' : ''}`}>
+              <h1 className={`text-2xl font-bold text-[#2f3a2f] ${currentLanguage === 'hi' ? 'font-hindi' : ''}`}>
                 {t.title}
               </h1>
-              <p className={`text-muted-foreground ${currentLanguage === 'hi' ? 'font-hindi' : ''}`}>
+              <p className={`text-[#6f6552] ${currentLanguage === 'hi' ? 'font-hindi' : ''}`}>
                 {t.subtitle}
               </p>
             </div>
@@ -390,6 +390,7 @@ const Earnings = () => {
               type="button"
               variant="outline"
               size="icon"
+              className="border-[#d7c7a8] bg-[#fffaf0] text-[#315f3b] hover:bg-[#f3ebdd] hover:text-[#315f3b]"
               onClick={() => void loadEarnings()}
               disabled={isLoading}
               title={t.refresh}
@@ -398,71 +399,71 @@ const Earnings = () => {
             </Button>
             <Dialog open={isWithdrawalDialogOpen} onOpenChange={setIsWithdrawalDialogOpen}>
             <DialogTrigger asChild>
-              <Button className="btn-primary-gradient" disabled={isLoading}>
+              <Button className="border border-[#b68222] bg-[#d89b2b] text-[#2f2416] hover:bg-[#c88d22]" disabled={isLoading}>
                 <ArrowDownToLine className="w-4 h-4 mr-2" />
                 {t.requestWithdrawal}
               </Button>
             </DialogTrigger>
-            <DialogContent>
+            <DialogContent className="border-[#d7c7a8] bg-[#fffaf0]">
               <DialogHeader>
                 <DialogTitle>{t.requestWithdrawal}</DialogTitle>
               </DialogHeader>
               <div className="space-y-4 py-4">
-                <div className="p-4 bg-muted rounded-lg">
-                  <p className="text-sm text-muted-foreground mb-1">{t.availableBalance}</p>
-                  <p className="text-2xl font-bold">{formatPrice(summary.availableBalance)}</p>
+                <div className="rounded-lg border border-[#e2d4b7] bg-[#fffdf7] p-4">
+                  <p className="mb-1 text-sm text-[#6f6552]">{t.availableBalance}</p>
+                  <p className="text-2xl font-bold text-[#2f3a2f]">{formatPrice(summary.availableBalance)}</p>
                 </div>
 
                 <div>
-                  <Label htmlFor="amount">{t.withdrawalAmount}</Label>
+                  <Label htmlFor="amount" className="text-[#5c513f]">{t.withdrawalAmount}</Label>
                   <Input
                     id="amount"
                     type="number"
                     placeholder="1000"
                     value={withdrawalAmount}
                     onChange={(e) => setWithdrawalAmount(e.target.value)}
-                    className="mt-1.5"
+                    className="mt-1.5 border-[#d7c7a8] bg-[#fffdf7] text-[#2f3a2f] focus-visible:ring-[#315f3b]"
                   />
-                  <p className="text-xs text-muted-foreground mt-1">{t.minWithdrawal}</p>
+                  <p className="mt-1 text-xs text-[#6f6552]">{t.minWithdrawal}</p>
                 </div>
 
                 <div className="space-y-3">
-                  <p className="text-sm font-medium">{t.bankDetails}</p>
+                  <p className="text-sm font-medium text-[#2f3a2f]">{t.bankDetails}</p>
                   <div>
-                    <Label htmlFor="bn">{t.bankName}</Label>
+                    <Label htmlFor="bn" className="text-[#5c513f]">{t.bankName}</Label>
                     <Input
                       id="bn"
                       value={bankForm.bankName}
                       onChange={(e) => setBankForm((f) => ({ ...f, bankName: e.target.value }))}
-                      className="mt-1.5"
+                      className="mt-1.5 border-[#d7c7a8] bg-[#fffdf7] text-[#2f3a2f] focus-visible:ring-[#315f3b]"
                     />
                   </div>
                   <div>
-                    <Label htmlFor="ac">{t.accountNumber}</Label>
+                    <Label htmlFor="ac" className="text-[#5c513f]">{t.accountNumber}</Label>
                     <Input
                       id="ac"
                       value={bankForm.accountNumber}
                       onChange={(e) => setBankForm((f) => ({ ...f, accountNumber: e.target.value }))}
-                      className="mt-1.5"
+                      className="mt-1.5 border-[#d7c7a8] bg-[#fffdf7] text-[#2f3a2f] focus-visible:ring-[#315f3b]"
                     />
                   </div>
                   <div className="grid grid-cols-2 gap-2">
                     <div>
-                      <Label htmlFor="ifsc">{t.ifsc}</Label>
+                      <Label htmlFor="ifsc" className="text-[#5c513f]">{t.ifsc}</Label>
                       <Input
                         id="ifsc"
                         value={bankForm.ifscCode}
                         onChange={(e) => setBankForm((f) => ({ ...f, ifscCode: e.target.value }))}
-                        className="mt-1.5"
+                        className="mt-1.5 border-[#d7c7a8] bg-[#fffdf7] text-[#2f3a2f] focus-visible:ring-[#315f3b]"
                       />
                     </div>
                     <div>
-                      <Label htmlFor="holder">{t.accountHolder}</Label>
+                      <Label htmlFor="holder" className="text-[#5c513f]">{t.accountHolder}</Label>
                       <Input
                         id="holder"
                         value={bankForm.accountHolderName}
                         onChange={(e) => setBankForm((f) => ({ ...f, accountHolderName: e.target.value }))}
-                        className="mt-1.5"
+                        className="mt-1.5 border-[#d7c7a8] bg-[#fffdf7] text-[#2f3a2f] focus-visible:ring-[#315f3b]"
                       />
                     </div>
                   </div>
@@ -473,14 +474,14 @@ const Earnings = () => {
                     type="button"
                     variant="outline"
                     onClick={() => setIsWithdrawalDialogOpen(false)}
-                    className="flex-1"
+                    className="flex-1 border-[#d7c7a8] bg-[#fffdf7] text-[#315f3b] hover:bg-[#f3ebdd] hover:text-[#315f3b]"
                   >
                     {t.cancel}
                   </Button>
                   <Button
                     type="button"
                     onClick={() => void handleWithdrawal()}
-                    className="flex-1 btn-primary-gradient"
+                    className="flex-1 border border-[#b68222] bg-[#d89b2b] text-[#2f2416] hover:bg-[#c88d22]"
                     disabled={
                       !withdrawalAmount ||
                       parseFloat(withdrawalAmount) <= 0 ||
@@ -496,39 +497,39 @@ const Earnings = () => {
           </div>
         </div>
 
-        <Alert className="mb-6 border-primary/30 bg-primary/5">
+        <Alert className="mb-6 border-[#d7c7a8] bg-[#fff7e8]">
           <Info className="h-4 w-4" />
           <AlertDescription className={currentLanguage === 'hi' ? 'font-hindi' : ''}>{t.dataNote}</AlertDescription>
         </Alert>
 
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-          <Card>
+          <Card className="border-[#d7c7a8] bg-[#fffaf0] shadow-[0_16px_40px_rgba(95,70,40,0.08)]">
             <CardHeader className="pb-3">
               <CardDescription>{t.totalEarnings}</CardDescription>
-              <CardTitle className="text-2xl">{formatPrice(summary.totalEarnings)}</CardTitle>
+              <CardTitle className="text-2xl text-[#2f3a2f]">{formatPrice(summary.totalEarnings)}</CardTitle>
             </CardHeader>
             <CardContent>
               {showGrowth ? (
                 <div
-                  className={`flex items-center gap-1 text-sm ${growthPositive ? 'text-success' : 'text-destructive'}`}
+                  className={`flex items-center gap-1 text-sm ${growthPositive ? 'text-[#315f3b]' : 'text-[#8a4f2a]'}`}
                 >
                   {growthPositive ? <TrendingUp className="w-4 h-4" /> : <TrendingDown className="w-4 h-4" />}
                   <span>
                     {growthPositive ? '+' : ''}
                     {summary.growth.toFixed(1)}%{' '}
-                    <span className="text-muted-foreground font-normal">{t.growthVsPrev}</span>
+                    <span className="font-normal text-[#6f6552]">{t.growthVsPrev}</span>
                   </span>
                 </div>
               ) : (
-                <p className="text-sm text-muted-foreground">—</p>
+                <p className="text-sm text-[#6f6552]">—</p>
               )}
             </CardContent>
           </Card>
 
-          <Card>
+          <Card className="border-[#d7c7a8] bg-[#fffaf0] shadow-[0_16px_40px_rgba(95,70,40,0.08)]">
             <CardHeader className="pb-3">
               <CardDescription>{t.availableBalance}</CardDescription>
-              <CardTitle className="text-2xl">{formatPrice(summary.availableBalance)}</CardTitle>
+              <CardTitle className="text-2xl text-[#2f3a2f]">{formatPrice(summary.availableBalance)}</CardTitle>
             </CardHeader>
             <CardContent>
               <Button
@@ -536,7 +537,7 @@ const Earnings = () => {
                 variant="ghost"
                 size="sm"
                 onClick={() => setIsWithdrawalDialogOpen(true)}
-                className="h-7"
+                className="h-7 text-[#315f3b] hover:bg-[#f3ebdd] hover:text-[#315f3b]"
               >
                 <ArrowDownToLine className="w-3 h-3 mr-1" />
                 {currentLanguage === 'en' ? 'Withdraw' : 'निकालें'}
@@ -544,26 +545,26 @@ const Earnings = () => {
             </CardContent>
           </Card>
 
-          <Card>
+          <Card className="border-[#d7c7a8] bg-[#fffaf0] shadow-[0_16px_40px_rgba(95,70,40,0.08)]">
             <CardHeader className="pb-3">
               <CardDescription>{t.pendingPayments}</CardDescription>
-              <CardTitle className="text-2xl">{formatPrice(summary.pendingPayments)}</CardTitle>
+              <CardTitle className="text-2xl text-[#2f3a2f]">{formatPrice(summary.pendingPayments)}</CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="flex items-center gap-1 text-warning text-sm">
+              <div className="flex items-center gap-1 text-[#d89b2b] text-sm">
                 <Clock className="w-4 h-4" />
                 <span>{currentLanguage === 'en' ? 'Awaiting payment' : 'भुगतान लंबित'}</span>
               </div>
             </CardContent>
           </Card>
 
-          <Card>
+          <Card className="border-[#d7c7a8] bg-[#fffaf0] shadow-[0_16px_40px_rgba(95,70,40,0.08)]">
             <CardHeader className="pb-3">
               <CardDescription>{t.withdrawn}</CardDescription>
-              <CardTitle className="text-2xl">{formatPrice(summary.withdrawnAmount)}</CardTitle>
+              <CardTitle className="text-2xl text-[#2f3a2f]">{formatPrice(summary.withdrawnAmount)}</CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="flex items-center gap-1 text-muted-foreground text-sm">
+              <div className="flex items-center gap-1 text-[#6f6552] text-sm">
                 <Wallet className="w-4 h-4" />
                 <span>{currentLanguage === 'en' ? 'Completed payouts' : 'पूर्ण भुगतान'}</span>
               </div>
@@ -572,7 +573,7 @@ const Earnings = () => {
         </div>
 
         <div className="grid lg:grid-cols-2 gap-6 mb-6">
-          <Card>
+          <Card className="border-[#d7c7a8] bg-[#fffaf0] shadow-[0_16px_40px_rgba(95,70,40,0.08)]">
             <CardHeader>
               <CardTitle>{t.earningsChart}</CardTitle>
               <CardDescription>
@@ -590,8 +591,8 @@ const Earnings = () => {
                     <Area
                       type="monotone"
                       dataKey="earnings"
-                      stroke="hsl(var(--primary))"
-                      fill="hsl(var(--primary) / 0.2)"
+                      stroke="#315f3b"
+                      fill="rgba(49,95,59,0.18)"
                     />
                   </AreaChart>
                 </ResponsiveContainer>
@@ -599,7 +600,7 @@ const Earnings = () => {
             </CardContent>
           </Card>
 
-          <Card>
+          <Card className="border-[#d7c7a8] bg-[#fffaf0] shadow-[0_16px_40px_rgba(95,70,40,0.08)]">
             <CardHeader>
               <CardTitle>{t.monthlyBreakdown}</CardTitle>
             </CardHeader>
@@ -607,18 +608,18 @@ const Earnings = () => {
               <div className="space-y-4">
                 {monthlyBreakdown.length > 0 ? (
                   monthlyBreakdown.map((row) => (
-                    <div key={row.month} className="flex items-center justify-between p-3 bg-muted/50 rounded-lg">
+                    <div key={row.month} className="flex items-center justify-between rounded-lg border border-[#e2d4b7] bg-[#fffdf7] p-3">
                       <div>
-                        <p className="font-medium text-sm">{row.month}</p>
-                        <p className="text-xs text-muted-foreground">
+                        <p className="text-sm font-medium text-[#2f3a2f]">{row.month}</p>
+                        <p className="text-xs text-[#6f6552]">
                           {row.orders} {currentLanguage === 'en' ? 'paid orders' : 'भुगतान किए ऑर्डर'}
                         </p>
                       </div>
-                      <p className="font-bold">{formatPrice(row.amount)}</p>
+                      <p className="font-bold text-[#315f3b]">{formatPrice(row.amount)}</p>
                     </div>
                   ))
                 ) : (
-                  <p className="text-sm text-muted-foreground text-center py-8">
+                  <p className="py-8 text-center text-sm text-[#6f6552]">
                     {currentLanguage === 'en' ? 'No paid orders yet' : 'अभी कोई भुगतान किया ऑर्डर नहीं'}
                   </p>
                 )}
@@ -629,13 +630,13 @@ const Earnings = () => {
 
         <Tabs defaultValue="transactions" className="space-y-4">
           <div className="flex items-center justify-between flex-wrap gap-2">
-            <TabsList>
+            <TabsList className="border border-[#d7c7a8] bg-[#f4ead7] p-1">
               <TabsTrigger value="transactions">{t.transactions}</TabsTrigger>
               <TabsTrigger value="withdrawals">{t.withdrawals}</TabsTrigger>
             </TabsList>
 
             <Select value={filterPeriod} onValueChange={(v: 'week' | 'month' | 'year' | 'all') => setFilterPeriod(v)}>
-              <SelectTrigger className="w-40">
+              <SelectTrigger className="w-40 border-[#d7c7a8] bg-[#fffaf0] text-[#2f3a2f]">
                 <Filter className="w-4 h-4 mr-2" />
                 <SelectValue />
               </SelectTrigger>
@@ -650,26 +651,26 @@ const Earnings = () => {
 
           <TabsContent value="transactions" className="space-y-4">
             {filteredTransactions.length > 0 ? (
-              <Card>
+              <Card className="border-[#d7c7a8] bg-[#fffaf0] shadow-[0_16px_40px_rgba(95,70,40,0.08)]">
                 <CardContent className="p-0">
                   <div className="divide-y divide-border">
                     {filteredTransactions.map((transaction) => (
-                      <div key={transaction.id} className="p-4 hover:bg-muted/50 transition-colors">
+                      <div key={transaction.id} className="p-4 transition-colors hover:bg-[#f6eddc]">
                         <div className="flex items-center justify-between">
                           <div className="flex items-center gap-3">
-                            <div className="w-10 h-10 bg-muted rounded-lg flex items-center justify-center">
+                            <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-[#f3ebdd]">
                               {getTransactionIcon(transaction.type)}
                             </div>
                             <div>
-                              <p className="font-medium text-sm">{transaction.description}</p>
-                              <p className="text-xs text-muted-foreground">
+                              <p className="text-sm font-medium text-[#2f3a2f]">{transaction.description}</p>
+                              <p className="text-xs text-[#6f6552]">
                                 {formatRelativeTime(transaction.createdAt)}
                               </p>
                             </div>
                           </div>
                           <div className="text-right">
                             <p
-                              className={`font-bold ${transaction.amount > 0 ? 'text-success' : 'text-destructive'}`}
+                              className={`font-bold ${transaction.amount > 0 ? 'text-[#315f3b]' : 'text-[#8a4f2a]'}`}
                             >
                               {transaction.amount > 0 ? '+' : ''}
                               {formatPrice(Math.abs(transaction.amount))}
@@ -683,10 +684,10 @@ const Earnings = () => {
                 </CardContent>
               </Card>
             ) : (
-              <Card>
+              <Card className="border-[#d7c7a8] bg-[#fffaf0] shadow-[0_16px_40px_rgba(95,70,40,0.08)]">
                 <CardContent className="py-12 text-center">
-                  <Wallet className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
-                  <p className={`text-muted-foreground ${currentLanguage === 'hi' ? 'font-hindi' : ''}`}>
+                  <Wallet className="mx-auto mb-4 h-12 w-12 text-[#b8ad97]" />
+                  <p className={`text-[#6f6552] ${currentLanguage === 'hi' ? 'font-hindi' : ''}`}>
                     {t.noTransactions}
                   </p>
                 </CardContent>
@@ -700,6 +701,7 @@ const Earnings = () => {
                 type="button"
                 variant="outline"
                 size="sm"
+                className="border-[#d7c7a8] bg-[#fffdf7] text-[#315f3b] hover:bg-[#f3ebdd] hover:text-[#315f3b]"
                 disabled={exportingPayoutsCsv}
                 onClick={() => void handleExportPayoutsCsv()}
               >
@@ -712,36 +714,36 @@ const Earnings = () => {
               </Button>
             </div>
             {filteredWithdrawals.length > 0 ? (
-              <Card>
+              <Card className="border-[#d7c7a8] bg-[#fffaf0] shadow-[0_16px_40px_rgba(95,70,40,0.08)]">
                 <CardContent className="p-0">
                   <div className="divide-y divide-border">
                     {filteredWithdrawals.map((withdrawal) => (
                       <div key={withdrawal.id} className="p-4">
                         <div className="flex items-center justify-between mb-3">
                           <div>
-                            <p className="font-bold text-lg">{formatPrice(withdrawal.amount)}</p>
+                            <p className="text-lg font-bold text-[#2f3a2f]">{formatPrice(withdrawal.amount)}</p>
                             {getWithdrawalBadge(withdrawal.status)}
                           </div>
                         </div>
                         <div className="space-y-2 text-sm">
                           <div className="flex justify-between gap-2">
-                            <span className="text-muted-foreground shrink-0">{t.bankAccount}:</span>
+                            <span className="shrink-0 text-[#6f6552]">{t.bankAccount}:</span>
                             <span className="text-right">
                               {withdrawal.bankAccount.bankName} — {maskAccount(withdrawal.bankAccount.accountNumber)}
                             </span>
                           </div>
                           <div className="flex justify-between">
-                            <span className="text-muted-foreground">{t.requestedOn}:</span>
+                            <span className="text-[#6f6552]">{t.requestedOn}:</span>
                             <span>{formatDate(withdrawal.requestedAt)}</span>
                           </div>
                           {withdrawal.processedAt && (
                             <div className="flex justify-between">
-                              <span className="text-muted-foreground">{t.processedOn}:</span>
+                              <span className="text-[#6f6552]">{t.processedOn}:</span>
                               <span>{formatDate(withdrawal.processedAt)}</span>
                             </div>
                           )}
                           {withdrawal.rejectionReason && (
-                            <div className="mt-2 p-2 bg-destructive/10 rounded text-destructive text-xs">
+                            <div className="mt-2 rounded bg-[#f6e5dc] p-2 text-xs text-[#8a4f2a]">
                               {withdrawal.rejectionReason}
                             </div>
                           )}
@@ -752,10 +754,10 @@ const Earnings = () => {
                 </CardContent>
               </Card>
             ) : (
-              <Card>
+              <Card className="border-[#d7c7a8] bg-[#fffaf0] shadow-[0_16px_40px_rgba(95,70,40,0.08)]">
                 <CardContent className="py-12 text-center">
-                  <ArrowDownToLine className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
-                  <p className={`text-muted-foreground ${currentLanguage === 'hi' ? 'font-hindi' : ''}`}>
+                  <ArrowDownToLine className="mx-auto mb-4 h-12 w-12 text-[#b8ad97]" />
+                  <p className={`text-[#6f6552] ${currentLanguage === 'hi' ? 'font-hindi' : ''}`}>
                     {t.noWithdrawals}
                   </p>
                 </CardContent>
@@ -763,6 +765,7 @@ const Earnings = () => {
             )}
           </TabsContent>
         </Tabs>
+        </div>
       </div>
     </Layout>
   );

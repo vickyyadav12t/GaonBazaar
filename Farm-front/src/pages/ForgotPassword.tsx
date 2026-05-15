@@ -94,10 +94,11 @@ const ForgotPassword = () => {
   };
 
   return (
-    <div className="flex min-h-screen items-center justify-center overflow-x-hidden bg-gradient-to-b from-background to-muted/30 p-3 sm:p-4">
-      <Card className="w-full min-w-0 max-w-md border-2 shadow-lg">
+    <div className="flex min-h-screen items-center justify-center overflow-x-hidden bg-[#fbf7eb] p-3 text-[#213525] sm:p-4">
+      <div className="absolute inset-0 opacity-60 [background-image:linear-gradient(rgba(49,95,59,0.07)_1px,transparent_1px),linear-gradient(90deg,rgba(49,95,59,0.07)_1px,transparent_1px)] [background-size:42px_42px]" />
+      <Card className="relative z-10 w-full min-w-0 max-w-md rounded-lg border-2 border-[#d7c7a8] bg-[#fffaf0] shadow-sm">
         <CardHeader className="space-y-1 px-4 pt-6 sm:px-6">
-          <div className="mb-2 flex items-start gap-2 text-primary sm:items-center">
+          <div className="mb-2 flex items-start gap-2 text-[#315f3b] sm:items-center">
             <KeyRound className="mt-0.5 h-6 w-6 shrink-0 sm:mt-0" />
             <CardTitle className="text-xl break-words sm:text-2xl">
               {step === 'email' ? 'Forgot password' : 'Enter code & new password'}
@@ -123,11 +124,11 @@ const ForgotPassword = () => {
                     placeholder="you@example.com"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
-                    className="pl-10"
+                    className="rounded-md border-2 border-[#d7c7a8] bg-[#fffdf7] pl-10 focus:border-[#315f3b]"
                   />
                 </div>
               </div>
-              <Button type="submit" className="w-full" disabled={isLoading}>
+              <Button type="submit" className="w-full rounded-md bg-[#d89b2b] font-bold text-[#24170c] hover:bg-[#c8871f]" disabled={isLoading}>
                 {isLoading ? 'Sending…' : 'Send verification code'}
               </Button>
             </form>
@@ -144,7 +145,7 @@ const ForgotPassword = () => {
                   placeholder="000000"
                   value={otp}
                   onChange={(e) => setOtp(e.target.value.replace(/\D/g, '').slice(0, 6))}
-                  className="text-center text-lg tracking-[0.4em] font-mono"
+                  className="rounded-md border-2 border-[#d7c7a8] bg-[#fffdf7] text-center font-mono text-lg tracking-[0.4em] focus:border-[#315f3b]"
                 />
               </div>
               <div className="space-y-2">
@@ -155,6 +156,7 @@ const ForgotPassword = () => {
                   autoComplete="new-password"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
+                  className="rounded-md border-2 border-[#d7c7a8] bg-[#fffdf7] focus:border-[#315f3b]"
                 />
               </div>
               <div className="space-y-2">
@@ -165,15 +167,16 @@ const ForgotPassword = () => {
                   autoComplete="new-password"
                   value={confirm}
                   onChange={(e) => setConfirm(e.target.value)}
+                  className="rounded-md border-2 border-[#d7c7a8] bg-[#fffdf7] focus:border-[#315f3b]"
                 />
               </div>
-              <Button type="submit" className="w-full" disabled={isLoading}>
+              <Button type="submit" className="w-full rounded-md bg-[#d89b2b] font-bold text-[#24170c] hover:bg-[#c8871f]" disabled={isLoading}>
                 {isLoading ? 'Saving…' : 'Update password'}
               </Button>
               <Button
                 type="button"
                 variant="secondary"
-                className="w-full"
+                className="w-full rounded-md bg-[#315f3b]/10 text-[#315f3b] hover:bg-[#315f3b]/15"
                 disabled={isLoading}
                 onClick={async () => {
                   try {
@@ -202,7 +205,7 @@ const ForgotPassword = () => {
               <Button
                 type="button"
                 variant="outline"
-                className="w-full"
+                className="w-full rounded-md border-2 border-[#315f3b] text-[#315f3b] hover:bg-[#315f3b] hover:text-[#fff8e8]"
                 disabled={isLoading}
                 onClick={() => {
                   setStep('email');
@@ -215,7 +218,7 @@ const ForgotPassword = () => {
               </Button>
             </form>
           )}
-          <Button variant="ghost" className="w-full mt-4" asChild>
+          <Button variant="ghost" className="mt-4 w-full text-[#315f3b] hover:bg-[#f1e5cc] hover:text-[#8a4f2a]" asChild>
             <Link to="/login">
               <ArrowLeft className="w-4 h-4 mr-2" />
               Back to login

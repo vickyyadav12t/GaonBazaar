@@ -28,6 +28,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Badge } from '@/components/ui/badge';
+import { enHi, scriptFontClass, toNewsApiLang } from '@/lib/i18n';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useAppSelector } from '@/hooks/useRedux';
 import { cropCalendar, cropCategories } from '@/data/mockData';
@@ -229,7 +230,8 @@ const CropCalendar = () => {
       winter: { en: 'Winter', hi: 'सर्दी' },
       autumn: { en: 'Autumn', hi: 'शरद' },
     };
-    return names[season as keyof typeof names]?.[currentLanguage] || season;
+    const bucket = toNewsApiLang(currentLanguage);
+    return names[season as keyof typeof names]?.[bucket] || season;
   };
 
   const getActivityForMonth = (crop: CropCalendarEntry, month: number): CropActivity | null => {
@@ -419,17 +421,17 @@ const CropCalendar = () => {
     },
   };
 
-  const t = content[currentLanguage];
+  const t = content[toNewsApiLang(currentLanguage)];
   const currentMonth = new Date().getMonth() + 1;
 
   const handleDownloadIcs = () => {
     if (!selectedCrop) return;
-    const name = currentLanguage === 'hi' ? selectedCrop.cropNameHindi : selectedCrop.cropName;
+    const name = enHi(currentLanguage, selectedCrop.cropName, selectedCrop.cropNameHindi);
     downloadCropScheduleIcs(
       {
         crop: selectedCrop,
         cropDisplayName: name,
-        zoneLabel: currentLanguage === 'hi' ? zoneMeta.labelHi : zoneMeta.labelEn,
+        zoneLabel: enHi(currentLanguage, zoneMeta.labelEn, zoneMeta.labelHi),
         year: new Date().getFullYear(),
         disclaimer: t.guideDisclaimer,
       },
@@ -454,13 +456,13 @@ const CropCalendar = () => {
   const getActivityColor = (activity: CropActivity) => {
     switch (activity) {
       case 'planting':
-        return 'bg-primary/10 text-primary border-primary/20';
+        return 'bg-[#eaf5ec] text-[#315f3b] border-[#bfd2bf]';
       case 'growing':
-        return 'bg-success/10 text-success border-success/20';
+        return 'bg-[#eef5ee] text-[#58774e] border-[#c9d8c5]';
       case 'harvesting':
-        return 'bg-warning/10 text-warning border-warning/20';
+        return 'bg-[#fff4dd] text-[#9a6b12] border-[#e8cf96]';
       default:
-        return 'bg-muted text-muted-foreground';
+        return 'bg-[#f3ebdd] text-[#6c5a3d]';
     }
   };
 
@@ -483,32 +485,32 @@ const CropCalendar = () => {
 
   return (
     <Layout>
-      <div className="print:hidden min-h-screen min-w-0 overflow-x-hidden bg-gradient-to-b from-background to-muted/20">
+      <div className="print:hidden min-h-screen min-w-0 overflow-x-hidden bg-[#f6f1e7] bg-[linear-gradient(rgba(138,79,42,0.05)_1px,transparent_1px),linear-gradient(90deg,rgba(138,79,42,0.05)_1px,transparent_1px)] bg-[size:24px_24px]">
         <div className="container mx-auto min-w-0 px-3 py-6 sm:px-4 sm:py-8">
           {/* Header Section */}
           <AnimateOnScroll animation="fade-in">
             <div className="text-center mb-10">
-              <div className="inline-flex items-center gap-2 bg-primary/10 px-4 py-2 rounded-full mb-4">
-                <Calendar className="w-5 h-5 text-primary" />
-                <span className="text-sm font-semibold text-primary">
+              <div className="mb-4 inline-flex items-center gap-2 rounded-full border border-[#d7c7a8] bg-[#fffaf0] px-4 py-2">
+                <Calendar className="w-5 h-5 text-[#315f3b]" />
+                <span className="text-sm font-semibold text-[#315f3b]">
                   {currentLanguage === 'en' ? 'Seasonal Planning Guide' : 'मौसमी योजना गाइड'}
                 </span>
               </div>
-              <h1 className={`text-4xl md:text-5xl lg:text-6xl font-extrabold mb-4 ${currentLanguage === 'hi' ? 'font-hindi' : ''}`}>
+              <h1 className={`mb-4 text-4xl font-extrabold text-[#2f3a2f] md:text-5xl lg:text-6xl ${currentLanguage === 'hi' ? 'font-hindi' : ''}`}>
                 {t.title}
               </h1>
-              <p className={`text-xl text-muted-foreground max-w-2xl mx-auto ${currentLanguage === 'hi' ? 'font-hindi' : ''}`}>
+              <p className={`mx-auto max-w-2xl text-xl text-[#6f6552] ${currentLanguage === 'hi' ? 'font-hindi' : ''}`}>
                 {t.subtitle}
               </p>
               <p
-                className={`text-base text-muted-foreground max-w-2xl mx-auto mt-3 ${currentLanguage === 'hi' ? 'font-hindi' : ''}`}
+                className={`mx-auto mt-3 max-w-2xl text-base text-[#6f6552] ${currentLanguage === 'hi' ? 'font-hindi' : ''}`}
               >
                 {t.audienceNote}
               </p>
-              <Alert className="mt-8 max-w-3xl mx-auto border-amber-500/40 bg-amber-50/90 text-left shadow-sm dark:border-amber-500/30 dark:bg-amber-950/25">
-                <Info className="h-5 w-5 text-amber-700 dark:text-amber-400" />
+              <Alert className="mx-auto mt-8 max-w-3xl border-[#d7c7a8] bg-[#fff7e8] text-left shadow-[0_16px_40px_rgba(95,70,40,0.08)]">
+                <Info className="h-5 w-5 text-[#d89b2b]" />
                 <AlertDescription
-                  className={`text-foreground/90 sm:text-[15px] leading-relaxed ${currentLanguage === 'hi' ? 'font-hindi' : ''}`}
+                  className={`leading-relaxed text-[#2f3a2f] sm:text-[15px] ${currentLanguage === 'hi' ? 'font-hindi' : ''}`}
                 >
                   {t.guideDisclaimer}
                 </AlertDescription>
@@ -518,18 +520,18 @@ const CropCalendar = () => {
 
           {/* Season Navigation Bar */}
           <AnimateOnScroll animation="slide-up" delay={0.1}>
-            <Card className="mb-8 border-2 shadow-lg bg-gradient-to-br from-card to-muted/30">
+            <Card className="mb-8 border-[#d7c7a8] bg-[#fffaf0] shadow-[0_16px_40px_rgba(95,70,40,0.08)]">
               <CardContent className="p-6">
                 <div className="flex flex-wrap items-center justify-center gap-4">
-                  <span className={`text-base font-semibold text-foreground flex items-center gap-2 ${currentLanguage === 'hi' ? 'font-hindi' : ''}`}>
-                    <Sun className="w-5 h-5 text-secondary" />
+                  <span className={`flex items-center gap-2 text-base font-semibold text-[#2f3a2f] ${currentLanguage === 'hi' ? 'font-hindi' : ''}`}>
+                    <Sun className="w-5 h-5 text-[#d89b2b]" />
                     {currentLanguage === 'en' ? 'Browse by Season:' : 'मौसम से ब्राउज़ करें:'}
                   </span>
                   {[
-                    { id: 'winter', name: 'Winter', nameHi: 'सर्दी', months: [12, 1, 2], emoji: '❄️', color: 'from-blue-500/20 to-blue-600/10 text-blue-600 border-blue-500/30' },
-                    { id: 'spring', name: 'Spring', nameHi: 'वसंत', months: [3, 4, 5], emoji: '🌷', color: 'from-green-500/20 to-green-600/10 text-green-600 border-green-500/30' },
-                    { id: 'monsoon', name: 'Monsoon', nameHi: 'मानसून', months: [6, 7, 8], emoji: '🌧️', color: 'from-purple-500/20 to-purple-600/10 text-purple-600 border-purple-500/30' },
-                    { id: 'autumn', name: 'Autumn', nameHi: 'शरद', months: [9, 10, 11], emoji: '🍂', color: 'from-orange-500/20 to-orange-600/10 text-orange-600 border-orange-500/30' },
+                    { id: 'winter', name: 'Winter', nameHi: 'सर्दी', months: [12, 1, 2], emoji: '❄️', color: 'bg-[#f3ebdd] text-[#6c5a3d] border-[#d7c7a8]' },
+                    { id: 'spring', name: 'Spring', nameHi: 'वसंत', months: [3, 4, 5], emoji: '🌷', color: 'bg-[#eaf5ec] text-[#315f3b] border-[#bfd2bf]' },
+                    { id: 'monsoon', name: 'Monsoon', nameHi: 'मानसून', months: [6, 7, 8], emoji: '🌧️', color: 'bg-[#eef5ee] text-[#58774e] border-[#c9d8c5]' },
+                    { id: 'autumn', name: 'Autumn', nameHi: 'शरद', months: [9, 10, 11], emoji: '🍂', color: 'bg-[#fff4dd] text-[#9a6b12] border-[#e8cf96]' },
                   ].map((season) => {
                     const isActive = season.months.includes(selectedMonth);
                     const seasonCrops = getCropsBySeason(season.id);
@@ -543,17 +545,17 @@ const CropCalendar = () => {
                             pushCalendarQuery(nm, activeTab, selectedCrop?.id ?? null);
                           }
                         }}
-                        className={`flex items-center gap-3 px-6 py-3 rounded-xl border-2 transition-all duration-300 hover:scale-105 ${
+                        className={`flex items-center gap-3 rounded-xl border px-6 py-3 transition-all duration-300 hover:scale-105 ${
                           isActive 
-                            ? `bg-gradient-to-br ${season.color} border-current font-bold shadow-lg scale-105` 
-                            : 'bg-card text-muted-foreground border-border hover:border-primary/50 hover:bg-muted'
+                            ? `${season.color} scale-105 font-bold shadow-[0_12px_28px_rgba(95,70,40,0.12)]`
+                            : 'border-[#d7c7a8] bg-[#fffdf7] text-[#6f6552] hover:border-[#c8b38b] hover:bg-[#f6eddc]'
                         }`}
                       >
                         <span className="text-2xl">{season.emoji}</span>
                         <span className={`text-sm font-semibold ${currentLanguage === 'hi' ? 'font-hindi' : ''}`}>
                           {currentLanguage === 'en' ? season.name : season.nameHi}
                         </span>
-                        <Badge variant="secondary" className="ml-1 text-xs font-bold">
+                        <Badge className="ml-1 bg-[#fffaf0] text-[#6c5a3d] hover:bg-[#fffaf0] text-xs font-bold">
                           {seasonCrops.length}
                         </Badge>
                       </button>
@@ -567,75 +569,71 @@ const CropCalendar = () => {
           {/* Current Month Info Card */}
           <AnimateOnScroll animation="slide-up" delay={0.2}>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-              <Card className="bg-gradient-to-br from-primary/10 to-primary/5 border-primary/20">
+              <Card className="border-[#d7c7a8] bg-[#fffaf0] shadow-[0_16px_40px_rgba(95,70,40,0.08)]">
                 <CardContent className="p-6">
                   <div className="flex items-center gap-4">
-                    <div className="w-16 h-16 bg-primary/20 rounded-xl flex items-center justify-center">
-                      <Calendar className="w-8 h-8 text-primary" />
+                    <div className="flex h-16 w-16 items-center justify-center rounded-xl bg-[#f3ebdd]">
+                      <Calendar className="w-8 h-8 text-[#315f3b]" />
                     </div>
                     <div>
-                      <p
-                        className={`text-sm text-muted-foreground mb-1 ${currentLanguage === 'hi' ? 'font-hindi' : ''}`}
-                      >
+                      <p className={`mb-1 text-sm text-[#6f6552] ${currentLanguage === 'hi' ? 'font-hindi' : ''}`}>
                         {t.statSelectedMonth}
                       </p>
-                      <p className={`text-2xl font-bold ${currentLanguage === 'hi' ? 'font-hindi' : ''}`}>
+                      <p className={`text-2xl font-bold text-[#2f3a2f] ${currentLanguage === 'hi' ? 'font-hindi' : ''}`}>
                         {currentLanguage === 'hi' ? currentMonthData.nameHi : currentMonthData.name}
                       </p>
                     </div>
                   </div>
                 </CardContent>
               </Card>
-              <Card className="bg-gradient-to-br from-secondary/10 to-secondary/5 border-secondary/20">
+              <Card className="border-[#d7c7a8] bg-[#fffaf0] shadow-[0_16px_40px_rgba(95,70,40,0.08)]">
                 <CardContent className="p-6">
                   <div className="flex items-center gap-4">
-                    <div className="w-16 h-16 bg-secondary/20 rounded-xl flex items-center justify-center">
-                      <TrendingUp className="w-8 h-8 text-secondary" />
+                    <div className="flex h-16 w-16 items-center justify-center rounded-xl bg-[#fff4dd]">
+                      <TrendingUp className="w-8 h-8 text-[#d89b2b]" />
                     </div>
                     <div>
-                      <p className="text-sm text-muted-foreground mb-1">
+                      <p className="mb-1 text-sm text-[#6f6552]">
                         {getSeasonName(calendarSeasonForSelectedMonth)}
                       </p>
-                      <p className="text-2xl font-bold">
+                      <p className="text-2xl font-bold text-[#2f3a2f]">
                         {cropsThisMonth} {currentLanguage === 'en' ? 'Crops' : 'फसलें'}
                       </p>
                     </div>
                   </div>
                 </CardContent>
               </Card>
-              <Card className="bg-gradient-to-br from-success/10 to-success/5 border-success/20">
+              <Card className="border-[#d7c7a8] bg-[#fffaf0] shadow-[0_16px_40px_rgba(95,70,40,0.08)]">
                 <CardContent className="p-6">
                   <div className="flex items-center gap-4">
-                    <div className="w-16 h-16 bg-success/20 rounded-xl flex items-center justify-center">
-                      <Sparkles className="w-8 h-8 text-success" />
+                    <div className="flex h-16 w-16 items-center justify-center rounded-xl bg-[#eaf5ec]">
+                      <Sparkles className="w-8 h-8 text-[#315f3b]" />
                     </div>
                     <div>
-                      <p className="text-sm text-muted-foreground mb-1">
+                      <p className="mb-1 text-sm text-[#6f6552]">
                         {currentLanguage === 'en' ? 'Total Crops' : 'कुल फसलें'}
                       </p>
-                      <p className="text-2xl font-bold">
+                      <p className="text-2xl font-bold text-[#2f3a2f]">
                         {filteredCrops.length}
                       </p>
                     </div>
                   </div>
                 </CardContent>
               </Card>
-              <Card className="bg-gradient-to-br from-accent/10 to-accent/5 border-accent/20">
+              <Card className="border-[#d7c7a8] bg-[#fffaf0] shadow-[0_16px_40px_rgba(95,70,40,0.08)]">
                 <CardContent className="p-6">
                   <div className="flex items-center gap-4">
-                    <div className="w-16 h-16 bg-accent/20 rounded-xl flex items-center justify-center">
-                      <MapPin className="w-8 h-8 text-accent" />
+                    <div className="flex h-16 w-16 items-center justify-center rounded-xl bg-[#f6e5dc]">
+                      <MapPin className="w-8 h-8 text-[#8a4f2a]" />
                     </div>
                     <div className="min-w-0">
-                      <p
-                        className={`text-sm text-muted-foreground mb-1 ${currentLanguage === 'hi' ? 'font-hindi' : ''}`}
-                      >
+                      <p className={`mb-1 text-sm text-[#6f6552] ${currentLanguage === 'hi' ? 'font-hindi' : ''}`}>
                         {t.agroZoneLabel}
                       </p>
-                      <p className={`text-xl font-bold truncate ${currentLanguage === 'hi' ? 'font-hindi' : ''}`}>
+                      <p className={`truncate text-xl font-bold text-[#2f3a2f] ${currentLanguage === 'hi' ? 'font-hindi' : ''}`}>
                         {currentLanguage === 'hi' ? zoneMeta.shortHi : zoneMeta.shortEn}
                       </p>
-                      <p className={`text-xs text-muted-foreground mt-1 line-clamp-2 ${currentLanguage === 'hi' ? 'font-hindi' : ''}`}>
+                      <p className={`mt-1 line-clamp-2 text-xs text-[#6f6552] ${currentLanguage === 'hi' ? 'font-hindi' : ''}`}>
                         {currentLanguage === 'hi' ? zoneMeta.labelHi : zoneMeta.labelEn}
                       </p>
                     </div>
@@ -649,17 +647,17 @@ const CropCalendar = () => {
           <AnimateOnScroll animation="slide-up" delay={0.3}>
             <div className="flex flex-col md:flex-row md:flex-wrap gap-4 mb-2">
               <div className="relative flex-1">
-                <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground z-10" />
+                <Search className="absolute left-4 top-1/2 z-10 h-5 w-5 -translate-y-1/2 text-[#8b816f]" />
                 <Input
                   placeholder={t.search}
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="pl-12 py-6 text-lg border-2 focus:border-primary"
+                  className="border-[#d7c7a8] bg-[#fffaf0] py-6 pl-12 text-lg text-[#2f3a2f] placeholder:text-[#8b816f] focus-visible:ring-[#315f3b]"
                 />
               </div>
               
               <Select value={selectedCategory} onValueChange={(v: any) => setSelectedCategory(v)}>
-                <SelectTrigger className="w-full md:w-56 py-6 border-2">
+                <SelectTrigger className="w-full border-[#d7c7a8] bg-[#fffaf0] py-6 text-[#2f3a2f] md:w-56">
                   <Filter className="w-4 h-4 mr-2" />
                   <SelectValue />
                 </SelectTrigger>
@@ -681,7 +679,7 @@ const CropCalendar = () => {
                   pushCalendarQuery(nm, activeTab, selectedCrop?.id ?? null);
                 }}
               >
-                <SelectTrigger className="w-full md:w-56 py-6 border-2">
+                <SelectTrigger className="w-full border-[#d7c7a8] bg-[#fffaf0] py-6 text-[#2f3a2f] md:w-56">
                   <Calendar className="w-4 h-4 mr-2" />
                   <SelectValue />
                 </SelectTrigger>
@@ -699,7 +697,7 @@ const CropCalendar = () => {
                 <Button
                   type="button"
                   variant="secondary"
-                  className={`w-full md:w-auto gap-2 py-6 px-4 border-2 border-border ${currentLanguage === 'hi' ? 'font-hindi' : ''}`}
+                  className={`w-full gap-2 border-[#d7c7a8] bg-[#fffaf0] px-4 py-6 text-[#315f3b] hover:bg-[#f3ebdd] hover:text-[#315f3b] md:w-auto ${currentLanguage === 'hi' ? 'font-hindi' : ''}`}
                   onClick={jumpToToday}
                 >
                   <CalendarClock className="w-4 h-4 shrink-0" aria-hidden />
@@ -723,7 +721,7 @@ const CropCalendar = () => {
                   );
                 }}
               >
-                <SelectTrigger className="w-full md:w-64 py-6 border-2">
+                <SelectTrigger className="w-full border-[#d7c7a8] bg-[#fffaf0] py-6 text-[#2f3a2f] md:w-64">
                   <MapPin className="w-4 h-4 mr-2 shrink-0" />
                   <SelectValue />
                 </SelectTrigger>
@@ -741,12 +739,12 @@ const CropCalendar = () => {
               </Select>
             </div>
             <p
-              className={`text-xs text-muted-foreground max-w-3xl mb-4 ${currentLanguage === 'hi' ? 'font-hindi' : ''}`}
+              className={`mb-4 max-w-3xl text-xs text-[#6f6552] ${currentLanguage === 'hi' ? 'font-hindi' : ''}`}
             >
               {t.agroZoneHelp}
             </p>
             {calendarApiMeta?.lastUpdated && remoteCalendar && (
-              <p className="text-xs text-muted-foreground max-w-3xl mb-6">
+              <p className="mb-6 max-w-3xl text-xs text-[#6f6552]">
                 {t.guideDatasetUpdated}:{' '}
                 {new Date(calendarApiMeta.lastUpdated).toLocaleString(
                   currentLanguage === 'hi' ? 'hi-IN' : 'en-IN',
@@ -760,10 +758,10 @@ const CropCalendar = () => {
             user?.role === 'farmer' &&
             farmerGuideContext &&
             farmerGuideContext.matchingCropIds.length > 0 && (
-              <Alert className="mb-6 max-w-3xl mx-auto border-primary/30 bg-primary/5">
-                <Sprout className="h-5 w-5 text-primary" />
+              <Alert className="mx-auto mb-6 max-w-3xl border-[#d7c7a8] bg-[#fff7e8]">
+                <Sprout className="h-5 w-5 text-[#315f3b]" />
                 <AlertDescription
-                  className={`${currentLanguage === 'hi' ? 'font-hindi' : ''} text-foreground/90`}
+                  className={`${currentLanguage === 'hi' ? 'font-hindi' : ''} text-[#2f3a2f]`}
                 >
                   <span className="font-semibold block mb-1">{t.farmerGuideHighlightTitle}</span>
                   <span>
@@ -786,12 +784,12 @@ const CropCalendar = () => {
             }}
             className="space-y-6"
           >
-            <TabsList className="grid w-full max-w-md mx-auto grid-cols-2 bg-muted p-1 rounded-xl">
-              <TabsTrigger value="calendar" className="rounded-lg data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
+            <TabsList className="mx-auto grid w-full max-w-md grid-cols-2 rounded-xl border border-[#d7c7a8] bg-[#f4ead7] p-1">
+              <TabsTrigger value="calendar" className="rounded-lg text-[#6c5a3d] data-[state=active]:bg-[#fffaf0] data-[state=active]:text-[#315f3b]">
                 <Calendar className="w-4 h-4 mr-2" />
                 {t.calendar}
               </TabsTrigger>
-              <TabsTrigger value="list" className="rounded-lg data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
+              <TabsTrigger value="list" className="rounded-lg text-[#6c5a3d] data-[state=active]:bg-[#fffaf0] data-[state=active]:text-[#315f3b]">
                 <List className="w-4 h-4 mr-2" />
                 {t.list}
               </TabsTrigger>
@@ -800,8 +798,8 @@ const CropCalendar = () => {
             {/* Calendar View */}
             <TabsContent value="calendar" className="space-y-6">
               {/* Month Overview */}
-              <Card className="border-2 shadow-lg">
-                <CardHeader className="bg-gradient-to-r from-primary/10 to-secondary/10 border-b">
+              <Card className="border-[#d7c7a8] bg-[#fffaf0] shadow-[0_16px_40px_rgba(95,70,40,0.08)]">
+                <CardHeader className="border-b border-[#e2d4b7] bg-[#f6eddc]">
                   <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
                     <div className="min-w-0">
                       <CardTitle className="text-2xl mb-2">
@@ -829,7 +827,7 @@ const CropCalendar = () => {
                           {t.jumpToToday}
                         </Button>
                       )}
-                      <Badge className="text-lg px-4 py-2 bg-primary text-primary-foreground">
+                      <Badge className="bg-[#315f3b] px-4 py-2 text-lg text-[#fffaf0] hover:bg-[#315f3b]">
                         {cropsThisMonth} {currentLanguage === 'en' ? 'Crops' : 'फसलें'}
                       </Badge>
                     </div>
@@ -846,8 +844,8 @@ const CropCalendar = () => {
                           <Card 
                             key={crop.id} 
                             className={cn(
-                              'cursor-pointer hover:shadow-xl hover:scale-105 transition-all duration-300 border-2 hover:border-primary/50 group',
-                              farmerPick && 'ring-2 ring-primary border-primary/50 shadow-md'
+                              'group cursor-pointer rounded-xl border border-[#d7c7a8] bg-[#fffdf7] transition-all duration-300 hover:scale-105 hover:border-[#c8b38b] hover:shadow-[0_16px_40px_rgba(95,70,40,0.12)]',
+                              farmerPick && 'ring-2 ring-[#315f3b] border-[#315f3b] shadow-[0_16px_40px_rgba(95,70,40,0.12)]'
                             )}
                             onClick={() => {
                               setSelectedCrop(crop);
@@ -889,13 +887,13 @@ const CropCalendar = () => {
                   ) : (
                     <AnimateOnScroll animation="zoom-in">
                       <div className="text-center py-16 px-2">
-                        <div className="inline-flex items-center justify-center w-24 h-24 bg-muted rounded-full mb-6">
-                          <Calendar className="w-12 h-12 text-muted-foreground" />
+                        <div className="mb-6 inline-flex h-24 w-24 items-center justify-center rounded-full bg-[#f3ebdd]">
+                          <Calendar className="h-12 w-12 text-[#8b816f]" />
                         </div>
                         <h3 className={`text-xl font-bold text-foreground mb-2 ${currentLanguage === 'hi' ? 'font-hindi' : ''}`}>
                           {t.noCrops}
                         </h3>
-                        <p className={`text-muted-foreground mb-6 max-w-md mx-auto ${currentLanguage === 'hi' ? 'font-hindi' : ''}`}>
+                        <p className={`mx-auto mb-6 max-w-md text-[#6f6552] ${currentLanguage === 'hi' ? 'font-hindi' : ''}`}>
                           {hasActiveFilters ? t.noCropsThisMonthFiltered : t.tryDifferent}
                         </p>
                         {hasActiveFilters && (
@@ -910,10 +908,10 @@ const CropCalendar = () => {
               </Card>
 
               {/* Year Calendar Grid */}
-              <Card className="border-2 shadow-lg">
-                <CardHeader className="bg-gradient-to-r from-muted/50 to-muted/30 border-b">
+              <Card className="border-[#d7c7a8] bg-[#fffaf0] shadow-[0_16px_40px_rgba(95,70,40,0.08)]">
+                <CardHeader className="border-b border-[#e2d4b7] bg-[#f6eddc]">
                   <CardTitle className="text-xl flex items-center gap-2">
-                    <Clock className="w-5 h-5 text-primary" />
+                    <Clock className="w-5 h-5 text-[#315f3b]" />
                     {currentLanguage === 'en' ? 'Annual Calendar' : 'वार्षिक कैलेंडर'}
                   </CardTitle>
                   <CardDescription className="flex flex-col gap-1 sm:block">
@@ -922,7 +920,7 @@ const CropCalendar = () => {
                         ? 'View all crops throughout the year — tap a month to focus it.'
                         : 'पूरे वर्ष की फसलें — किसी महीने पर टैप करके उस पर फ़ोकस करें।'}
                     </span>
-                    <span className={`text-xs font-medium text-primary md:hidden ${currentLanguage === 'hi' ? 'font-hindi' : ''}`}>
+                    <span className={`text-xs font-medium text-[#315f3b] md:hidden ${currentLanguage === 'hi' ? 'font-hindi' : ''}`}>
                       {t.scrollMonthsHint}
                     </span>
                   </CardDescription>
@@ -948,19 +946,19 @@ const CropCalendar = () => {
                           }}
                           className={`text-center rounded-xl border-2 transition-transform duration-200 touch-manipulation active:scale-[0.97] min-w-[5.5rem] shrink-0 snap-center min-h-[5.5rem] py-3 px-2 flex flex-col items-center justify-center md:min-w-0 md:min-h-0 md:w-full md:p-4 md:hover:scale-105 ${
                             isSelected
-                              ? 'border-primary bg-gradient-to-br from-primary/20 to-primary/10 shadow-lg md:scale-105'
-                              : 'border-border hover:border-primary/50 bg-card'
-                          } ${isCurrent && !isSelected ? 'ring-2 ring-primary/30' : ''}`}
+                              ? 'border-[#315f3b] bg-[#eaf5ec] shadow-[0_12px_28px_rgba(95,70,40,0.12)] md:scale-105'
+                              : 'border-[#d7c7a8] bg-[#fffdf7] hover:border-[#c8b38b]'
+                          } ${isCurrent && !isSelected ? 'ring-2 ring-[#d89b2b]/40' : ''}`}
                         >
-                          <p className={`text-sm font-bold mb-1 ${isSelected ? 'text-primary' : 'text-foreground'}`}>
+                          <p className={`mb-1 text-sm font-bold ${isSelected ? 'text-[#315f3b]' : 'text-[#2f3a2f]'}`}>
                             {currentLanguage === 'hi' ? month.shortHi : month.short}
                           </p>
-                          <p className={`text-xs font-semibold ${isSelected ? 'text-primary' : 'text-muted-foreground'}`}>
+                          <p className={`text-xs font-semibold ${isSelected ? 'text-[#315f3b]' : 'text-[#6f6552]'}`}>
                             {monthCrops} {currentLanguage === 'en' ? 'crops' : 'फसलें'}
                           </p>
                           {isCurrent && (
                             <div className="mt-1">
-                              <Badge variant="secondary" className="text-xs">
+                              <Badge className="bg-[#fff4dd] text-[#9a6b12] hover:bg-[#fff4dd] text-xs">
                                 {currentLanguage === 'en' ? 'Now' : 'अभी'}
                               </Badge>
                             </div>
@@ -980,7 +978,7 @@ const CropCalendar = () => {
                 value={listSort}
                 onValueChange={(v) => setListSort(v as 'name' | 'season' | 'planting')}
               >
-                <SelectTrigger className="w-full sm:w-72 py-6 border-2">
+                <SelectTrigger className="w-full border-[#d7c7a8] bg-[#fffaf0] py-6 text-[#2f3a2f] sm:w-72">
                   <ArrowDownAZ className="w-4 h-4 mr-2 shrink-0" aria-hidden />
                   <SelectValue placeholder={t.sortList} />
                 </SelectTrigger>
@@ -993,13 +991,13 @@ const CropCalendar = () => {
             </div>
 
             {sortedListCrops.length === 0 ? (
-              <div className="text-center py-16 px-4 rounded-xl border-2 border-dashed bg-muted/30">
-                <List className="w-12 h-12 mx-auto text-muted-foreground mb-4" aria-hidden />
+              <div className="rounded-xl border border-dashed border-[#d7c7a8] bg-[#fffaf0] px-4 py-16 text-center">
+                <List className="mx-auto mb-4 h-12 w-12 text-[#8b816f]" aria-hidden />
                 <h3 className={`text-lg font-semibold mb-2 ${currentLanguage === 'hi' ? 'font-hindi' : ''}`}>
                   {t.listEmptyFiltered}
                 </h3>
                 {hasActiveFilters ? (
-                  <Button type="button" onClick={clearFilters} className={currentLanguage === 'hi' ? 'font-hindi' : ''}>
+                  <Button type="button" onClick={clearFilters} className={`border border-[#b68222] bg-[#d89b2b] text-[#2f2416] hover:bg-[#c88d22] ${currentLanguage === 'hi' ? 'font-hindi' : ''}`}>
                     {t.clearFilters}
                   </Button>
                 ) : null}
@@ -1012,8 +1010,8 @@ const CropCalendar = () => {
                 <Card 
                   key={crop.id}
                   className={cn(
-                    'cursor-pointer hover:shadow-lg transition-shadow',
-                    farmerPick && 'ring-2 ring-primary border-primary/50 shadow-sm'
+                    'cursor-pointer border-[#d7c7a8] bg-[#fffaf0] shadow-[0_16px_40px_rgba(95,70,40,0.08)] transition-all hover:border-[#c8b38b] hover:shadow-[0_16px_40px_rgba(95,70,40,0.12)]',
+                    farmerPick && 'ring-2 ring-[#315f3b] border-[#315f3b] shadow-[0_16px_40px_rgba(95,70,40,0.12)]'
                   )}
                   onClick={() => {
                     setSelectedCrop(crop);
@@ -1024,10 +1022,10 @@ const CropCalendar = () => {
                     <div className="flex items-center gap-3">
                       <div className="text-4xl">{crop.icon}</div>
                       <div>
-                        <CardTitle className="text-lg">
+                        <CardTitle className="text-lg text-[#2f3a2f]">
                           {currentLanguage === 'hi' ? crop.cropNameHindi : crop.cropName}
                         </CardTitle>
-                        <CardDescription>
+                        <CardDescription className="text-[#6f6552]">
                           {getSeasonName(crop.season)}
                         </CardDescription>
                       </div>
@@ -1036,28 +1034,28 @@ const CropCalendar = () => {
                   <CardContent>
                     <div className="space-y-2">
                       <div className="flex items-center gap-2 text-sm">
-                        <Sprout className="w-4 h-4 text-primary" />
-                        <span className="text-muted-foreground">{t.plantingTime}:</span>
-                        <span className="font-medium">
+                        <Sprout className="w-4 h-4 text-[#315f3b]" />
+                        <span className="text-[#6f6552]">{t.plantingTime}:</span>
+                        <span className="font-medium text-[#2f3a2f]">
                           {crop.plantingMonths.map(m => currentLanguage === 'hi' ? months[m-1].shortHi : months[m-1].short).join(', ')}
                         </span>
                       </div>
                       <div className="flex items-center gap-2 text-sm">
-                        <Scissors className="w-4 h-4 text-warning" />
-                        <span className="text-muted-foreground">{t.harvestTime}:</span>
-                        <span className="font-medium">
+                        <Scissors className="w-4 h-4 text-[#d89b2b]" />
+                        <span className="text-[#6f6552]">{t.harvestTime}:</span>
+                        <span className="font-medium text-[#2f3a2f]">
                           {crop.harvestingMonths.map(m => currentLanguage === 'hi' ? months[m-1].shortHi : months[m-1].short).join(', ')}
                         </span>
                       </div>
                       <div className="flex items-center gap-2 text-sm">
-                        <Leaf className="w-4 h-4 text-success" />
-                        <span className="text-muted-foreground">{t.growingPeriod}:</span>
-                        <span className="font-medium">{crop.growingPeriod} {t.days}</span>
+                        <Leaf className="w-4 h-4 text-[#58774e]" />
+                        <span className="text-[#6f6552]">{t.growingPeriod}:</span>
+                        <span className="font-medium text-[#2f3a2f]">{crop.growingPeriod} {t.days}</span>
                       </div>
                     </div>
                     <Button 
                       variant="outline" 
-                      className="w-full mt-4"
+                      className="mt-4 w-full border-[#d7c7a8] bg-[#fffdf7] text-[#315f3b] hover:bg-[#f3ebdd] hover:text-[#315f3b]"
                       onClick={(e) => {
                         e.stopPropagation();
                         setSelectedCrop(crop);
@@ -1086,7 +1084,7 @@ const CropCalendar = () => {
             }
           }}
         >
-          <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+          <DialogContent className="max-h-[90vh] max-w-2xl overflow-y-auto border-[#d7c7a8] bg-[#fffaf0]">
             {selectedCrop && (
               <>
                 <DialogHeader>
@@ -1096,7 +1094,7 @@ const CropCalendar = () => {
                       <h2 className="text-2xl">
                         {currentLanguage === 'hi' ? selectedCrop.cropNameHindi : selectedCrop.cropName}
                       </h2>
-                      <Badge variant="outline" className="mt-1">
+                      <Badge variant="outline" className="mt-1 border-[#d7c7a8] bg-[#fffdf7] text-[#6c5a3d]">
                         {getSeasonName(selectedCrop.season)}
                       </Badge>
                     </div>
@@ -1106,18 +1104,18 @@ const CropCalendar = () => {
                 <div className="space-y-6 py-4">
                   {/* Description */}
                   <div>
-                    <h3 className="font-semibold mb-2">{t.description}</h3>
-                    <p className={`text-muted-foreground ${currentLanguage === 'hi' ? 'font-hindi' : ''}`}>
+                    <h3 className="mb-2 font-semibold text-[#2f3a2f]">{t.description}</h3>
+                    <p className={`text-[#6f6552] ${currentLanguage === 'hi' ? 'font-hindi' : ''}`}>
                       {currentLanguage === 'hi' ? selectedCrop.descriptionHindi : selectedCrop.description}
                     </p>
                   </div>
 
-                  <div className="rounded-xl border bg-muted/40 p-4 space-y-3">
+                  <div className="space-y-3 rounded-xl border border-[#e2d4b7] bg-[#fffdf7] p-4">
                     <h3 className="font-semibold flex items-center gap-2 text-sm sm:text-base">
-                      <ExternalLink className="w-4 h-4 shrink-0 text-primary" aria-hidden />
+                      <ExternalLink className="w-4 h-4 shrink-0 text-[#315f3b]" aria-hidden />
                       <span className={currentLanguage === 'hi' ? 'font-hindi' : ''}>{t.trustLinksHeading}</span>
                     </h3>
-                    <p className={`text-xs text-muted-foreground leading-relaxed ${currentLanguage === 'hi' ? 'font-hindi' : ''}`}>
+                    <p className={`text-xs leading-relaxed text-[#6f6552] ${currentLanguage === 'hi' ? 'font-hindi' : ''}`}>
                       {t.trustLinksNote}
                     </p>
                     <ul className="space-y-2.5">
@@ -1130,7 +1128,7 @@ const CropCalendar = () => {
                             href={link.href}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className={`text-primary text-sm underline-offset-2 hover:underline inline-flex items-start gap-1.5 break-words text-left ${currentLanguage === 'hi' ? 'font-hindi' : ''}`}
+                            className={`inline-flex items-start gap-1.5 break-words text-left text-sm text-[#315f3b] underline-offset-2 hover:underline ${currentLanguage === 'hi' ? 'font-hindi' : ''}`}
                           >
                             <span>{currentLanguage === 'hi' ? link.labelHi : link.labelEn}</span>
                             <ExternalLink className="w-3.5 h-3.5 shrink-0 mt-0.5 opacity-80" aria-hidden />
@@ -1142,10 +1140,10 @@ const CropCalendar = () => {
 
                   {/* Timeline */}
                   <div className="grid grid-cols-2 gap-4">
-                    <Card>
+                    <Card className="border-[#d7c7a8] bg-[#fffdf7]">
                       <CardHeader className="pb-3">
                         <CardTitle className="text-sm flex items-center gap-2">
-                          <Sprout className="w-4 h-4 text-primary" />
+                          <Sprout className="w-4 h-4 text-[#315f3b]" />
                           {t.plantingTime}
                         </CardTitle>
                       </CardHeader>
@@ -1158,10 +1156,10 @@ const CropCalendar = () => {
                       </CardContent>
                     </Card>
 
-                    <Card>
+                    <Card className="border-[#d7c7a8] bg-[#fffdf7]">
                       <CardHeader className="pb-3">
                         <CardTitle className="text-sm flex items-center gap-2">
-                          <Scissors className="w-4 h-4 text-warning" />
+                          <Scissors className="w-4 h-4 text-[#d89b2b]" />
                           {t.harvestTime}
                         </CardTitle>
                       </CardHeader>
@@ -1176,21 +1174,21 @@ const CropCalendar = () => {
                   </div>
 
                   {/* Growing Period */}
-                  <div className="flex items-center justify-between p-4 bg-muted rounded-lg">
-                    <span className="text-muted-foreground">{t.growingPeriod}</span>
-                    <span className="font-bold text-lg">{selectedCrop.growingPeriod} {t.days}</span>
+                  <div className="flex items-center justify-between rounded-lg bg-[#f3ebdd] p-4">
+                    <span className="text-[#6f6552]">{t.growingPeriod}</span>
+                    <span className="text-lg font-bold text-[#2f3a2f]">{selectedCrop.growingPeriod} {t.days}</span>
                   </div>
 
                   {/* Tips */}
                   <div>
                     <h3 className="font-semibold mb-3 flex items-center gap-2">
-                      <Info className="w-5 h-5 text-primary" />
+                      <Info className="w-5 h-5 text-[#315f3b]" />
                       {t.tips}
                     </h3>
                     <ul className="space-y-2">
                       {(currentLanguage === 'hi' ? selectedCrop.tipsHindi : selectedCrop.tips).map((tip, index) => (
                         <li key={index} className={`flex items-start gap-2 ${currentLanguage === 'hi' ? 'font-hindi' : ''}`}>
-                          <span className="text-primary mt-1">•</span>
+                          <span className="mt-1 text-[#315f3b]">•</span>
                           <span>{tip}</span>
                         </li>
                       ))}
@@ -1199,15 +1197,15 @@ const CropCalendar = () => {
 
                   {/* Monthly Activity Chart */}
                   <div className="print:hidden">
-                    <p className={`text-xs text-muted-foreground mb-3 ${currentLanguage === 'hi' ? 'font-hindi' : ''}`}>
+                    <p className={`mb-3 text-xs text-[#6f6552] ${currentLanguage === 'hi' ? 'font-hindi' : ''}`}>
                       {t.exportHint}
                     </p>
                     <div className="flex flex-col sm:flex-row gap-2">
-                      <Button type="button" variant="outline" className="flex-1 gap-2" onClick={() => window.print()}>
+                      <Button type="button" variant="outline" className="flex-1 gap-2 border-[#d7c7a8] bg-[#fffdf7] text-[#315f3b] hover:bg-[#f3ebdd] hover:text-[#315f3b]" onClick={() => window.print()}>
                         <Printer className="h-4 w-4 shrink-0" aria-hidden />
                         <span className={currentLanguage === 'hi' ? 'font-hindi' : ''}>{t.printOrPdf}</span>
                       </Button>
-                      <Button type="button" variant="outline" className="flex-1 gap-2" onClick={handleDownloadIcs}>
+                      <Button type="button" variant="outline" className="flex-1 gap-2 border-[#d7c7a8] bg-[#fffdf7] text-[#315f3b] hover:bg-[#f3ebdd] hover:text-[#315f3b]" onClick={handleDownloadIcs}>
                         <FileDown className="h-4 w-4 shrink-0" aria-hidden />
                         <span className={currentLanguage === 'hi' ? 'font-hindi' : ''}>{t.downloadIcs}</span>
                       </Button>
@@ -1226,12 +1224,12 @@ const CropCalendar = () => {
                             key={month.num}
                             className={`aspect-square rounded-lg flex items-center justify-center text-xs border-2 ${
                               activity === 'planting' 
-                                ? 'bg-primary/20 border-primary' 
+                                ? 'border-[#315f3b] bg-[#eaf5ec]' 
                                 : activity === 'growing'
-                                ? 'bg-success/20 border-success'
+                                ? 'border-[#58774e] bg-[#eef5ee]'
                                 : activity === 'harvesting'
-                                ? 'bg-warning/20 border-warning'
-                                : 'bg-muted border-border'
+                                ? 'border-[#d89b2b] bg-[#fff4dd]'
+                                : 'border-[#d7c7a8] bg-[#f3ebdd]'
                             }`}
                             title={`${month.name}: ${activity || 'inactive'}`}
                           >
@@ -1246,15 +1244,15 @@ const CropCalendar = () => {
                     </div>
                     <div className="flex gap-4 mt-3 text-xs">
                       <div className="flex items-center gap-1">
-                        <div className="w-3 h-3 bg-primary/20 border border-primary rounded" />
+                        <div className="h-3 w-3 rounded border border-[#315f3b] bg-[#eaf5ec]" />
                         <span>{t.planting}</span>
                       </div>
                       <div className="flex items-center gap-1">
-                        <div className="w-3 h-3 bg-success/20 border border-success rounded" />
+                        <div className="h-3 w-3 rounded border border-[#58774e] bg-[#eef5ee]" />
                         <span>{t.growing}</span>
                       </div>
                       <div className="flex items-center gap-1">
-                        <div className="w-3 h-3 bg-warning/20 border border-warning rounded" />
+                        <div className="h-3 w-3 rounded border border-[#d89b2b] bg-[#fff4dd]" />
                         <span>{t.harvesting}</span>
                       </div>
                     </div>
@@ -1269,7 +1267,7 @@ const CropCalendar = () => {
                     const browseLabel = t.browseCategoryMarketplace.replace('{category}', catLabel);
                     return (
                       <div className="pt-2 border-t">
-                        <Button className="w-full gap-2" asChild>
+                        <Button className="w-full gap-2 border border-[#b68222] bg-[#d89b2b] text-[#2f2416] hover:bg-[#c88d22]" asChild>
                           <Link
                             to={`/marketplace?category=${encodeURIComponent(selectedCrop.category)}`}
                             className={`inline-flex w-full items-center justify-center gap-2 ${currentLanguage === 'hi' ? 'font-hindi' : ''}`}
@@ -1364,4 +1362,3 @@ const CropCalendar = () => {
 };
 
 export default CropCalendar;
-

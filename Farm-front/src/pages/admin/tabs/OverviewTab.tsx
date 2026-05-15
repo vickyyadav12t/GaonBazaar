@@ -52,32 +52,32 @@ export default function AdminOverviewTab() {
     <div className="space-y-6">
   {vm.stats?.orderStatusBreakdown != null && (vm.stats?.totalOrders ?? 0) > 0 && (
     <AnimateOnScroll animation="slide-up" delay={0.12}>
-      <Card className="border-2 shadow-lg">
+      <Card className="border-[#d7c7a8] bg-[#fffaf0] shadow-[0_16px_40px_rgba(95,70,40,0.08)]">
         <CardHeader className="pb-2">
           <CardTitle className="text-lg flex items-center gap-2">
-            <ShoppingCart className="w-5 h-5 text-accent" />
+            <ShoppingCart className="w-5 h-5 text-[#8a4f2a]" />
             Order fulfilment mix
           </CardTitle>
-          <CardDescription>
+          <CardDescription className="text-[#6f6552]">
             Linked orders only (same total as the KPI above). Segment width ∝ count.
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
-          <div className="flex h-3 rounded-full overflow-hidden bg-muted">
+          <div className="flex h-3 overflow-hidden rounded-full bg-[#f3ebdd]">
             {(
               [
-                { key: 'pending', n: vm.stats.orderStatusBreakdown.pending, cls: 'bg-warning' },
+                { key: 'pending', n: vm.stats.orderStatusBreakdown.pending, cls: 'bg-[#d89b2b]' },
                 {
                   key: 'processing',
                   n: vm.stats.orderStatusBreakdown.processing,
-                  cls: 'bg-primary/70',
+                  cls: 'bg-[#58774e]',
                 },
-                { key: 'shipped', n: vm.stats.orderStatusBreakdown.shipped, cls: 'bg-secondary' },
-                { key: 'delivered', n: vm.stats.orderStatusBreakdown.delivered, cls: 'bg-success' },
+                { key: 'shipped', n: vm.stats.orderStatusBreakdown.shipped, cls: 'bg-[#6c5a3d]' },
+                { key: 'delivered', n: vm.stats.orderStatusBreakdown.delivered, cls: 'bg-[#315f3b]' },
                 {
                   key: 'cancelled',
                   n: vm.stats.orderStatusBreakdown.cancelled,
-                  cls: 'bg-destructive/80',
+                  cls: 'bg-[#8a4f2a]',
                 },
               ] as const
             ).map(({ key, n, cls }) =>
@@ -93,25 +93,25 @@ export default function AdminOverviewTab() {
               ) : null
             )}
           </div>
-          <div className="flex flex-wrap gap-x-4 gap-y-2 text-xs text-muted-foreground">
+          <div className="flex flex-wrap gap-x-4 gap-y-2 text-xs text-[#6f6552]">
             <span>
-              <span className="inline-block w-2 h-2 rounded-full bg-warning mr-1 align-middle" />
+              <span className="mr-1 inline-block h-2 w-2 align-middle rounded-full bg-[#d89b2b]" />
               Pending {vm.stats.orderStatusBreakdown.pending}
             </span>
             <span>
-              <span className="inline-block w-2 h-2 rounded-full bg-primary/70 mr-1 align-middle" />
+              <span className="mr-1 inline-block h-2 w-2 align-middle rounded-full bg-[#58774e]" />
               Processing {vm.stats.orderStatusBreakdown.processing}
             </span>
             <span>
-              <span className="inline-block w-2 h-2 rounded-full bg-secondary mr-1 align-middle" />
+              <span className="mr-1 inline-block h-2 w-2 align-middle rounded-full bg-[#6c5a3d]" />
               Shipped {vm.stats.orderStatusBreakdown.shipped}
             </span>
             <span>
-              <span className="inline-block w-2 h-2 rounded-full bg-success mr-1 align-middle" />
+              <span className="mr-1 inline-block h-2 w-2 align-middle rounded-full bg-[#315f3b]" />
               Delivered {vm.stats.orderStatusBreakdown.delivered}
             </span>
             <span>
-              <span className="inline-block w-2 h-2 rounded-full bg-destructive/80 mr-1 align-middle" />
+              <span className="mr-1 inline-block h-2 w-2 align-middle rounded-full bg-[#8a4f2a]" />
               Cancelled {vm.stats.orderStatusBreakdown.cancelled}
             </span>
           </div>
@@ -122,13 +122,13 @@ export default function AdminOverviewTab() {
   {/* Charts Row 1 */}
   <AnimateOnScroll animation="slide-up" delay={0.2}>
     <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-      <Card className="border-2 shadow-lg">
+      <Card className="border-[#d7c7a8] bg-[#fffaf0] shadow-[0_16px_40px_rgba(95,70,40,0.08)]">
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
-            <TrendingUp className="w-5 h-5 text-primary" />
+            <TrendingUp className="w-5 h-5 text-[#315f3b]" />
             Orders & Revenue Trend
           </CardTitle>
-          <CardDescription>
+          <CardDescription className="text-[#6f6552]">
             Linked orders only (buyer and farmer accounts exist), by month placed — same scope as
             the Total Orders KPI.
           </CardDescription>
@@ -142,20 +142,21 @@ export default function AdminOverviewTab() {
                 <YAxis className="text-xs" allowDecimals={false} />
                 <Tooltip
                   formatter={(value: number | string) => [Number(value).toLocaleString('en-IN'), 'Orders']}
+                  contentStyle={{ borderRadius: '8px', border: '1px solid #d7c7a8', backgroundColor: '#fffaf0' }}
                 />
-                <Area type="monotone" dataKey="orders" stroke="hsl(var(--primary))" fill="hsl(var(--primary) / 0.2)" />
+                <Area type="monotone" dataKey="orders" stroke="#315f3b" fill="rgba(49,95,59,0.16)" />
               </AreaChart>
             </ResponsiveContainer>
           </div>
         </CardContent>
       </Card>
-      <Card className="border-2 shadow-lg">
+      <Card className="border-[#d7c7a8] bg-[#fffaf0] shadow-[0_16px_40px_rgba(95,70,40,0.08)]">
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
-            <TrendingUp className="w-5 h-5 text-success" />
+            <TrendingUp className="w-5 h-5 text-[#d89b2b]" />
             Revenue (₹)
           </CardTitle>
-          <CardDescription>
+          <CardDescription className="text-[#6f6552]">
             Paid linked orders — produce subtotal per month; aligns with Revenue KPI (paid, linked
             only).
           </CardDescription>
@@ -180,8 +181,9 @@ export default function AdminOverviewTab() {
                     `₹${Number(value).toLocaleString('en-IN')}`,
                     'Revenue',
                   ]}
+                  contentStyle={{ borderRadius: '8px', border: '1px solid #d7c7a8', backgroundColor: '#fffaf0' }}
                 />
-                <Bar dataKey="revenue" fill="hsl(var(--secondary))" radius={[4, 4, 0, 0]} />
+                <Bar dataKey="revenue" fill="#d89b2b" radius={[4, 4, 0, 0]} />
               </BarChart>
             </ResponsiveContainer>
           </div>
@@ -193,13 +195,13 @@ export default function AdminOverviewTab() {
   {/* Charts Row 2 */}
   <AnimateOnScroll animation="slide-up" delay={0.3}>
     <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-      <Card className="border-2 shadow-lg">
+      <Card className="border-[#d7c7a8] bg-[#fffaf0] shadow-[0_16px_40px_rgba(95,70,40,0.08)]">
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
-            <Users className="w-5 h-5 text-accent" />
+            <Users className="w-5 h-5 text-[#8a4f2a]" />
             User Growth
           </CardTitle>
-          <CardDescription>New accounts per month (last 6 months)</CardDescription>
+          <CardDescription className="text-[#6f6552]">New accounts per month (last 6 months)</CardDescription>
         </CardHeader>
         <CardContent className="min-w-0">
           <div className="h-48 min-w-0 w-full">
@@ -210,25 +212,26 @@ export default function AdminOverviewTab() {
                 <YAxis className="text-xs" allowDecimals={false} />
                 <Tooltip
                   formatter={(value: number | string) => [Number(value).toLocaleString('en-IN'), 'New users']}
+                  contentStyle={{ borderRadius: '8px', border: '1px solid #d7c7a8', backgroundColor: '#fffaf0' }}
                 />
-                <Line type="monotone" dataKey="users" stroke="hsl(var(--accent))" strokeWidth={2} />
+                <Line type="monotone" dataKey="users" stroke="#8a4f2a" strokeWidth={2} />
               </LineChart>
             </ResponsiveContainer>
           </div>
         </CardContent>
       </Card>
-      <Card className="border-2 shadow-lg">
+      <Card className="border-[#d7c7a8] bg-[#fffaf0] shadow-[0_16px_40px_rgba(95,70,40,0.08)]">
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
-            <Package className="w-5 h-5 text-secondary" />
+            <Package className="w-5 h-5 text-[#6c5a3d]" />
             Category Distribution
           </CardTitle>
-          <CardDescription>All vm.listings by category (current)</CardDescription>
+          <CardDescription className="text-[#6f6552]">All vm.listings by category (current)</CardDescription>
         </CardHeader>
         <CardContent className="min-w-0">
           <div className="h-48 min-w-0 w-full">
             {vm.categoryChartData.length === 0 ? (
-              <div className="h-full flex items-center justify-center text-sm text-muted-foreground">
+              <div className="flex h-full items-center justify-center text-sm text-[#6f6552]">
                 No products yet
               </div>
             ) : (
@@ -249,38 +252,38 @@ export default function AdminOverviewTab() {
                       <Cell key={`${entry.category}-${index}`} fill={entry.color} />
                     ))}
                   </Pie>
-                  <Tooltip formatter={(value: number | string) => [Number(value).toLocaleString('en-IN'), 'Listings']} />
+                  <Tooltip formatter={(value: number | string) => [Number(value).toLocaleString('en-IN'), 'Listings']} contentStyle={{ borderRadius: '8px', border: '1px solid #d7c7a8', backgroundColor: '#fffaf0' }} />
                 </PieChart>
               </ResponsiveContainer>
             )}
           </div>
         </CardContent>
       </Card>
-      <Card className="border-2 shadow-lg">
+      <Card className="border-[#d7c7a8] bg-[#fffaf0] shadow-[0_16px_40px_rgba(95,70,40,0.08)]">
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
-            <Activity className="w-5 h-5 text-primary" />
+            <Activity className="w-5 h-5 text-[#315f3b]" />
             Quick Stats
           </CardTitle>
-          <CardDescription>Platform at a glance</CardDescription>
+          <CardDescription className="text-[#6f6552]">Platform at a glance</CardDescription>
         </CardHeader>
         <CardContent>
           <div className="space-y-4">
-            <div className="flex justify-between items-center p-3 bg-muted/50 rounded-lg">
-              <span className="text-sm font-medium text-muted-foreground">Farmers</span>
-              <span className="font-bold text-lg">{vm.stats?.totalFarmers ?? 0}</span>
+            <div className="flex items-center justify-between rounded-lg border border-[#e2d4b7] bg-[#fffdf7] p-3">
+              <span className="text-sm font-medium text-[#6f6552]">Farmers</span>
+              <span className="text-lg font-bold text-[#2f3a2f]">{vm.stats?.totalFarmers ?? 0}</span>
             </div>
-            <div className="flex justify-between items-center p-3 bg-muted/50 rounded-lg">
-              <span className="text-sm font-medium text-muted-foreground">Buyers</span>
-              <span className="font-bold text-lg">{vm.stats?.totalBuyers ?? 0}</span>
+            <div className="flex items-center justify-between rounded-lg border border-[#e2d4b7] bg-[#fffdf7] p-3">
+              <span className="text-sm font-medium text-[#6f6552]">Buyers</span>
+              <span className="text-lg font-bold text-[#2f3a2f]">{vm.stats?.totalBuyers ?? 0}</span>
             </div>
-            <div className="flex justify-between items-center p-3 bg-warning/10 rounded-lg">
-              <span className="text-sm font-medium text-warning">Pending KYC</span>
-              <span className="font-bold text-lg text-warning">{vm.pendingKYC}</span>
+            <div className="flex items-center justify-between rounded-lg border border-[#e8cf96] bg-[#fff4dd] p-3">
+              <span className="text-sm font-medium text-[#9a6b12]">Pending KYC</span>
+              <span className="text-lg font-bold text-[#9a6b12]">{vm.pendingKYC}</span>
             </div>
-            <div className="flex justify-between items-center p-3 bg-success/10 rounded-lg">
-              <span className="text-sm font-medium text-success">Active Listings</span>
-              <span className="font-bold text-lg text-success">{vm.activeListings}</span>
+            <div className="flex items-center justify-between rounded-lg border border-[#bfd2bf] bg-[#eaf5ec] p-3">
+              <span className="text-sm font-medium text-[#315f3b]">Active Listings</span>
+              <span className="text-lg font-bold text-[#315f3b]">{vm.activeListings}</span>
             </div>
           </div>
         </CardContent>
@@ -291,23 +294,23 @@ export default function AdminOverviewTab() {
   {/* Recent Activity */}
   <AnimateOnScroll animation="slide-up" delay={0.4}>
     <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-      <Card className="border-2 shadow-lg">
-        <CardHeader className="bg-gradient-to-r from-warning/10 to-warning/5 border-b">
+      <Card className="border-[#d7c7a8] bg-[#fffaf0] shadow-[0_16px_40px_rgba(95,70,40,0.08)]">
+        <CardHeader className="border-b border-[#e2d4b7] bg-[#f6eddc]">
           <CardTitle className="flex items-center gap-2">
-            <AlertCircle className="w-5 h-5 text-warning" />
+            <AlertCircle className="w-5 h-5 text-[#d89b2b]" />
             Pending KYC
           </CardTitle>
-          <CardDescription>Requires immediate attention</CardDescription>
+          <CardDescription className="text-[#6f6552]">Requires immediate attention</CardDescription>
         </CardHeader>
         <CardContent className="p-6">
           <div className="space-y-3">
             {vm.overviewPendingKycFarmers.slice(0, 3).map((farmer) => (
-              <div key={farmer.id} className="flex items-center justify-between p-4 bg-muted/50 rounded-lg hover:bg-muted transition-colors border border-border">
+              <div key={farmer.id} className="flex items-center justify-between rounded-lg border border-[#e2d4b7] bg-[#fffdf7] p-4 transition-colors hover:bg-[#f6eddc]">
                 <div className="flex items-center gap-3">
                   <img
                     src={resolveBackendAssetUrl(farmer.avatar)}
                     alt={farmer.name}
-                    className="w-12 h-12 rounded-full object-cover border-2 border-warning/20"
+                    className="h-12 w-12 rounded-full border-2 border-[#e8cf96] object-cover"
                     loading="lazy"
                     decoding="async"
                     onError={(e) => {
@@ -318,18 +321,17 @@ export default function AdminOverviewTab() {
                   />
                   <div>
                     <p className="font-semibold text-sm">{farmer.name}</p>
-                    <p className="text-xs text-muted-foreground">{farmer.location.district}</p>
+                    <p className="text-xs text-[#6f6552]">{farmer.location.district}</p>
                   </div>
                 </div>
                 <div className="flex gap-2">
-                  <Button size="sm" className="bg-success hover:bg-success/90 h-8 text-xs" onClick={() => void vm.handleKycApprove(farmer.id)}>
+                  <Button size="sm" className="h-8 border border-[#315f3b] bg-[#315f3b] text-xs text-[#fffaf0] hover:bg-[#284e31]" onClick={() => void vm.handleKycApprove(farmer.id)}>
                     <CheckCircle className="w-3 h-3 mr-1" />
                     Approve
                   </Button>
                   <Button
                     size="sm"
-                    variant="destructive"
-                    className="h-8 text-xs"
+                    className="h-8 bg-[#8a4f2a] text-xs text-[#fffaf0] hover:bg-[#784223]"
                     onClick={() => {
                       vm.setKycRejectTarget({ id: farmer.id, name: farmer.name });
                       vm.setKycRejectReason('');
@@ -343,23 +345,23 @@ export default function AdminOverviewTab() {
             ))}
             {vm.overviewPendingKycFarmers.length === 0 && (
               <div className="text-center py-8">
-                <CheckCircle className="w-12 h-12 text-success mx-auto mb-2" />
-                <p className="text-muted-foreground">All KYC requests processed</p>
+                <CheckCircle className="mx-auto mb-2 h-12 w-12 text-[#315f3b]" />
+                <p className="text-[#6f6552]">All KYC requests processed</p>
               </div>
             )}
           </div>
         </CardContent>
       </Card>
 
-      <Card className="border-2 shadow-lg">
-        <CardHeader className="bg-gradient-to-r from-success/10 to-success/5 border-b">
+      <Card className="border-[#d7c7a8] bg-[#fffaf0] shadow-[0_16px_40px_rgba(95,70,40,0.08)]">
+        <CardHeader className="border-b border-[#e2d4b7] bg-[#f6eddc]">
           <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
             <div>
               <CardTitle className="flex items-center gap-2">
-                <CheckCircle className="w-5 h-5 text-success" />
+                <CheckCircle className="w-5 h-5 text-[#315f3b]" />
                 Recent Orders
               </CardTitle>
-              <CardDescription>
+              <CardDescription className="text-[#6f6552]">
                 Latest linked orders — click a row for quick view (timeline + summary).
               </CardDescription>
             </div>
@@ -367,7 +369,7 @@ export default function AdminOverviewTab() {
               type="button"
               variant="outline"
               size="sm"
-              className="shrink-0"
+              className="shrink-0 border-[#d7c7a8] bg-[#fffdf7] text-[#315f3b] hover:bg-[#f3ebdd] hover:text-[#315f3b]"
               disabled={vm.csvExporting === 'orders'}
               onClick={() => void vm.handleExportOrdersCsv()}
             >
@@ -387,15 +389,15 @@ export default function AdminOverviewTab() {
                 key={order.id}
                 type="button"
                 onClick={() => vm.setAdminOrderPreviewId(order.id)}
-                className="w-full flex items-center justify-between p-4 bg-muted/50 rounded-lg hover:bg-muted transition-colors border border-border text-left cursor-pointer"
+                className="flex w-full cursor-pointer items-center justify-between rounded-lg border border-[#e2d4b7] bg-[#fffdf7] p-4 text-left transition-colors hover:bg-[#f6eddc]"
               >
                 <div className="flex-1">
                   <p className="font-semibold text-sm mb-1">{order.productName}</p>
-                  <p className="text-xs text-muted-foreground">{order.buyerName} → {order.farmerName}</p>
+                  <p className="text-xs text-[#6f6552]">{order.buyerName} → {order.farmerName}</p>
                 </div>
                 <div className="text-right ml-4">
                   <p className="font-bold text-sm mb-1">₹{order.totalAmount.toLocaleString()}</p>
-                  <Badge className={order.status === 'delivered' ? 'bg-success/10 text-success' : 'bg-warning/10 text-warning'}>
+                  <Badge className={order.status === 'delivered' ? 'bg-[#eaf5ec] text-[#315f3b]' : 'bg-[#fff4dd] text-[#9a6b12]'}>
                     {order.status}
                   </Badge>
                 </div>
@@ -409,13 +411,13 @@ export default function AdminOverviewTab() {
 
   {/* Notifications broadcast (maintenance announcements) */}
   <AnimateOnScroll animation="slide-up" delay={0.45}>
-    <Card className="border-2 shadow-lg">
+    <Card className="border-[#d7c7a8] bg-[#fffaf0] shadow-[0_16px_40px_rgba(95,70,40,0.08)]">
       <CardHeader className="pb-2">
         <CardTitle className="text-lg flex items-center gap-2">
-          <Megaphone className="w-5 h-5 text-primary" />
+          <Megaphone className="w-5 h-5 text-[#315f3b]" />
           Broadcast notification
         </CardTitle>
-        <CardDescription>
+        <CardDescription className="text-[#6f6552]">
           Send an in-app announcement to all farmers, all buyers, or one user
           (title, message, optional link).
         </CardDescription>
@@ -423,14 +425,14 @@ export default function AdminOverviewTab() {
       <CardContent className="space-y-4">
         <div className="flex min-w-0 flex-col gap-4 lg:flex-row">
           <div className="min-w-0 flex-1 space-y-1.5">
-            <Label htmlFor="broadcast-audience" className="text-xs text-muted-foreground">
+            <Label htmlFor="broadcast-audience" className="text-xs text-[#6f6552]">
               Audience
             </Label>
             <Select
               value={vm.notifAudience}
               onValueChange={(v) => vm.setNotifAudience(v as any)}
             >
-              <SelectTrigger id="broadcast-audience" className="w-full lg:w-[240px]">
+              <SelectTrigger id="broadcast-audience" className="w-full border-[#d7c7a8] bg-[#fffdf7] text-[#2f3a2f] lg:w-[240px]">
                 <SelectValue placeholder="Audience" />
               </SelectTrigger>
               <SelectContent>
@@ -443,7 +445,7 @@ export default function AdminOverviewTab() {
 
           {vm.notifAudience === 'user' && (
             <div className="min-w-0 flex-1 space-y-1.5">
-              <Label htmlFor="broadcast-user-id" className="text-xs text-muted-foreground">
+              <Label htmlFor="broadcast-user-id" className="text-xs text-[#6f6552]">
                 Recipient user id
               </Label>
               <Input
@@ -451,13 +453,14 @@ export default function AdminOverviewTab() {
                 value={vm.notifRecipientUserId}
                 onChange={(e) => vm.setNotifRecipientUserId(e.target.value)}
                 placeholder="e.g. 6642…"
+                className="border-[#d7c7a8] bg-[#fffdf7] text-[#2f3a2f] placeholder:text-[#8b816f] focus-visible:ring-[#315f3b]"
               />
             </div>
           )}
         </div>
 
         <div className="space-y-1.5">
-          <Label htmlFor="broadcast-title" className="text-xs text-muted-foreground">
+          <Label htmlFor="broadcast-title" className="text-xs text-[#6f6552]">
             Title
           </Label>
           <Input
@@ -465,11 +468,12 @@ export default function AdminOverviewTab() {
             value={vm.notifTitle}
             onChange={(e) => vm.setNotifTitle(e.target.value)}
             placeholder="Maintenance / announcement title"
+            className="border-[#d7c7a8] bg-[#fffdf7] text-[#2f3a2f] placeholder:text-[#8b816f] focus-visible:ring-[#315f3b]"
           />
         </div>
 
         <div className="space-y-1.5">
-          <Label htmlFor="broadcast-message" className="text-xs text-muted-foreground">
+          <Label htmlFor="broadcast-message" className="text-xs text-[#6f6552]">
             Message
           </Label>
           <Textarea
@@ -478,12 +482,12 @@ export default function AdminOverviewTab() {
             onChange={(e) => vm.setNotifMessage(e.target.value)}
             placeholder="Your message…"
             rows={4}
-            className="resize-none"
+            className="resize-none border-[#d7c7a8] bg-[#fffdf7] text-[#2f3a2f] placeholder:text-[#8b816f] focus-visible:ring-[#315f3b]"
           />
         </div>
 
         <div className="space-y-1.5">
-          <Label htmlFor="broadcast-link" className="text-xs text-muted-foreground">
+          <Label htmlFor="broadcast-link" className="text-xs text-[#6f6552]">
             Link (optional)
           </Label>
           <Input
@@ -491,13 +495,14 @@ export default function AdminOverviewTab() {
             value={vm.notifLink}
             onChange={(e) => vm.setNotifLink(e.target.value)}
             placeholder="e.g. /orders or https://…"
+            className="border-[#d7c7a8] bg-[#fffdf7] text-[#2f3a2f] placeholder:text-[#8b816f] focus-visible:ring-[#315f3b]"
           />
         </div>
 
         <div className="flex flex-wrap items-center justify-between gap-3 pt-2">
           <Button
             type="button"
-            className="btn-primary-gradient"
+            className="border border-[#b68222] bg-[#d89b2b] text-[#2f2416] hover:bg-[#c88d22]"
             disabled={vm.notifBroadcastBusy}
             onClick={() => void vm.handleBroadcastNotifications()}
           >
@@ -515,8 +520,8 @@ export default function AdminOverviewTab() {
           </Button>
 
           {vm.notifLastRecipients !== null && (
-            <p className="text-sm text-muted-foreground">
-              Created for <span className="font-semibold text-foreground">{vm.notifLastRecipients}</span> user
+            <p className="text-sm text-[#6f6552]">
+              Created for <span className="font-semibold text-[#2f3a2f]">{vm.notifLastRecipients}</span> user
               {vm.notifLastRecipients === 1 ? '' : 's'}.
             </p>
           )}

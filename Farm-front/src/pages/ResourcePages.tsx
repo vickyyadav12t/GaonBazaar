@@ -4,14 +4,22 @@ import Layout from '@/components/layout/Layout';
 function DocShell({ title, children }: { title: string; children: ReactNode }) {
   return (
     <Layout showMobileNav={false}>
-      <article className="container mx-auto min-w-0 max-w-3xl px-4 py-10 sm:py-12">
-        <h1 className="mb-6 text-2xl font-bold tracking-tight text-foreground sm:text-3xl md:text-4xl">
-          {title}
-        </h1>
-        <div className="min-w-0 space-y-4 break-words text-sm leading-relaxed text-muted-foreground md:text-base">
-          {children}
-        </div>
-      </article>
+      <section className="relative min-h-[calc(100vh-4.5rem)] overflow-hidden bg-[#fbf7eb] text-[#213525]">
+        <div className="absolute inset-0 opacity-60 [background-image:linear-gradient(rgba(49,95,59,0.07)_1px,transparent_1px),linear-gradient(90deg,rgba(49,95,59,0.07)_1px,transparent_1px)] [background-size:42px_42px]" />
+        <article className="container relative z-10 mx-auto min-w-0 max-w-3xl px-4 py-10 sm:py-14">
+          <div className="mb-5 inline-flex rounded-md border border-[#315f3b]/20 bg-[#315f3b]/10 px-3 py-1.5 text-xs font-bold uppercase tracking-wide text-[#315f3b]">
+            GaonBazaar
+          </div>
+          <div className="rounded-lg border-2 border-[#d7c7a8] bg-[#fffaf0] p-5 shadow-sm sm:p-8">
+            <h1 className="mb-6 text-2xl font-bold tracking-tight text-[#243a28] sm:text-3xl md:text-4xl">
+              {title}
+            </h1>
+            <div className="min-w-0 space-y-4 break-words text-sm leading-relaxed text-[#58624f] md:text-base">
+              {children}
+            </div>
+          </div>
+        </article>
+      </section>
     </Layout>
   );
 }

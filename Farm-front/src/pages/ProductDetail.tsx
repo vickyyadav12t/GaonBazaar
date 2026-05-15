@@ -18,6 +18,7 @@ import {
   optimizeListingImageUrl,
   sanitizeImageUrlList,
 } from '@/lib/productImageUrl';
+import { enHi, scriptFontClass, toNewsApiLang } from '@/lib/i18n';
 
 const ProductDetail = () => {
   const { id } = useParams();
@@ -176,7 +177,7 @@ const ProductDetail = () => {
             {isLoading ? 'Loading product...' : 'Product not found'}
           </h1>
           {!isLoading && (
-            <Link to="/marketplace" className="text-primary mt-4 inline-block">
+            <Link to="/marketplace" className="mt-4 inline-block text-[#315f3b]">
               Back to Marketplace
             </Link>
           )}
@@ -215,11 +216,9 @@ const ProductDetail = () => {
 
     if (product.availableQuantity != null && product.availableQuantity <= 0) {
       toast({
-        title: currentLanguage === 'en' ? 'Out of stock' : 'स्टॉक में नहीं',
+        title: enHi(currentLanguage, 'Out of stock', 'स्टॉक में नहीं'),
         description:
-          currentLanguage === 'en'
-            ? 'This product is currently unavailable.'
-            : 'यह उत्पाद अभी उपलब्ध नहीं है।',
+          enHi(currentLanguage, 'This product is currently unavailable.', 'यह उत्पाद अभी उपलब्ध नहीं है।'),
         variant: 'destructive',
       });
       return;
@@ -380,7 +379,7 @@ const ProductDetail = () => {
     },
   };
 
-  const t = content[currentLanguage];
+  const t = content[toNewsApiLang(currentLanguage)];
 
   const galleryImages =
     product.images.length > 0 ? product.images : [LISTING_IMAGE_PLACEHOLDER];
@@ -388,20 +387,22 @@ const ProductDetail = () => {
 
   return (
     <Layout>
-      <div className="container mx-auto min-w-0 px-3 py-5 sm:px-4 sm:py-6">
+      <div className="min-h-screen bg-[#fbf7eb] text-[#213525]">
+        <div className="absolute inset-0 opacity-50 [background-image:linear-gradient(rgba(49,95,59,0.06)_1px,transparent_1px),linear-gradient(90deg,rgba(49,95,59,0.06)_1px,transparent_1px)] [background-size:42px_42px]" />
+        <div className="container relative z-10 mx-auto min-w-0 px-3 py-5 sm:px-4 sm:py-6">
         {/* Back Button */}
         <button
           onClick={() => navigate(-1)}
-          className="flex items-center gap-2 text-muted-foreground hover:text-foreground mb-6 transition-colors"
+          className="mb-6 flex items-center gap-2 text-muted-foreground transition-colors hover:text-[#315f3b]"
         >
           <ArrowLeft className="w-5 h-5" />
-          <span className={currentLanguage === 'hi' ? 'font-hindi' : ''}>{t.back}</span>
+          <span className={scriptFontClass(currentLanguage)}>{t.back}</span>
         </button>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
           {/* Image Gallery */}
           <div>
-            <div className="relative aspect-square rounded-2xl overflow-hidden bg-muted mb-4">
+            <div className="relative mb-4 aspect-square overflow-hidden rounded-lg border border-[#d7c7a8] bg-[#f1e5cc] shadow-sm">
               <img
                 src={optimizeListingImageUrl(galleryImages[safeImageIndex], 1024)}
                 alt={product.name}
@@ -418,13 +419,13 @@ const ProductDetail = () => {
                 <>
                   <button
                     onClick={() => setCurrentImageIndex((prev) => (prev === 0 ? galleryImages.length - 1 : prev - 1))}
-                    className="absolute left-4 top-1/2 -translate-y-1/2 w-10 h-10 bg-background/80 backdrop-blur-sm rounded-full flex items-center justify-center hover:bg-background transition-colors"
+                    className="absolute left-4 top-1/2 flex h-10 w-10 -translate-y-1/2 items-center justify-center rounded-md border border-[#d7c7a8] bg-[#fffaf0]/95 transition-colors hover:bg-[#fffdf7]"
                   >
                     <ChevronLeft className="w-5 h-5" />
                   </button>
                   <button
                     onClick={() => setCurrentImageIndex((prev) => (prev === galleryImages.length - 1 ? 0 : prev + 1))}
-                    className="absolute right-4 top-1/2 -translate-y-1/2 w-10 h-10 bg-background/80 backdrop-blur-sm rounded-full flex items-center justify-center hover:bg-background transition-colors"
+                    className="absolute right-4 top-1/2 flex h-10 w-10 -translate-y-1/2 items-center justify-center rounded-md border border-[#d7c7a8] bg-[#fffaf0]/95 transition-colors hover:bg-[#fffdf7]"
                   >
                     <ChevronRight className="w-5 h-5" />
                   </button>
@@ -434,12 +435,12 @@ const ProductDetail = () => {
               {/* Badges */}
               <div className="absolute top-4 left-4 flex flex-col gap-2">
                 {product.isOrganic && (
-                  <Badge className="bg-success text-success-foreground">
+                  <Badge className="bg-[#315f3b] text-[#fff8e8]">
                     <Leaf className="w-3 h-3 mr-1" /> {t.organic}
                   </Badge>
                 )}
                 {product.isNegotiable && (
-                  <Badge variant="secondary">
+                  <Badge className="bg-[#d89b2b] text-[#24170c]">
                     💬 {t.negotiable}
                   </Badge>
                 )}
@@ -449,8 +450,8 @@ const ProductDetail = () => {
               <div className="absolute top-4 right-4 flex gap-2">
                 <button
                   onClick={handleToggleWishlist}
-                  className={`w-10 h-10 rounded-full flex items-center justify-center transition-colors ${
-                    isWishlisted ? 'bg-destructive text-destructive-foreground' : 'bg-background/80 backdrop-blur-sm'
+                  className={`flex h-10 w-10 items-center justify-center rounded-md transition-colors ${
+                    isWishlisted ? 'bg-destructive text-destructive-foreground' : 'border border-[#d7c7a8] bg-[#fffaf0]/95'
                   }`}
                 >
                   <Heart className={`w-5 h-5 ${isWishlisted ? 'fill-current' : ''}`} />
@@ -458,7 +459,7 @@ const ProductDetail = () => {
                 <button
                   type="button"
                   onClick={() => void handleShare()}
-                  className="w-10 h-10 bg-background/80 backdrop-blur-sm rounded-full flex items-center justify-center"
+                  className="flex h-10 w-10 items-center justify-center rounded-md border border-[#d7c7a8] bg-[#fffaf0]/95"
                   aria-label="Share"
                 >
                   <Share2 className="w-5 h-5" />
@@ -473,8 +474,8 @@ const ProductDetail = () => {
                   <button
                     key={index}
                     onClick={() => setCurrentImageIndex(index)}
-                    className={`h-20 w-20 shrink-0 overflow-hidden rounded-xl border-2 transition-colors ${
-                      safeImageIndex === index ? 'border-primary' : 'border-transparent'
+                    className={`h-20 w-20 shrink-0 overflow-hidden rounded-md border-2 transition-colors ${
+                      safeImageIndex === index ? 'border-[#315f3b]' : 'border-transparent'
                     }`}
                   >
                     <img
@@ -502,15 +503,15 @@ const ProductDetail = () => {
                 {product.category}
               </p>
               <h1
-                className={`mb-2 text-2xl font-bold text-foreground sm:text-3xl ${currentLanguage === 'hi' ? 'font-hindi' : ''}`}
+                className={`mb-2 text-2xl font-bold text-foreground sm:text-3xl ${scriptFontClass(currentLanguage)}`}
               >
-                {currentLanguage === 'hi' && product.nameHindi ? product.nameHindi : product.name}
+                {enHi(currentLanguage, product.name, product.nameHindi || product.name)}
               </h1>
             </div>
 
             {/* Price */}
             <div className="mb-6 flex min-w-0 flex-wrap items-baseline gap-2">
-              <span className="text-3xl font-bold text-primary sm:text-4xl">{formatPrice(product.price)}</span>
+              <span className="text-3xl font-bold text-[#315f3b] sm:text-4xl">{formatPrice(product.price)}</span>
               <span className="text-lg text-muted-foreground">
                 {t.perUnit} {product.unit}
               </span>
@@ -518,20 +519,20 @@ const ProductDetail = () => {
 
             {/* Quick Info */}
             <div className="grid grid-cols-2 gap-4 mb-6">
-              <div className="bg-muted/50 rounded-xl p-4">
-                <p className={`text-sm text-muted-foreground ${currentLanguage === 'hi' ? 'font-hindi' : ''}`}>
+              <div className="rounded-lg border border-[#d7c7a8] bg-[#fffaf0] p-4 shadow-sm">
+                <p className={`text-sm text-muted-foreground ${scriptFontClass(currentLanguage)}`}>
                   {t.minOrder}
                 </p>
                 <p className="font-semibold">{product.minOrderQuantity} {product.unit}</p>
               </div>
-              <div className="bg-muted/50 rounded-xl p-4">
-                <p className={`text-sm text-muted-foreground ${currentLanguage === 'hi' ? 'font-hindi' : ''}`}>
+              <div className="rounded-lg border border-[#d7c7a8] bg-[#fffaf0] p-4 shadow-sm">
+                <p className={`text-sm text-muted-foreground ${scriptFontClass(currentLanguage)}`}>
                   {t.available}
                 </p>
                 <p className="font-semibold">{product.availableQuantity} {product.unit}</p>
               </div>
-              <div className="bg-muted/50 rounded-xl p-4 col-span-2">
-                <p className={`text-sm text-muted-foreground ${currentLanguage === 'hi' ? 'font-hindi' : ''}`}>
+              <div className="col-span-2 rounded-lg border border-[#d7c7a8] bg-[#fffaf0] p-4 shadow-sm">
+                <p className={`text-sm text-muted-foreground ${scriptFontClass(currentLanguage)}`}>
                   {t.harvested}
                 </p>
                 <p className="font-semibold">
@@ -546,13 +547,13 @@ const ProductDetail = () => {
 
             {/* Quantity Selector */}
             <div className="mb-6">
-              <label className={`text-sm font-medium mb-2 block ${currentLanguage === 'hi' ? 'font-hindi' : ''}`}>
+              <label className={`text-sm font-medium mb-2 block ${scriptFontClass(currentLanguage)}`}>
                 {t.quantity} ({product.unit})
               </label>
               <div className="flex min-w-0 flex-wrap items-center gap-3 sm:gap-4">
                 <button
                   onClick={() => setQuantity(Math.max(product.minOrderQuantity, quantity - 1))}
-                  className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-muted text-xl font-bold transition-colors hover:bg-muted/80 sm:h-12 sm:w-12"
+                  className="flex h-11 w-11 shrink-0 items-center justify-center rounded-md border border-[#d7c7a8] bg-[#fffaf0] text-xl font-bold transition-colors hover:bg-[#f1e5cc] sm:h-12 sm:w-12"
                 >
                   -
                 </button>
@@ -560,11 +561,11 @@ const ProductDetail = () => {
                   type="number"
                   value={quantity}
                   onChange={(e) => setQuantity(Math.max(product.minOrderQuantity, parseInt(e.target.value) || 0))}
-                  className="w-20 shrink-0 text-center text-base font-semibold sm:w-24 sm:text-lg"
+                  className="w-20 shrink-0 rounded-md border-2 border-[#d7c7a8] bg-[#fffdf7] text-center text-base font-semibold focus:border-[#315f3b] sm:w-24 sm:text-lg"
                 />
                 <button
                   onClick={() => setQuantity(Math.min(product.availableQuantity, quantity + 1))}
-                  className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-muted text-xl font-bold transition-colors hover:bg-muted/80 sm:h-12 sm:w-12"
+                  className="flex h-11 w-11 shrink-0 items-center justify-center rounded-md border border-[#d7c7a8] bg-[#fffaf0] text-xl font-bold transition-colors hover:bg-[#f1e5cc] sm:h-12 sm:w-12"
                 >
                   +
                 </button>
@@ -583,7 +584,7 @@ const ProductDetail = () => {
                 <Button
                   onClick={handleAddToCart}
                   variant="outline"
-                  className="flex-1 py-6 text-lg"
+                  className="flex-1 rounded-md border-2 border-[#315f3b] py-6 text-lg text-[#315f3b] hover:bg-[#315f3b] hover:text-[#fff8e8]"
                 >
                   <ShoppingCart className="w-5 h-5 mr-2" />
                   {t.addToCart}
@@ -592,25 +593,25 @@ const ProductDetail = () => {
                   <Button
                     onClick={handleNegotiate}
                     variant="secondary"
-                    className="flex-1 py-6 text-lg"
+                    className="flex-1 rounded-md bg-[#315f3b]/10 py-6 text-lg text-[#315f3b] hover:bg-[#315f3b]/15"
                   >
                     <MessageCircle className="w-5 h-5 mr-2" />
                     {t.negotiate}
                   </Button>
                 )}
               </div>
-              <Button onClick={handleBuyNow} className="w-full py-6 text-lg btn-primary-gradient">
+              <Button onClick={handleBuyNow} className="w-full rounded-md bg-[#d89b2b] py-6 text-lg font-bold text-[#24170c] hover:bg-[#c8871f]">
                 {t.buyNow}
               </Button>
             </div>
 
             {/* Farmer Card */}
-            <div className="card-elevated p-4 mb-6">
-              <h3 className={`font-semibold mb-3 ${currentLanguage === 'hi' ? 'font-hindi' : ''}`}>
+            <div className="mb-6 rounded-lg border border-[#d7c7a8] bg-[#fffaf0] p-4 shadow-sm">
+              <h3 className={`font-semibold mb-3 ${scriptFontClass(currentLanguage)}`}>
                 {t.aboutFarmer}
               </h3>
               <div className="flex items-center gap-4">
-                <div className="w-16 h-16 rounded-full overflow-hidden bg-muted">
+                <div className="h-16 w-16 overflow-hidden rounded-md border border-[#d7c7a8] bg-[#f1e5cc]">
                   {product.farmerAvatar ? (
                     <img
                       src={optimizeListingImageUrl(product.farmerAvatar, 128)}
@@ -633,7 +634,7 @@ const ProductDetail = () => {
                 <div className="flex-1">
                   <h4 className="font-semibold text-foreground flex items-center gap-2">
                     {product.farmerName}
-                    <span className="verified-badge">
+                    <span className="inline-flex items-center gap-1 rounded-md bg-[#315f3b]/10 px-2 py-1 text-xs font-medium text-[#315f3b]">
                       <CheckCircle className="w-3 h-3" />
                       {t.verified}
                     </span>
@@ -648,7 +649,7 @@ const ProductDetail = () => {
                 <div>
                   <p className="text-sm text-muted-foreground">{t.rating}</p>
                   <div className="flex items-center gap-1">
-                    <Star className="w-5 h-5 text-secondary fill-secondary" />
+                    <Star className="w-5 h-5 fill-[#d89b2b] text-[#d89b2b]" />
                     <span className="font-semibold">
                       {product.farmerRating > 0 ? product.farmerRating : '—'}
                     </span>
@@ -667,7 +668,7 @@ const ProductDetail = () => {
 
             {/* Description */}
             <div className="mb-6">
-              <h3 className={`font-semibold mb-3 ${currentLanguage === 'hi' ? 'font-hindi' : ''}`}>
+              <h3 className={`font-semibold mb-3 ${scriptFontClass(currentLanguage)}`}>
                 {t.description}
               </h3>
               <p className="text-muted-foreground leading-relaxed">
@@ -680,18 +681,18 @@ const ProductDetail = () => {
         {/* Related Products */}
         {relatedProducts.length > 0 && (
           <div className="mt-12">
-            <h2 className={`text-xl font-bold mb-6 ${currentLanguage === 'hi' ? 'font-hindi' : ''}`}>
+            <h2 className={`text-xl font-bold mb-6 ${scriptFontClass(currentLanguage)}`}>
               {t.viewMore}
             </h2>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
               {relatedProducts.map((p) => (
-                <Link key={p.id} to={`/product/${p.id}`} className="card-product">
+                <Link key={p.id} to={`/product/${p.id}`} className="overflow-hidden rounded-lg border border-[#d7c7a8] bg-[#fffaf0] shadow-sm transition-all hover:-translate-y-1 hover:shadow-md">
                   <div className="aspect-[4/3] overflow-hidden">
                     <img src={p.images[0]} alt={p.name} className="w-full h-full object-cover" />
                   </div>
                   <div className="p-4">
                     <h3 className="font-semibold">{p.name}</h3>
-                    <p className="text-primary font-bold">
+                    <p className="font-bold text-[#315f3b]">
                       {formatPrice(p.price)}/{p.unit}
                     </p>
                   </div>
@@ -700,6 +701,7 @@ const ProductDetail = () => {
             </div>
           </div>
         )}
+      </div>
       </div>
     </Layout>
   );

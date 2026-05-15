@@ -108,46 +108,50 @@ const FarmerChats = () => {
 
   return (
     <Layout>
-      <div className="container mx-auto min-w-0 px-3 py-5 sm:px-4 sm:py-6">
+      <div className="min-h-screen bg-[linear-gradient(rgba(251,247,235,0.97),rgba(251,247,235,0.97)),linear-gradient(rgba(138,79,42,0.07)_1px,transparent_1px),linear-gradient(90deg,rgba(138,79,42,0.07)_1px,transparent_1px)] bg-[size:auto,24px_24px,24px_24px]">
+        <div className="container mx-auto min-w-0 px-3 py-5 sm:px-4 sm:py-6">
         <div className="flex items-center gap-4 mb-2">
-          <button onClick={() => navigate(-1)} className="p-2 hover:bg-muted rounded-lg">
+          <button
+            onClick={() => navigate(-1)}
+            className="rounded-lg border border-[#d7c7a8] bg-[#fffaf0] p-2 text-[#315f3b] transition hover:bg-[#f6eddc]"
+          >
             <ArrowLeft className="w-5 h-5" />
           </button>
-          <h1 className="text-2xl font-bold">
+          <h1 className="text-2xl font-bold text-[#2f3a2f]">
             {currentLanguage === 'en' ? 'Farmer Chats' : 'किसान चैट'}
           </h1>
         </div>
-        <p className="text-sm text-muted-foreground mb-4">
+        <p className="mb-4 text-sm text-[#6f6552]">
           {currentLanguage === 'en'
             ? 'Buyer conversations for your listings'
             : 'आपकी लिस्टिंग के लिए खरीदार बातचीत'}
         </p>
 
         <div className="relative mb-4">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+          <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[#8b816f]" />
           <Input
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             placeholder={currentLanguage === 'en' ? 'Search chats...' : 'चैट खोजें...'}
-            className="pl-9"
+            className="border-[#d7c7a8] bg-[#fffaf0] pl-9 text-[#2f3a2f] placeholder:text-[#8b816f] focus-visible:ring-[#315f3b]"
           />
         </div>
 
         <div className="space-y-3">
           {isLoading ? (
-            <div className="text-center py-12 text-muted-foreground">
+            <div className="py-12 text-center text-[#6f6552]">
               {currentLanguage === 'en' ? 'Loading chats...' : 'चैट लोड हो रही हैं...'}
             </div>
           ) : filteredChats.length === 0 ? (
-            <div className="text-center py-12 card-elevated">
-              <MessageCircle className="w-12 h-12 text-muted-foreground mx-auto mb-3" />
-              <p className="text-muted-foreground">
+            <div className="rounded-2xl border border-[#d7c7a8] bg-[#fffaf0] py-12 text-center shadow-[0_16px_40px_rgba(95,70,40,0.08)]">
+              <MessageCircle className="mx-auto mb-3 h-12 w-12 text-[#b8ad97]" />
+              <p className="text-[#6f6552]">
                 {currentLanguage === 'en' ? 'No chats found.' : 'कोई चैट नहीं मिली।'}
               </p>
             </div>
           ) : (
             filteredChats.map((chat) => (
-              <Link key={chat.id} to={`/chat/${chat.id}`} className="block card-elevated p-4 hover:shadow-md border-l-4 border-l-green-500">
+              <Link key={chat.id} to={`/chat/${chat.id}`} className="block rounded-2xl border border-[#d7c7a8] border-l-4 border-l-[#315f3b] bg-[#fffaf0] p-4 shadow-[0_16px_40px_rgba(95,70,40,0.08)] transition hover:shadow-[0_18px_42px_rgba(95,70,40,0.12)]">
                 <div className="flex items-start gap-3">
                   <img
                     src={chat.productImage}
@@ -156,22 +160,22 @@ const FarmerChats = () => {
                     height={56}
                     loading="lazy"
                     decoding="async"
-                    className="w-14 h-14 rounded-lg object-cover bg-muted"
+                    className="h-14 w-14 rounded-lg border border-[#e2d4b7] bg-[#f3ebdd] object-cover"
                   />
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center justify-between gap-2">
-                      <h3 className="font-semibold truncate">{chat.buyerName}</h3>
+                      <h3 className="truncate font-semibold text-[#2f3a2f]">{chat.buyerName}</h3>
                       {chat.unreadCount > 0 && (
-                        <Badge className="bg-accent text-accent-foreground">{chat.unreadCount}</Badge>
+                        <Badge className="bg-[#d89b2b] text-[#2f2416]">{chat.unreadCount}</Badge>
                       )}
                     </div>
-                    <p className="text-sm text-muted-foreground truncate">{chat.productName}</p>
-                    <p className="text-sm truncate mt-1">{chat.lastMessage || '-'}</p>
-                    <p className="text-xs text-muted-foreground mt-1">
+                    <p className="truncate text-sm text-[#6f6552]">{chat.productName}</p>
+                    <p className="mt-1 truncate text-sm text-[#2f3a2f]">{chat.lastMessage || '-'}</p>
+                    <p className="mt-1 text-xs text-[#6f6552]">
                       {new Date(chat.lastMessageTime).toLocaleString()}
                     </p>
                   </div>
-                  <Button size="sm" variant="outline">
+                  <Button size="sm" variant="outline" className="border-[#d7c7a8] bg-[#fffdf7] text-[#315f3b] hover:bg-[#f3ebdd] hover:text-[#315f3b]">
                     {currentLanguage === 'en' ? 'Open' : 'खोलें'}
                   </Button>
                 </div>
@@ -185,6 +189,7 @@ const FarmerChats = () => {
             <Button
               type="button"
               variant="outline"
+              className="border-[#d7c7a8] bg-[#fffdf7] text-[#315f3b] hover:bg-[#f3ebdd] hover:text-[#315f3b]"
               disabled={loadingMore}
               onClick={() => void loadChats({ silent: true, append: true })}
             >
@@ -199,9 +204,9 @@ const FarmerChats = () => {
           </div>
         )}
       </div>
+      </div>
     </Layout>
   );
 };
 
 export default FarmerChats;
-

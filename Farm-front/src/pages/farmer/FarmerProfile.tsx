@@ -311,18 +311,18 @@ const FarmerProfile = () => {
   const kycDocBadge = (doc: KycDocumentItem | undefined) => {
     if (!doc) {
       return (
-        <Badge variant="secondary" className="text-muted-foreground">
+        <Badge variant="secondary" className="text-[#6f6552]">
           {currentLanguage === 'en' ? 'Not uploaded' : 'अपलोड नहीं'}
         </Badge>
       );
     }
     if (user?.kycStatus === 'approved' && doc.reviewStatus === 'approved') {
-      return <Badge className="bg-success/10 text-success">{currentLanguage === 'en' ? 'Verified' : 'सत्यापित'}</Badge>;
+      return <Badge className="bg-[#eaf5ec] text-[#315f3b]">{currentLanguage === 'en' ? 'Verified' : 'सत्यापित'}</Badge>;
     }
     if (user?.kycStatus === 'rejected' || doc.reviewStatus === 'rejected') {
       return <Badge variant="destructive">{currentLanguage === 'en' ? 'Rejected' : 'अस्वीकृत'}</Badge>;
     }
-    return <Badge className="bg-warning/10 text-warning">{currentLanguage === 'en' ? 'Pending review' : 'समीक्षा लंबित'}</Badge>;
+    return <Badge className="bg-[#fff4dd] text-[#9a6b12]">{currentLanguage === 'en' ? 'Pending review' : 'समीक्षा लंबित'}</Badge>;
   };
 
   const canEditKyc = user?.kycStatus !== 'approved';
@@ -352,19 +352,23 @@ const FarmerProfile = () => {
 
   return (
     <Layout>
-      <div className="container mx-auto min-w-0 px-3 py-5 sm:px-4 sm:py-6">
+      <div className="min-h-screen bg-[linear-gradient(rgba(251,247,235,0.97),rgba(251,247,235,0.97)),linear-gradient(rgba(138,79,42,0.07)_1px,transparent_1px),linear-gradient(90deg,rgba(138,79,42,0.07)_1px,transparent_1px)] bg-[size:auto,24px_24px,24px_24px]">
+        <div className="container mx-auto min-w-0 px-3 py-5 sm:px-4 sm:py-6">
         {/* Header */}
         <div className="flex items-center gap-4 mb-6">
-          <button onClick={() => navigate(-1)} className="p-2 hover:bg-muted rounded-lg">
+          <button
+            onClick={() => navigate(-1)}
+            className="rounded-lg border border-[#d7c7a8] bg-[#fffaf0] p-2 text-[#315f3b] transition hover:bg-[#f6eddc]"
+          >
             <ArrowLeft className="w-5 h-5" />
           </button>
-          <h1 className="text-2xl font-bold">
+          <h1 className="text-2xl font-bold text-[#2f3a2f]">
             {currentLanguage === 'en' ? 'My Profile' : 'मेरी प्रोफाइल'}
           </h1>
         </div>
 
         <Tabs value={profileTab} onValueChange={setProfileTab} className="space-y-6">
-          <TabsList className="grid w-full grid-cols-2">
+          <TabsList className="grid w-full grid-cols-2 border border-[#d7c7a8] bg-[#f4ead7] p-1">
             <TabsTrigger value="profile">
               {currentLanguage === 'en' ? 'Profile Details' : 'प्रोफाइल विवरण'}
             </TabsTrigger>
@@ -375,7 +379,7 @@ const FarmerProfile = () => {
 
           <TabsContent value="profile" className="space-y-6">
             {/* Profile Header */}
-            <div className="card-elevated p-6">
+            <div className="rounded-2xl border border-[#d7c7a8] bg-[#fffaf0] p-6 shadow-[0_16px_40px_rgba(95,70,40,0.08)]">
               <div className="flex flex-col sm:flex-row items-center gap-6">
                 <div className="relative">
                   <input
@@ -388,7 +392,7 @@ const FarmerProfile = () => {
                   <img
                     src={avatarDisplayUrl}
                     alt={user?.name || 'Farmer'}
-                    className="w-24 h-24 rounded-full object-cover border-4 border-primary/20"
+                    className="h-24 w-24 rounded-full border-4 border-[#e2d4b7] object-cover"
                     onError={(e) => {
                       const el = e.currentTarget;
                       el.onerror = null;
@@ -399,26 +403,26 @@ const FarmerProfile = () => {
                     type="button"
                     disabled={isUploadingAvatar}
                     onClick={() => avatarInputRef.current?.click()}
-                    className="absolute bottom-0 right-0 w-8 h-8 bg-primary text-primary-foreground rounded-full flex items-center justify-center shadow-lg disabled:opacity-60"
+                    className="absolute bottom-0 right-0 flex h-8 w-8 items-center justify-center rounded-full border border-[#b68222] bg-[#d89b2b] text-[#2f2416] shadow-lg disabled:opacity-60"
                     title={currentLanguage === 'en' ? 'Change photo' : 'फोटो बदलें'}
                   >
                     <Camera className="w-4 h-4" />
                   </button>
                 </div>
                 <div className="text-center sm:text-left">
-                  <h2 className="text-xl font-bold">{user?.name}</h2>
-                  <p className="text-muted-foreground flex items-center justify-center sm:justify-start gap-1 mt-1">
+                  <h2 className="text-xl font-bold text-[#2f3a2f]">{user?.name}</h2>
+                  <p className="mt-1 flex items-center justify-center gap-1 text-[#6f6552] sm:justify-start">
                     <MapPin className="w-4 h-4" />
                     {user?.location?.district}, {user?.location?.state}
                   </p>
                   <div className="flex items-center gap-2 mt-2">
                     {user?.kycStatus === 'approved' ? (
-                      <Badge className="bg-success/10 text-success gap-1">
+                      <Badge className="gap-1 bg-[#eaf5ec] text-[#315f3b]">
                         <Shield className="w-3 h-3" />
                         {currentLanguage === 'en' ? 'Verified Farmer' : 'सत्यापित किसान'}
                       </Badge>
                     ) : (
-                      <Badge className="bg-warning/10 text-warning">
+                      <Badge className="bg-[#fff4dd] text-[#9a6b12]">
                         {currentLanguage === 'en' ? 'Verification Pending' : 'सत्यापन लंबित'}
                       </Badge>
                     )}
@@ -427,6 +431,11 @@ const FarmerProfile = () => {
                 <div className="sm:ml-auto">
                   <Button
                     variant={isEditing ? 'default' : 'outline'}
+                    className={
+                      isEditing
+                        ? 'border border-[#b68222] bg-[#d89b2b] text-[#2f2416] hover:bg-[#c88d22]'
+                        : 'border-[#d7c7a8] bg-[#fffdf7] text-[#315f3b] hover:bg-[#f3ebdd] hover:text-[#315f3b]'
+                    }
                     onClick={() => isEditing ? handleSave() : setIsEditing(true)}
                   >
                     {isEditing ? (
@@ -440,13 +449,14 @@ const FarmerProfile = () => {
             </div>
 
             {/* Profile Form */}
-            <div className="card-elevated p-6">
-              <h3 className="font-semibold mb-4">{currentLanguage === 'en' ? 'Personal Information' : 'व्यक्तिगत जानकारी'}</h3>
+            <div className="rounded-2xl border border-[#d7c7a8] bg-[#fffaf0] p-6 shadow-[0_16px_40px_rgba(95,70,40,0.08)]">
+              <h3 className="mb-4 font-semibold text-[#2f3a2f]">{currentLanguage === 'en' ? 'Personal Information' : 'व्यक्तिगत जानकारी'}</h3>
               <div className="grid gap-4">
                 <div className="grid sm:grid-cols-2 gap-4">
                   <div>
-                    <Label>{currentLanguage === 'en' ? 'Full Name' : 'पूरा नाम'}</Label>
+                    <Label className="text-[#5c513f]">{currentLanguage === 'en' ? 'Full Name' : 'पूरा नाम'}</Label>
                     <Input
+                      className="mt-2 border-[#d7c7a8] bg-[#fffdf7] text-[#2f3a2f] focus-visible:ring-[#315f3b]"
                       value={profile.name}
                       onChange={(e) => setProfile({ ...profile, name: e.target.value })}
                       disabled={!isEditing}
@@ -456,8 +466,9 @@ const FarmerProfile = () => {
                     )}
                   </div>
                   <div>
-                    <Label>{currentLanguage === 'en' ? 'Phone' : 'फोन'}</Label>
+                    <Label className="text-[#5c513f]">{currentLanguage === 'en' ? 'Phone' : 'फोन'}</Label>
                     <Input
+                      className="mt-2 border-[#d7c7a8] bg-[#fffdf7] text-[#2f3a2f] focus-visible:ring-[#315f3b]"
                       value={profile.phone}
                       onChange={(e) => setProfile({ ...profile, phone: e.target.value })}
                       disabled={!isEditing}
@@ -468,9 +479,10 @@ const FarmerProfile = () => {
                   </div>
                 </div>
                 <div>
-                  <Label>{currentLanguage === 'en' ? 'Email' : 'ईमेल'}</Label>
+                  <Label className="text-[#5c513f]">{currentLanguage === 'en' ? 'Email' : 'ईमेल'}</Label>
                   <Input
                     type="email"
+                    className="mt-2 border-[#d7c7a8] bg-[#fffdf7] text-[#2f3a2f] focus-visible:ring-[#315f3b]"
                     value={profile.email}
                     onChange={(e) => setProfile({ ...profile, email: e.target.value })}
                     disabled={!isEditing}
@@ -480,8 +492,9 @@ const FarmerProfile = () => {
                   )}
                 </div>
                 <div>
-                  <Label>{currentLanguage === 'en' ? 'About / Bio' : 'परिचय'}</Label>
+                  <Label className="text-[#5c513f]">{currentLanguage === 'en' ? 'About / Bio' : 'परिचय'}</Label>
                   <Textarea
+                    className="mt-2 border-[#d7c7a8] bg-[#fffdf7] text-[#2f3a2f] focus-visible:ring-[#315f3b]"
                     value={profile.bio}
                     onChange={(e) => setProfile({ ...profile, bio: e.target.value })}
                     disabled={!isEditing}
@@ -492,21 +505,23 @@ const FarmerProfile = () => {
             </div>
 
             {/* Farm Details */}
-            <div className="card-elevated p-6">
-              <h3 className="font-semibold mb-4">{currentLanguage === 'en' ? 'Farm Details' : 'खेत विवरण'}</h3>
+            <div className="rounded-2xl border border-[#d7c7a8] bg-[#fffaf0] p-6 shadow-[0_16px_40px_rgba(95,70,40,0.08)]">
+              <h3 className="mb-4 font-semibold text-[#2f3a2f]">{currentLanguage === 'en' ? 'Farm Details' : 'खेत विवरण'}</h3>
               <div className="grid gap-4">
                 <div className="grid sm:grid-cols-2 gap-4">
                   <div>
-                    <Label>{currentLanguage === 'en' ? 'Farm Size' : 'खेत का आकार'}</Label>
+                    <Label className="text-[#5c513f]">{currentLanguage === 'en' ? 'Farm Size' : 'खेत का आकार'}</Label>
                     <Input
+                      className="mt-2 border-[#d7c7a8] bg-[#fffdf7] text-[#2f3a2f] focus-visible:ring-[#315f3b]"
                       value={profile.farmSize}
                       onChange={(e) => setProfile({ ...profile, farmSize: e.target.value })}
                       disabled={!isEditing}
                     />
                   </div>
                   <div>
-                    <Label>{currentLanguage === 'en' ? 'Main Crops' : 'मुख्य फसलें'}</Label>
+                    <Label className="text-[#5c513f]">{currentLanguage === 'en' ? 'Main Crops' : 'मुख्य फसलें'}</Label>
                     <Input
+                      className="mt-2 border-[#d7c7a8] bg-[#fffdf7] text-[#2f3a2f] focus-visible:ring-[#315f3b]"
                       value={profile.crops}
                       onChange={(e) => setProfile({ ...profile, crops: e.target.value })}
                       disabled={!isEditing}
@@ -516,16 +531,18 @@ const FarmerProfile = () => {
                 </div>
                 <div className="grid sm:grid-cols-3 gap-4">
                   <div>
-                    <Label>{currentLanguage === 'en' ? 'Village' : 'गांव'}</Label>
+                    <Label className="text-[#5c513f]">{currentLanguage === 'en' ? 'Village' : 'गांव'}</Label>
                     <Input
+                      className="mt-2 border-[#d7c7a8] bg-[#fffdf7] text-[#2f3a2f] focus-visible:ring-[#315f3b]"
                       value={profile.village}
                       onChange={(e) => setProfile({ ...profile, village: e.target.value })}
                       disabled={!isEditing}
                     />
                   </div>
                   <div>
-                    <Label>{currentLanguage === 'en' ? 'District' : 'जिला'}</Label>
+                    <Label className="text-[#5c513f]">{currentLanguage === 'en' ? 'District' : 'जिला'}</Label>
                     <Input
+                      className="mt-2 border-[#d7c7a8] bg-[#fffdf7] text-[#2f3a2f] focus-visible:ring-[#315f3b]"
                       value={profile.district}
                       onChange={(e) => setProfile({ ...profile, district: e.target.value })}
                       disabled={!isEditing}
@@ -535,8 +552,9 @@ const FarmerProfile = () => {
                     )}
                   </div>
                   <div>
-                    <Label>{currentLanguage === 'en' ? 'State' : 'राज्य'}</Label>
+                    <Label className="text-[#5c513f]">{currentLanguage === 'en' ? 'State' : 'राज्य'}</Label>
                     <Input
+                      className="mt-2 border-[#d7c7a8] bg-[#fffdf7] text-[#2f3a2f] focus-visible:ring-[#315f3b]"
                       value={profile.state}
                       onChange={(e) => setProfile({ ...profile, state: e.target.value })}
                       disabled={!isEditing}
@@ -552,20 +570,20 @@ const FarmerProfile = () => {
 
           <TabsContent value="kyc" className="space-y-6">
             {/* KYC Status */}
-            <div className="card-elevated p-6">
+            <div className="rounded-2xl border border-[#d7c7a8] bg-[#fffaf0] p-6 shadow-[0_16px_40px_rgba(95,70,40,0.08)]">
               <div className="flex items-center gap-3 mb-6">
-                <div className={`w-12 h-12 rounded-full flex items-center justify-center ${user?.kycStatus === 'approved' ? 'bg-success/10' : 'bg-warning/10'}`}>
+                <div className={`flex h-12 w-12 items-center justify-center rounded-full ${user?.kycStatus === 'approved' ? 'bg-[#eaf5ec]' : 'bg-[#fff4dd]'}`}>
                   {user?.kycStatus === 'approved' ? (
-                    <Check className="w-6 h-6 text-success" />
+                    <Check className="w-6 h-6 text-[#315f3b]" />
                   ) : (
-                    <AlertCircle className="w-6 h-6 text-warning" />
+                    <AlertCircle className="w-6 h-6 text-[#d89b2b]" />
                   )}
                 </div>
                 <div>
-                  <h3 className="font-semibold">
+                  <h3 className="font-semibold text-[#2f3a2f]">
                     {currentLanguage === 'en' ? 'KYC Status' : 'केवाईसी स्थिति'}
                   </h3>
-                  <p className="text-sm text-muted-foreground">
+                  <p className="text-sm text-[#6f6552]">
                     {user?.kycStatus === 'approved'
                       ? currentLanguage === 'en'
                         ? 'Your KYC is verified.'
@@ -596,7 +614,7 @@ const FarmerProfile = () => {
                   return (
                     <div
                       key={row.type}
-                      className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 p-4 bg-muted/50 rounded-xl"
+                      className="flex flex-col gap-3 rounded-xl border border-[#e2d4b7] bg-[#fffdf7] p-4 sm:flex-row sm:items-center sm:justify-between"
                     >
                       <div className="flex items-center gap-3 min-w-0">
                         <div
@@ -605,16 +623,16 @@ const FarmerProfile = () => {
                           <Shield className={`w-5 h-5 ${row.iconClass}`} />
                         </div>
                         <div className="min-w-0">
-                          <p className="font-medium">{label}</p>
+                          <p className="font-medium text-[#2f3a2f]">{label}</p>
                           {doc?.originalName && (
-                            <p className="text-xs text-muted-foreground truncate">{doc.originalName}</p>
+                            <p className="truncate text-xs text-[#6f6552]">{doc.originalName}</p>
                           )}
                           {doc?.fileUrl && (
                             <a
                               href={doc.fileUrl}
                               target="_blank"
                               rel="noopener noreferrer"
-                              className="text-xs text-primary font-medium"
+                              className="text-xs font-medium text-[#315f3b]"
                             >
                               {currentLanguage === 'en' ? 'View file' : 'फ़ाइल देखें'}
                             </a>
@@ -626,6 +644,7 @@ const FarmerProfile = () => {
                         {canEditKyc && (
                           <Button
                             size="sm"
+                            className="border border-[#b68222] bg-[#d89b2b] text-[#2f2416] hover:bg-[#c88d22]"
                             disabled={kycUploading}
                             onClick={() => startKycUpload(row.type)}
                           >
@@ -645,7 +664,7 @@ const FarmerProfile = () => {
                 })}
               </div>
 
-              <p className="text-xs text-muted-foreground mt-4">
+              <p className="mt-4 text-xs text-[#6f6552]">
                 {currentLanguage === 'en'
                   ? '* Approval needs at least one of Aadhaar or Kisan ID. You will be notified when your KYC is approved or rejected.'
                   : '* स्वीकृति के लिए आधार या किसान ID में से कम से कम एक आवश्यक है। केवाईसी पर निर्णय होने पर सूचना मिलेगी।'}
@@ -653,6 +672,7 @@ const FarmerProfile = () => {
             </div>
           </TabsContent>
         </Tabs>
+      </div>
       </div>
     </Layout>
   );

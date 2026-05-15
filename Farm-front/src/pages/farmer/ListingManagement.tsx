@@ -785,11 +785,11 @@ const ListingManagement = () => {
   const getStatusBadge = (status: string) => {
     switch (status) {
       case 'active':
-        return <Badge className="bg-success/10 text-success">{currentLanguage === 'en' ? 'Active' : 'सक्रिय'}</Badge>;
+        return <Badge className="bg-[#eaf5ec] text-[#315f3b]">{currentLanguage === 'en' ? 'Active' : 'सक्रिय'}</Badge>;
       case 'sold_out':
-        return <Badge className="bg-destructive/10 text-destructive">{currentLanguage === 'en' ? 'Sold Out' : 'बिक गया'}</Badge>;
+        return <Badge className="bg-[#f6e5dc] text-[#8a4f2a]">{currentLanguage === 'en' ? 'Sold Out' : 'बिक गया'}</Badge>;
       case 'hidden':
-        return <Badge className="bg-muted text-muted-foreground">{currentLanguage === 'en' ? 'Hidden' : 'छिपा हुआ'}</Badge>;
+        return <Badge className="bg-[#f3ebdd] text-[#6f6552]">{currentLanguage === 'en' ? 'Hidden' : 'छिपा हुआ'}</Badge>;
       default:
         return null;
     }
@@ -797,14 +797,15 @@ const ListingManagement = () => {
 
   return (
     <Layout>
-      <div className="container mx-auto min-w-0 px-3 py-5 sm:px-4 sm:py-6">
+      <div className="min-h-screen bg-[linear-gradient(rgba(251,247,235,0.97),rgba(251,247,235,0.97)),linear-gradient(rgba(138,79,42,0.07)_1px,transparent_1px),linear-gradient(90deg,rgba(138,79,42,0.07)_1px,transparent_1px)] bg-[size:auto,24px_24px,24px_24px]">
+        <div className="container mx-auto min-w-0 px-3 py-5 sm:px-4 sm:py-6">
         {/* Header */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-4">
           <div>
-            <h1 className="text-2xl font-bold">
+            <h1 className="text-2xl font-bold text-[#2f3a2f]">
               {currentLanguage === 'en' ? 'My Listings' : 'मेरी लिस्टिंग'}
             </h1>
-            <p className="text-muted-foreground">
+            <p className="text-[#6f6552]">
               {currentLanguage === 'en' ? 'Manage your crop listings' : 'अपनी फसल लिस्टिंग प्रबंधित करें'}
             </p>
           </div>
@@ -813,6 +814,7 @@ const ListingManagement = () => {
               type="button"
               variant="outline"
               size="icon"
+              className="border-[#d7c7a8] bg-[#fffaf0] text-[#315f3b] hover:bg-[#f3ebdd] hover:text-[#315f3b]"
               onClick={() => void loadListings()}
               disabled={isLoading}
               title={currentLanguage === 'en' ? 'Refresh listings' : 'लिस्टिंग रिफ्रेश'}
@@ -836,7 +838,7 @@ const ListingManagement = () => {
                 }
               }}
             >
-            <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+            <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto border-[#d7c7a8] bg-[#fffaf0]">
               <DialogHeader>
                 <DialogTitle>
                   {editingProductId
@@ -850,16 +852,16 @@ const ListingManagement = () => {
               </DialogHeader>
               <div className="grid gap-4 py-4">
                 {user?.role === 'farmer' && (
-                  <div className="rounded-xl border border-primary/25 bg-gradient-to-br from-primary/5 to-transparent p-4 space-y-3">
+                  <div className="space-y-3 rounded-xl border border-[#d7c7a8] bg-[#fff7e8] p-4">
                     <div className="flex items-start gap-2">
-                      <Sparkles className="h-5 w-5 text-primary shrink-0 mt-0.5" aria-hidden />
+                      <Sparkles className="mt-0.5 h-5 w-5 shrink-0 text-[#315f3b]" aria-hidden />
                       <div>
                         <p className="font-semibold text-sm">
                           {currentLanguage === 'en'
                             ? 'Mandi-ready listing coach'
                             : 'मंडी-तैयार लिस्टिंग कोच'}
                         </p>
-                        <p className="text-xs text-muted-foreground mt-1 leading-relaxed">
+                        <p className="mt-1 text-xs leading-relaxed text-[#6f6552]">
                           {currentLanguage === 'en'
                             ? 'Write like you talk: crop name, how much (number + quintal or kg), your area, how the stock looks (clean, fresh, bagged…), and if the rate is fixed or you want to talk on call. AI fills the form below — always read and change before posting.'
                             : 'जैसे बोलते हैं वैसे लिखें: कौन सी फसल, कितनी मात्रा (संख्या + क्विंटल/किलो), कहाँ का माल, माल कैसा है (साफ, ताज़ा, बोरी…), और रेट तय है या फोन पर बात होगी। AI नीचे फ़ॉर्म भरेगा — पोस्ट से पहले खुद पढ़कर बदल लें।'}
@@ -876,12 +878,13 @@ const ListingManagement = () => {
                           ? 'e.g. 50 quintal chawal, apna khet ka, fresh hai, Madhubani se'
                           : 'जैसे: 50 क्विंटल चावल, अपना खेत का, ताज़ा है, मधुबनी से'
                       }
-                      className="resize-y min-h-[4.5rem]"
+                      className="min-h-[4.5rem] resize-y border-[#d7c7a8] bg-[#fffdf7] text-[#2f3a2f] focus-visible:ring-[#315f3b]"
                     />
                     <div className="flex flex-wrap gap-2">
                       <Button
                         type="button"
                         variant="secondary"
+                        className="border border-[#c8d8cb] bg-[#eef5ee] text-[#315f3b] hover:bg-[#e3eee4]"
                         disabled={coachLoading || coachNotes.trim().length < 8}
                         onClick={() => void fetchCoachSuggestions()}
                       >
@@ -902,7 +905,7 @@ const ListingManagement = () => {
                         variant="outline"
                         disabled={coachLoading}
                         onClick={toggleCoachVoice}
-                        className={isListeningCoach ? 'ring-2 ring-primary ring-offset-2' : ''}
+                        className={`${isListeningCoach ? 'ring-2 ring-[#315f3b] ring-offset-2' : ''} border-[#d7c7a8] bg-[#fffdf7] text-[#315f3b] hover:bg-[#f3ebdd] hover:text-[#315f3b]`}
                         title={
                           currentLanguage === 'en'
                             ? 'Speak your notes (browser mic)'
@@ -925,51 +928,51 @@ const ListingManagement = () => {
                       </p>
                     )}
                     {coachDisclaimer && (
-                      <p className="text-xs text-muted-foreground border-l-2 border-amber-500/70 pl-2 leading-relaxed">
+                      <p className="border-l-2 border-[#d89b2b]/70 pl-2 text-xs leading-relaxed text-[#6f6552]">
                         {coachDisclaimer}
                       </p>
                     )}
                     {coachSuggestions && (
-                      <div className="rounded-lg border bg-card p-3 space-y-2 text-sm">
-                        <p className="text-xs font-medium text-amber-800 dark:text-amber-400">
+                      <div className="space-y-2 rounded-lg border border-[#e2d4b7] bg-[#fffdf7] p-3 text-sm">
+                        <p className="text-xs font-medium text-[#8a4f2a]">
                           {currentLanguage === 'en'
                             ? 'Suggested draft — not posted. Honesty tips:'
                             : 'सुझाया गया ड्राफ्ट — पोस्ट नहीं। ईमानदारी के टिप्स:'}
                         </p>
-                        <div className="text-xs space-y-1 text-muted-foreground">
+                        <div className="space-y-1 text-xs text-[#6f6552]">
                           <p>
-                            <span className="font-medium text-foreground">
+                            <span className="font-medium text-[#2f3a2f]">
                               {currentLanguage === 'en' ? 'Title (EN): ' : 'शीर्षक (EN): '}
                             </span>
                             {coachSuggestions.name}
                           </p>
                           {coachSuggestions.nameHindi ? (
                             <p>
-                              <span className="font-medium text-foreground">
+                              <span className="font-medium text-[#2f3a2f]">
                                 {currentLanguage === 'en' ? 'Title (HI): ' : 'शीर्षक (HI): '}
                               </span>
                               {coachSuggestions.nameHindi}
                             </p>
                           ) : null}
                           <p>
-                            <span className="font-medium text-foreground">
+                            <span className="font-medium text-[#2f3a2f]">
                               {currentLanguage === 'en' ? 'Category / unit: ' : 'श्रेणी / इकाई: '}
                             </span>
                             {coachSuggestions.category} · {coachSuggestions.unit}
                           </p>
                           {coachSuggestions.suggestedPrice != null ? (
                             <p>
-                              <span className="font-medium text-foreground">₹ / unit: </span>
+                              <span className="font-medium text-[#2f3a2f]">₹ / unit: </span>
                               {coachSuggestions.suggestedPrice}
                             </p>
                           ) : null}
                         </div>
-                        <ul className="text-xs text-muted-foreground list-disc pl-4 space-y-1">
+                        <ul className="list-disc space-y-1 pl-4 text-xs text-[#6f6552]">
                           {coachSuggestions.honestyHints.map((hint, idx) => (
                             <li key={idx}>{hint}</li>
                           ))}
                         </ul>
-                        <Button type="button" variant="default" onClick={applyCoachToForm} className="w-full sm:w-auto">
+                        <Button type="button" variant="default" onClick={applyCoachToForm} className="w-full border border-[#b68222] bg-[#d89b2b] text-[#2f2416] hover:bg-[#c88d22] sm:w-auto">
                           {currentLanguage === 'en'
                             ? 'Apply suggestions to form'
                             : 'सुझाव फ़ॉर्म में लगाएँ'}
@@ -981,8 +984,9 @@ const ListingManagement = () => {
 
                 <div className="grid sm:grid-cols-2 gap-4">
                   <div>
-                    <Label>{currentLanguage === 'en' ? 'Product Name (English)' : 'उत्पाद नाम (अंग्रेज़ी)'}</Label>
+                    <Label className="text-[#5c513f]">{currentLanguage === 'en' ? 'Product Name (English)' : 'उत्पाद नाम (अंग्रेज़ी)'}</Label>
                     <Input
+                      className="mt-2 border-[#d7c7a8] bg-[#fffdf7] text-[#2f3a2f] focus-visible:ring-[#315f3b]"
                       value={newProduct.name}
                       onChange={(e) =>
                         setNewProduct((prev) => ({ ...prev, name: e.target.value }))
@@ -994,8 +998,9 @@ const ListingManagement = () => {
                     )}
                   </div>
                   <div>
-                    <Label>{currentLanguage === 'en' ? 'Product Name (Hindi)' : 'उत्पाद नाम (हिंदी)'}</Label>
+                    <Label className="text-[#5c513f]">{currentLanguage === 'en' ? 'Product Name (Hindi)' : 'उत्पाद नाम (हिंदी)'}</Label>
                     <Input
+                      className="mt-2 border-[#d7c7a8] bg-[#fffdf7] text-[#2f3a2f] focus-visible:ring-[#315f3b]"
                       value={newProduct.nameHindi}
                       onChange={(e) =>
                         setNewProduct((prev) => ({ ...prev, nameHindi: e.target.value }))
@@ -1006,14 +1011,14 @@ const ListingManagement = () => {
                 </div>
                 
                 <div>
-                  <Label>{currentLanguage === 'en' ? 'Category' : 'श्रेणी'}</Label>
+                  <Label className="text-[#5c513f]">{currentLanguage === 'en' ? 'Category' : 'श्रेणी'}</Label>
                   <Select
                     value={newProduct.category}
                     onValueChange={(value) =>
                       setNewProduct((prev) => ({ ...prev, category: value as CropCategory }))
                     }
                   >
-                    <SelectTrigger>
+                    <SelectTrigger className="mt-2 border-[#d7c7a8] bg-[#fffdf7] text-[#2f3a2f]">
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
@@ -1029,8 +1034,9 @@ const ListingManagement = () => {
                 </div>
 
                 <div>
-                  <Label>{currentLanguage === 'en' ? 'Description' : 'विवरण'}</Label>
+                  <Label className="text-[#5c513f]">{currentLanguage === 'en' ? 'Description' : 'विवरण'}</Label>
                   <Textarea
+                    className="mt-2 border-[#d7c7a8] bg-[#fffdf7] text-[#2f3a2f] focus-visible:ring-[#315f3b]"
                     value={newProduct.description}
                     onChange={(e) =>
                       setNewProduct((prev) => ({ ...prev, description: e.target.value }))
@@ -1042,7 +1048,7 @@ const ListingManagement = () => {
 
                 {/* Images */}
                 <div>
-                  <Label>{currentLanguage === 'en' ? 'Images' : 'छवियाँ'}</Label>
+                  <Label className="text-[#5c513f]">{currentLanguage === 'en' ? 'Images' : 'छवियाँ'}</Label>
                   <div className="mt-2 grid gap-3">
                     <Input
                       type="file"
@@ -1053,13 +1059,14 @@ const ListingManagement = () => {
                     />
                     <div className="flex gap-2">
                       <Input
+                        className="border-[#d7c7a8] bg-[#fffdf7] text-[#2f3a2f] focus-visible:ring-[#315f3b]"
                         value={newProduct.imageUrlInput}
                         onChange={(e) =>
                           setNewProduct((prev) => ({ ...prev, imageUrlInput: e.target.value }))
                         }
                         placeholder={currentLanguage === 'en' ? 'Or paste image URL' : 'या छवि URL पेस्ट करें'}
                       />
-                      <Button type="button" variant="outline" onClick={addImageUrl}>
+                      <Button type="button" variant="outline" className="border-[#d7c7a8] bg-[#fffdf7] text-[#315f3b] hover:bg-[#f3ebdd] hover:text-[#315f3b]" onClick={addImageUrl}>
                         {currentLanguage === 'en' ? 'Add' : 'जोड़ें'}
                       </Button>
                     </div>
@@ -1069,7 +1076,7 @@ const ListingManagement = () => {
                         {imageFiles.map((it) => (
                           <div
                             key={it.id}
-                            className="relative flex h-24 items-center justify-center overflow-hidden rounded-lg border bg-muted"
+                            className="relative flex h-24 items-center justify-center overflow-hidden rounded-lg border border-[#e2d4b7] bg-[#f3ebdd]"
                           >
                             <img
                               src={it.previewUrl}
@@ -1079,7 +1086,7 @@ const ListingManagement = () => {
                             <button
                               type="button"
                               onClick={() => removeImageFile(it.id)}
-                              className="absolute top-1 right-1 bg-background/80 border border-border rounded px-2 py-1 text-xs"
+                              className="absolute top-1 right-1 rounded border border-[#d7c7a8] bg-[#fffaf0]/90 px-2 py-1 text-xs"
                             >
                               {currentLanguage === 'en' ? 'Remove' : 'हटाएं'}
                             </button>
@@ -1088,7 +1095,7 @@ const ListingManagement = () => {
                         {(newProduct.imageUrls || []).map((url) => (
                           <div
                             key={url}
-                            className="relative flex h-24 items-center justify-center overflow-hidden rounded-lg border bg-muted"
+                            className="relative flex h-24 items-center justify-center overflow-hidden rounded-lg border border-[#e2d4b7] bg-[#f3ebdd]"
                           >
                             <img
                               src={url}
@@ -1098,7 +1105,7 @@ const ListingManagement = () => {
                             <button
                               type="button"
                               onClick={() => removeImageUrl(url)}
-                              className="absolute top-1 right-1 bg-background/80 border border-border rounded px-2 py-1 text-xs"
+                              className="absolute top-1 right-1 rounded border border-[#d7c7a8] bg-[#fffaf0]/90 px-2 py-1 text-xs"
                             >
                               {currentLanguage === 'en' ? 'Remove' : 'हटाएं'}
                             </button>
@@ -1106,7 +1113,7 @@ const ListingManagement = () => {
                         ))}
                       </div>
                     )}
-                    <p className="text-xs text-muted-foreground">
+                    <p className="text-xs text-[#6f6552]">
                       {currentLanguage === 'en'
                         ? 'You can add up to 5 images. If none are provided, a default image will be used.'
                         : 'आप अधिकतम 5 छवियाँ जोड़ सकते हैं। अगर कोई छवि नहीं है, तो डिफ़ॉल्ट छवि लगेगी।'}
@@ -1116,9 +1123,10 @@ const ListingManagement = () => {
 
                 <div className="grid sm:grid-cols-3 gap-4">
                   <div>
-                    <Label>{currentLanguage === 'en' ? 'Price (₹)' : 'कीमत (₹)'}</Label>
+                    <Label className="text-[#5c513f]">{currentLanguage === 'en' ? 'Price (₹)' : 'कीमत (₹)'}</Label>
                     <Input
                       type="number"
+                      className="mt-2 border-[#d7c7a8] bg-[#fffdf7] text-[#2f3a2f] focus-visible:ring-[#315f3b]"
                       value={newProduct.price}
                       onChange={(e) =>
                         setNewProduct((prev) => ({ ...prev, price: e.target.value }))
@@ -1130,14 +1138,14 @@ const ListingManagement = () => {
                     )}
                   </div>
                   <div>
-                    <Label>{currentLanguage === 'en' ? 'Unit' : 'इकाई'}</Label>
+                    <Label className="text-[#5c513f]">{currentLanguage === 'en' ? 'Unit' : 'इकाई'}</Label>
                     <Select
                       value={newProduct.unit}
                       onValueChange={(value) =>
                         setNewProduct((prev) => ({ ...prev, unit: value }))
                       }
                     >
-                      <SelectTrigger>
+                      <SelectTrigger className="mt-2 border-[#d7c7a8] bg-[#fffdf7] text-[#2f3a2f]">
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
@@ -1150,12 +1158,13 @@ const ListingManagement = () => {
                     </Select>
                   </div>
                   <div>
-                    <Label>{currentLanguage === 'en' ? 'Min Order' : 'न्यूनतम ऑर्डर'}</Label>
+                    <Label className="text-[#5c513f]">{currentLanguage === 'en' ? 'Min Order' : 'न्यूनतम ऑर्डर'}</Label>
                     <Input
                       type="number"
                       inputMode="numeric"
                       min={1}
                       step={1}
+                      className="mt-2 border-[#d7c7a8] bg-[#fffdf7] text-[#2f3a2f] focus-visible:ring-[#315f3b]"
                       value={newProduct.minOrderQuantity}
                       onChange={(e) =>
                         setNewProduct((prev) => ({ ...prev, minOrderQuantity: e.target.value }))
@@ -1170,12 +1179,13 @@ const ListingManagement = () => {
 
                 <div className="grid sm:grid-cols-2 gap-4">
                   <div>
-                    <Label>{currentLanguage === 'en' ? 'Available Quantity' : 'उपलब्ध मात्रा'}</Label>
+                    <Label className="text-[#5c513f]">{currentLanguage === 'en' ? 'Available Quantity' : 'उपलब्ध मात्रा'}</Label>
                     <Input
                       type="number"
                       inputMode="numeric"
                       min={1}
                       step={1}
+                      className="mt-2 border-[#d7c7a8] bg-[#fffdf7] text-[#2f3a2f] focus-visible:ring-[#315f3b]"
                       value={newProduct.availableQuantity}
                       onChange={(e) =>
                         setNewProduct((prev) => ({ ...prev, availableQuantity: e.target.value }))
@@ -1187,9 +1197,10 @@ const ListingManagement = () => {
                     )}
                   </div>
                   <div>
-                    <Label>{currentLanguage === 'en' ? 'Harvest Date' : 'कटाई की तारीख'}</Label>
+                    <Label className="text-[#5c513f]">{currentLanguage === 'en' ? 'Harvest Date' : 'कटाई की तारीख'}</Label>
                     <Input
                       type="date"
+                      className="mt-2 border-[#d7c7a8] bg-[#fffdf7] text-[#2f3a2f] focus-visible:ring-[#315f3b]"
                       value={newProduct.harvestDate}
                       onChange={(e) =>
                         setNewProduct((prev) => ({ ...prev, harvestDate: e.target.value }))
@@ -1222,7 +1233,7 @@ const ListingManagement = () => {
                 <Button
                   onClick={() => void handleSaveListing()}
                   disabled={isUploadingImages}
-                  className="btn-primary-gradient mt-4"
+                  className="mt-4 border border-[#b68222] bg-[#d89b2b] text-[#2f2416] hover:bg-[#c88d22]"
                 >
                   {editingProductId ? (
                     currentLanguage === 'en' ? (
@@ -1240,7 +1251,7 @@ const ListingManagement = () => {
               </div>
             </DialogContent>
           </Dialog>
-            <Button className="btn-primary-gradient" type="button" onClick={openAddListingDialog}>
+            <Button className="border border-[#b68222] bg-[#d89b2b] text-[#2f2416] hover:bg-[#c88d22]" type="button" onClick={openAddListingDialog}>
               <Plus className="w-5 h-5 mr-2" />
               {currentLanguage === 'en' ? 'Add New Listing' : 'नई लिस्टिंग जोड़ें'}
             </Button>
@@ -1249,40 +1260,40 @@ const ListingManagement = () => {
 
         {/* Stats */}
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-          <div className="card-elevated p-4 flex items-center gap-3">
-            <div className="w-10 h-10 bg-primary/10 rounded-lg flex items-center justify-center">
-              <Package className="w-5 h-5 text-primary" />
+          <div className="flex items-center gap-3 rounded-2xl border border-[#d7c7a8] bg-[#fffaf0] p-4 shadow-[0_16px_40px_rgba(95,70,40,0.08)]">
+            <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-[#eef5ee]">
+              <Package className="w-5 h-5 text-[#315f3b]" />
             </div>
             <div>
-              <p className="text-2xl font-bold">{listings.length}</p>
-              <p className="text-sm text-muted-foreground">{currentLanguage === 'en' ? 'Total' : 'कुल'}</p>
+              <p className="text-2xl font-bold text-[#2f3a2f]">{listings.length}</p>
+              <p className="text-sm text-[#6f6552]">{currentLanguage === 'en' ? 'Total' : 'कुल'}</p>
             </div>
           </div>
-          <div className="card-elevated p-4 flex items-center gap-3">
-            <div className="w-10 h-10 bg-success/10 rounded-lg flex items-center justify-center">
-              <Eye className="w-5 h-5 text-success" />
+          <div className="flex items-center gap-3 rounded-2xl border border-[#d7c7a8] bg-[#fffaf0] p-4 shadow-[0_16px_40px_rgba(95,70,40,0.08)]">
+            <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-[#eaf5ec]">
+              <Eye className="w-5 h-5 text-[#315f3b]" />
             </div>
             <div>
-              <p className="text-2xl font-bold">{listings.filter(l => l.status === 'active').length}</p>
-              <p className="text-sm text-muted-foreground">{currentLanguage === 'en' ? 'Active' : 'सक्रिय'}</p>
+              <p className="text-2xl font-bold text-[#2f3a2f]">{listings.filter(l => l.status === 'active').length}</p>
+              <p className="text-sm text-[#6f6552]">{currentLanguage === 'en' ? 'Active' : 'सक्रिय'}</p>
             </div>
           </div>
-          <div className="card-elevated p-4 flex items-center gap-3">
-            <div className="w-10 h-10 bg-warning/10 rounded-lg flex items-center justify-center">
-              <TrendingUp className="w-5 h-5 text-warning" />
+          <div className="flex items-center gap-3 rounded-2xl border border-[#d7c7a8] bg-[#fffaf0] p-4 shadow-[0_16px_40px_rgba(95,70,40,0.08)]">
+            <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-[#fff4dd]">
+              <TrendingUp className="w-5 h-5 text-[#d89b2b]" />
             </div>
             <div>
-              <p className="text-2xl font-bold">{listings.reduce((sum, l) => sum + l.views, 0)}</p>
-              <p className="text-sm text-muted-foreground">{currentLanguage === 'en' ? 'Views' : 'व्यूज'}</p>
+              <p className="text-2xl font-bold text-[#2f3a2f]">{listings.reduce((sum, l) => sum + l.views, 0)}</p>
+              <p className="text-sm text-[#6f6552]">{currentLanguage === 'en' ? 'Views' : 'व्यूज'}</p>
             </div>
           </div>
-          <div className="card-elevated p-4 flex items-center gap-3">
-            <div className="w-10 h-10 bg-accent/10 rounded-lg flex items-center justify-center">
-              <Package className="w-5 h-5 text-accent" />
+          <div className="flex items-center gap-3 rounded-2xl border border-[#d7c7a8] bg-[#fffaf0] p-4 shadow-[0_16px_40px_rgba(95,70,40,0.08)]">
+            <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-[#efe5d2]">
+              <Package className="w-5 h-5 text-[#6c5a3d]" />
             </div>
             <div>
-              <p className="text-2xl font-bold">{listings.reduce((sum, l) => sum + l.inquiries, 0)}</p>
-              <p className="text-sm text-muted-foreground">{currentLanguage === 'en' ? 'Inquiries' : 'पूछताछ'}</p>
+              <p className="text-2xl font-bold text-[#2f3a2f]">{listings.reduce((sum, l) => sum + l.inquiries, 0)}</p>
+              <p className="text-sm text-[#6f6552]">{currentLanguage === 'en' ? 'Inquiries' : 'पूछताछ'}</p>
             </div>
           </div>
         </div>
@@ -1290,16 +1301,16 @@ const ListingManagement = () => {
         {/* Filters */}
         <div className="flex flex-col sm:flex-row gap-4 mb-6">
           <div className="relative flex-1">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#8b816f]" />
             <Input
               placeholder={currentLanguage === 'en' ? 'Search listings...' : 'लिस्टिंग खोजें...'}
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="pl-10"
+              className="border-[#d7c7a8] bg-[#fffaf0] pl-10 text-[#2f3a2f] placeholder:text-[#8b816f] focus-visible:ring-[#315f3b]"
             />
           </div>
           <Select value={filterStatus} onValueChange={setFilterStatus}>
-            <SelectTrigger className="w-full sm:w-40">
+            <SelectTrigger className="w-full border-[#d7c7a8] bg-[#fffaf0] text-[#2f3a2f] sm:w-40">
               <Filter className="w-4 h-4 mr-2" />
               <SelectValue />
             </SelectTrigger>
@@ -1313,13 +1324,13 @@ const ListingManagement = () => {
         </div>
 
         {sortLowStockFirst && (
-          <div className="mb-4 flex flex-col gap-2 rounded-lg border border-amber-500/40 bg-amber-50/80 px-4 py-3 text-sm dark:bg-amber-950/25 sm:flex-row sm:items-center sm:justify-between">
-            <span className="text-foreground">
+          <div className="mb-4 flex flex-col gap-2 rounded-lg border border-[#ead5a6] bg-[#fff7e8] px-4 py-3 text-sm sm:flex-row sm:items-center sm:justify-between">
+            <span className="text-[#2f3a2f]">
               {currentLanguage === 'en'
                 ? 'Sorted by available quantity (lowest first).'
                 : 'उपलब्ध मात्रा के अनुसार क्रमबद्ध (सबसे कम पहले)।'}
             </span>
-            <Button type="button" variant="outline" size="sm" className="shrink-0 w-fit" onClick={clearStockSort}>
+            <Button type="button" variant="outline" size="sm" className="shrink-0 w-fit border-[#d7c7a8] bg-[#fffdf7] text-[#315f3b] hover:bg-[#f3ebdd] hover:text-[#315f3b]" onClick={clearStockSort}>
               {currentLanguage === 'en' ? 'Clear sort' : 'क्रम हटाएं'}
             </Button>
           </div>
@@ -1329,8 +1340,8 @@ const ListingManagement = () => {
         <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
           {isLoading ? (
             <div className="col-span-full text-center py-12">
-              <Package className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
-              <p className="text-muted-foreground">
+              <Package className="mx-auto mb-4 h-12 w-12 text-[#b8ad97]" />
+              <p className="text-[#6f6552]">
                 {currentLanguage === 'en'
                   ? 'Loading listings...'
                   : 'लिस्टिंग लोड हो रही हैं...'}
@@ -1338,8 +1349,8 @@ const ListingManagement = () => {
             </div>
           ) : (
           displayedListings.map((listing) => (
-            <div key={listing.id} className="card-elevated overflow-hidden">
-              <div className="relative bg-muted">
+            <div key={listing.id} className="overflow-hidden rounded-2xl border border-[#d7c7a8] bg-[#fffaf0] shadow-[0_16px_40px_rgba(95,70,40,0.08)]">
+              <div className="relative bg-[#f3ebdd]">
                 <div className="flex h-44 w-full items-center justify-center p-3 sm:h-52">
                   <img
                     src={listingHeroImageUrlFromList(listing.images, 640)}
@@ -1357,18 +1368,18 @@ const ListingManagement = () => {
                 </div>
                 {listing.isOrganic && (
                   <div className="absolute top-2 left-2">
-                    <Badge className="bg-success text-white">
+                    <Badge className="bg-[#315f3b] text-white">
                       {currentLanguage === 'en' ? 'Organic' : 'जैविक'}
                     </Badge>
                   </div>
                 )}
               </div>
               <div className="p-4">
-                <h3 className="font-semibold mb-1">{listing.name}</h3>
-                <p className="text-lg font-bold text-primary">
+                <h3 className="mb-1 font-semibold text-[#2f3a2f]">{listing.name}</h3>
+                <p className="text-lg font-bold text-[#315f3b]">
                   ₹{listing.price.toLocaleString()}/{listing.unit}
                 </p>
-                <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-muted-foreground mt-2">
+                <div className="mt-2 flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-[#6f6552]">
                   <span className="flex items-center gap-1">
                     <Eye className="w-4 h-4" /> {listing.views}
                   </span>
@@ -1387,7 +1398,7 @@ const ListingManagement = () => {
                     size="sm"
                     onClick={() => void handleStatusToggle(listing.id)}
                     disabled={togglingId === listing.id}
-                    className="flex-1"
+                    className="flex-1 border-[#d7c7a8] bg-[#fffdf7] text-[#315f3b] hover:bg-[#f3ebdd] hover:text-[#315f3b]"
                   >
                     {listing.status === 'active' ? (
                       <><EyeOff className="w-4 h-4 mr-1" /> {currentLanguage === 'en' ? 'Hide' : 'छिपाएं'}</>
@@ -1402,6 +1413,7 @@ const ListingManagement = () => {
                     onClick={() => openEditListingDialog(listing)}
                     title={currentLanguage === 'en' ? 'Edit listing' : 'लिस्टिंग संपादित करें'}
                     aria-label={currentLanguage === 'en' ? 'Edit listing' : 'लिस्टिंग संपादित करें'}
+                    className="border-[#d7c7a8] bg-[#fffdf7] text-[#315f3b] hover:bg-[#f3ebdd] hover:text-[#315f3b]"
                   >
                     <Edit className="w-4 h-4" />
                   </Button>
@@ -1409,7 +1421,7 @@ const ListingManagement = () => {
                     variant="outline"
                     size="sm"
                     onClick={() => handleDelete(listing.id)}
-                    className="text-destructive hover:text-destructive"
+                    className="border-[#dfc0af] bg-[#fff8f4] text-[#8a4f2a] hover:bg-[#f6e5dc] hover:text-[#8a4f2a]"
                   >
                     <Trash2 className="w-4 h-4" />
                   </Button>
@@ -1421,15 +1433,16 @@ const ListingManagement = () => {
 
         {displayedListings.length === 0 && (
           <div className="text-center py-12">
-            <Package className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
-            <h3 className="text-lg font-medium mb-2">
+            <Package className="mx-auto mb-4 h-12 w-12 text-[#b8ad97]" />
+            <h3 className="mb-2 text-lg font-medium text-[#2f3a2f]">
               {currentLanguage === 'en' ? 'No listings found' : 'कोई लिस्टिंग नहीं मिली'}
             </h3>
-            <p className="text-muted-foreground">
+            <p className="text-[#6f6552]">
               {currentLanguage === 'en' ? 'Try adjusting your search or filters' : 'अपनी खोज या फ़िल्टर बदलें'}
             </p>
           </div>
         )}
+      </div>
       </div>
     </Layout>
   );

@@ -252,19 +252,23 @@ const BuyerProfile = () => {
 
   return (
     <Layout>
-      <div className="container mx-auto min-w-0 px-3 py-5 sm:px-4 sm:py-6">
+      <div className="min-h-screen bg-[linear-gradient(rgba(251,247,235,0.97),rgba(251,247,235,0.97)),linear-gradient(rgba(138,79,42,0.07)_1px,transparent_1px),linear-gradient(90deg,rgba(138,79,42,0.07)_1px,transparent_1px)] bg-[size:auto,24px_24px,24px_24px]">
+        <div className="container mx-auto min-w-0 px-3 py-5 sm:px-4 sm:py-6">
         {/* Header */}
         <div className="flex items-center gap-4 mb-6">
-          <button onClick={() => navigate(-1)} className="p-2 hover:bg-muted rounded-lg">
+          <button
+            onClick={() => navigate(-1)}
+            className="rounded-lg border border-[#d7c7a8] bg-[#fffaf0] p-2 text-[#315f3b] transition hover:bg-[#f6eddc]"
+          >
             <ArrowLeft className="w-5 h-5" />
           </button>
-          <h1 className="text-2xl font-bold">
+          <h1 className="text-2xl font-bold text-[#2f3a2f]">
             {currentLanguage === 'en' ? 'My Profile' : 'मेरी प्रोफाइल'}
           </h1>
         </div>
 
         {/* Profile Header */}
-        <div className="card-elevated p-6 mb-6">
+        <div className="mb-6 rounded-2xl border border-[#d7c7a8] bg-[#fffaf0] p-6 shadow-[0_16px_40px_rgba(95,70,40,0.08)]">
           <div className="flex flex-col sm:flex-row items-center gap-6">
             <div className="relative">
               <input
@@ -277,7 +281,7 @@ const BuyerProfile = () => {
               <img
                 src={avatarDisplayUrl}
                 alt={user?.name || 'Buyer'}
-                className="w-24 h-24 rounded-full object-cover border-4 border-primary/20"
+                className="h-24 w-24 rounded-full border-4 border-[#e2d4b7] object-cover"
                 onError={(e) => {
                   const el = e.currentTarget;
                   el.onerror = null;
@@ -288,36 +292,41 @@ const BuyerProfile = () => {
                 type="button"
                 disabled={isUploadingAvatar}
                 onClick={() => avatarInputRef.current?.click()}
-                className="absolute bottom-0 right-0 w-8 h-8 bg-primary text-primary-foreground rounded-full flex items-center justify-center shadow-lg disabled:opacity-60"
+                className="absolute bottom-0 right-0 flex h-8 w-8 items-center justify-center rounded-full border border-[#b68222] bg-[#d89b2b] text-[#2f2416] shadow-lg disabled:opacity-60"
                 title={currentLanguage === 'en' ? 'Change photo' : 'फोटो बदलें'}
               >
                 <Camera className="w-4 h-4" />
               </button>
             </div>
             <div className="text-center sm:text-left">
-              <h2 className="text-xl font-bold">{user?.name}</h2>
-              <p className="text-primary font-medium">{profile.businessName}</p>
-              <p className="text-muted-foreground flex items-center justify-center sm:justify-start gap-1 mt-1">
+              <h2 className="text-xl font-bold text-[#2f3a2f]">{user?.name}</h2>
+              <p className="font-medium text-[#315f3b]">{profile.businessName}</p>
+              <p className="mt-1 flex items-center justify-center gap-1 text-[#6f6552] sm:justify-start">
                 <MapPin className="w-4 h-4" />
                 {profile.district}, {profile.state}
               </p>
               <div className="flex items-center gap-2 mt-2">
                 {user?.kycStatus === 'approved' ? (
-                  <Badge className="bg-success/10 text-success gap-1">
+                  <Badge className="gap-1 bg-[#eaf5ec] text-[#315f3b]">
                     <Shield className="w-3 h-3" />
                     {currentLanguage === 'en' ? 'Verified Buyer' : 'सत्यापित खरीदार'}
                   </Badge>
                 ) : (
-                  <Badge className="bg-warning/10 text-warning">
+                  <Badge className="bg-[#fff4dd] text-[#9a6b12]">
                     {currentLanguage === 'en' ? 'Verification Pending' : 'सत्यापन लंबित'}
                   </Badge>
                 )}
-                <Badge variant="outline" className="capitalize">{profile.businessType}</Badge>
+                <Badge variant="outline" className="capitalize border-[#d7c7a8] bg-[#fffdf7] text-[#6f6552]">{profile.businessType}</Badge>
               </div>
             </div>
             <div className="sm:ml-auto">
               <Button
                 variant={isEditing ? 'default' : 'outline'}
+                className={
+                  isEditing
+                    ? 'border border-[#b68222] bg-[#d89b2b] text-[#2f2416] hover:bg-[#c88d22]'
+                    : 'border-[#d7c7a8] bg-[#fffdf7] text-[#315f3b] hover:bg-[#f3ebdd] hover:text-[#315f3b]'
+                }
                 onClick={() => isEditing ? handleSave() : setIsEditing(true)}
               >
                 {isEditing ? (
@@ -332,37 +341,38 @@ const BuyerProfile = () => {
 
         {/* Stats */}
         <div className="grid grid-cols-3 gap-4 mb-6">
-          <div className="card-elevated p-4 text-center">
-            <p className="text-3xl font-bold text-primary">{stats.totalOrders}</p>
-            <p className="text-sm text-muted-foreground">
+          <div className="rounded-2xl border border-[#d7c7a8] bg-[#fffaf0] p-4 text-center shadow-[0_16px_40px_rgba(95,70,40,0.08)]">
+            <p className="text-3xl font-bold text-[#315f3b]">{stats.totalOrders}</p>
+            <p className="text-sm text-[#6f6552]">
               {currentLanguage === 'en' ? 'Orders' : 'ऑर्डर'}
             </p>
           </div>
-          <div className="card-elevated p-4 text-center">
-            <p className="text-3xl font-bold text-success">₹{stats.totalSpent.toLocaleString()}</p>
-            <p className="text-sm text-muted-foreground">
+          <div className="rounded-2xl border border-[#d7c7a8] bg-[#fffaf0] p-4 text-center shadow-[0_16px_40px_rgba(95,70,40,0.08)]">
+            <p className="text-3xl font-bold text-[#315f3b]">₹{stats.totalSpent.toLocaleString()}</p>
+            <p className="text-sm text-[#6f6552]">
               {currentLanguage === 'en' ? 'Total Spent' : 'कुल खर्च'}
             </p>
           </div>
-          <div className="card-elevated p-4 text-center">
-            <p className="text-3xl font-bold text-warning">{stats.uniqueFarmers}</p>
-            <p className="text-sm text-muted-foreground">
+          <div className="rounded-2xl border border-[#d7c7a8] bg-[#fffaf0] p-4 text-center shadow-[0_16px_40px_rgba(95,70,40,0.08)]">
+            <p className="text-3xl font-bold text-[#d89b2b]">{stats.uniqueFarmers}</p>
+            <p className="text-sm text-[#6f6552]">
               {currentLanguage === 'en' ? 'Farmers' : 'किसान'}
             </p>
           </div>
         </div>
 
         {/* Profile Form */}
-        <div className="card-elevated p-6 mb-6">
-          <h3 className="font-semibold mb-4 flex items-center gap-2">
-            <Phone className="w-5 h-5" />
+        <div className="mb-6 rounded-2xl border border-[#d7c7a8] bg-[#fffaf0] p-6 shadow-[0_16px_40px_rgba(95,70,40,0.08)]">
+          <h3 className="mb-4 flex items-center gap-2 font-semibold text-[#2f3a2f]">
+            <Phone className="w-5 h-5 text-[#315f3b]" />
             {currentLanguage === 'en' ? 'Personal Information' : 'व्यक्तिगत जानकारी'}
           </h3>
           <div className="grid gap-4">
             <div className="grid sm:grid-cols-2 gap-4">
               <div>
-                <Label>{currentLanguage === 'en' ? 'Full Name' : 'पूरा नाम'}</Label>
+                <Label className="text-[#5c513f]">{currentLanguage === 'en' ? 'Full Name' : 'पूरा नाम'}</Label>
                 <Input
+                  className="mt-2 border-[#d7c7a8] bg-[#fffdf7] text-[#2f3a2f] focus-visible:ring-[#315f3b]"
                   value={profile.name}
                   onChange={(e) => setProfile({ ...profile, name: e.target.value })}
                   disabled={!isEditing}
@@ -372,8 +382,9 @@ const BuyerProfile = () => {
                 )}
               </div>
               <div>
-                <Label>{currentLanguage === 'en' ? 'Phone' : 'फोन'}</Label>
+                <Label className="text-[#5c513f]">{currentLanguage === 'en' ? 'Phone' : 'फोन'}</Label>
                 <Input
+                  className="mt-2 border-[#d7c7a8] bg-[#fffdf7] text-[#2f3a2f] focus-visible:ring-[#315f3b]"
                   value={profile.phone}
                   onChange={(e) => setProfile({ ...profile, phone: e.target.value })}
                   disabled={!isEditing}
@@ -384,9 +395,10 @@ const BuyerProfile = () => {
               </div>
             </div>
             <div>
-              <Label>{currentLanguage === 'en' ? 'Email' : 'ईमेल'}</Label>
+              <Label className="text-[#5c513f]">{currentLanguage === 'en' ? 'Email' : 'ईमेल'}</Label>
               <Input
                 type="email"
+                className="mt-2 border-[#d7c7a8] bg-[#fffdf7] text-[#2f3a2f] focus-visible:ring-[#315f3b]"
                 value={profile.email}
                 onChange={(e) => setProfile({ ...profile, email: e.target.value })}
                 disabled={!isEditing}
@@ -399,16 +411,17 @@ const BuyerProfile = () => {
         </div>
 
         {/* Business Details */}
-        <div className="card-elevated p-6 mb-6">
-          <h3 className="font-semibold mb-4 flex items-center gap-2">
-            <Building className="w-5 h-5" />
+        <div className="mb-6 rounded-2xl border border-[#d7c7a8] bg-[#fffaf0] p-6 shadow-[0_16px_40px_rgba(95,70,40,0.08)]">
+          <h3 className="mb-4 flex items-center gap-2 font-semibold text-[#2f3a2f]">
+            <Building className="w-5 h-5 text-[#315f3b]" />
             {currentLanguage === 'en' ? 'Business Details' : 'व्यापार विवरण'}
           </h3>
           <div className="grid gap-4">
             <div className="grid sm:grid-cols-2 gap-4">
               <div>
-                <Label>{currentLanguage === 'en' ? 'Business Name' : 'व्यापार का नाम'}</Label>
+                <Label className="text-[#5c513f]">{currentLanguage === 'en' ? 'Business Name' : 'व्यापार का नाम'}</Label>
                 <Input
+                  className="mt-2 border-[#d7c7a8] bg-[#fffdf7] text-[#2f3a2f] focus-visible:ring-[#315f3b]"
                   value={profile.businessName}
                   onChange={(e) => setProfile({ ...profile, businessName: e.target.value })}
                   disabled={!isEditing}
@@ -418,13 +431,13 @@ const BuyerProfile = () => {
                 )}
               </div>
               <div>
-                <Label>{currentLanguage === 'en' ? 'Business Type' : 'व्यापार का प्रकार'}</Label>
+                <Label className="text-[#5c513f]">{currentLanguage === 'en' ? 'Business Type' : 'व्यापार का प्रकार'}</Label>
                 <Select
                   value={profile.businessType}
                   onValueChange={(value) => setProfile({ ...profile, businessType: value as any })}
                   disabled={!isEditing}
                 >
-                  <SelectTrigger>
+                  <SelectTrigger className="mt-2 border-[#d7c7a8] bg-[#fffdf7] text-[#2f3a2f]">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
@@ -437,8 +450,9 @@ const BuyerProfile = () => {
               </div>
             </div>
             <div>
-              <Label>{currentLanguage === 'en' ? 'GST Number' : 'जीएसटी नंबर'}</Label>
+              <Label className="text-[#5c513f]">{currentLanguage === 'en' ? 'GST Number' : 'जीएसटी नंबर'}</Label>
               <Input
+                className="mt-2 border-[#d7c7a8] bg-[#fffdf7] text-[#2f3a2f] focus-visible:ring-[#315f3b]"
                 value={profile.gstNumber}
                 onChange={(e) => setProfile({ ...profile, gstNumber: e.target.value })}
                 disabled={!isEditing}
@@ -448,15 +462,16 @@ const BuyerProfile = () => {
         </div>
 
         {/* Address */}
-        <div className="card-elevated p-6">
-          <h3 className="font-semibold mb-4 flex items-center gap-2">
-            <MapPin className="w-5 h-5" />
+        <div className="rounded-2xl border border-[#d7c7a8] bg-[#fffaf0] p-6 shadow-[0_16px_40px_rgba(95,70,40,0.08)]">
+          <h3 className="mb-4 flex items-center gap-2 font-semibold text-[#2f3a2f]">
+            <MapPin className="w-5 h-5 text-[#315f3b]" />
             {currentLanguage === 'en' ? 'Business Address' : 'व्यापार का पता'}
           </h3>
           <div className="grid gap-4">
             <div>
-              <Label>{currentLanguage === 'en' ? 'Address' : 'पता'}</Label>
+              <Label className="text-[#5c513f]">{currentLanguage === 'en' ? 'Address' : 'पता'}</Label>
               <Input
+                className="mt-2 border-[#d7c7a8] bg-[#fffdf7] text-[#2f3a2f] focus-visible:ring-[#315f3b]"
                 value={profile.address}
                 onChange={(e) => setProfile({ ...profile, address: e.target.value })}
                 disabled={!isEditing}
@@ -464,8 +479,9 @@ const BuyerProfile = () => {
             </div>
             <div className="grid sm:grid-cols-2 gap-4">
               <div>
-                <Label>{currentLanguage === 'en' ? 'District' : 'जिला'}</Label>
+                <Label className="text-[#5c513f]">{currentLanguage === 'en' ? 'District' : 'जिला'}</Label>
                 <Input
+                  className="mt-2 border-[#d7c7a8] bg-[#fffdf7] text-[#2f3a2f] focus-visible:ring-[#315f3b]"
                   value={profile.district}
                   onChange={(e) => setProfile({ ...profile, district: e.target.value })}
                   disabled={!isEditing}
@@ -475,8 +491,9 @@ const BuyerProfile = () => {
                 )}
               </div>
               <div>
-                <Label>{currentLanguage === 'en' ? 'State' : 'राज्य'}</Label>
+                <Label className="text-[#5c513f]">{currentLanguage === 'en' ? 'State' : 'राज्य'}</Label>
                 <Input
+                  className="mt-2 border-[#d7c7a8] bg-[#fffdf7] text-[#2f3a2f] focus-visible:ring-[#315f3b]"
                   value={profile.state}
                   onChange={(e) => setProfile({ ...profile, state: e.target.value })}
                   disabled={!isEditing}
@@ -488,6 +505,7 @@ const BuyerProfile = () => {
             </div>
           </div>
         </div>
+      </div>
       </div>
     </Layout>
   );

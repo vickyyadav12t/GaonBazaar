@@ -16,6 +16,7 @@ import { mapApiUserToAuth } from '@/lib/mapAuthUser';
 import { validateEmail, validatePhone } from '@/lib/validators';
 import { getApiErrorMessage } from '@/lib/apiErrors';
 import { ROUTES } from '@/constants';
+import { enHi, scriptFontClass, toNewsApiLang } from '@/lib/i18n';
 
 const MAX_KYC_BYTES = 5 * 1024 * 1024;
 
@@ -135,7 +136,7 @@ const Register = () => {
     },
   };
 
-  const t = content[currentLanguage];
+  const t = content[toNewsApiLang(currentLanguage)];
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -405,15 +406,15 @@ const Register = () => {
   ];
 
   return (
-    <div className="flex min-h-screen overflow-x-hidden bg-gradient-to-br from-background via-muted/20 to-background">
+    <div className="flex min-h-screen overflow-x-hidden bg-[#fbf7eb] text-[#213525]">
       {/* Left Side - Branding */}
-      <div className="hidden lg:flex lg:w-1/2 bg-gradient-to-br from-primary via-primary/90 to-primary-dark text-primary-foreground p-12 flex-col justify-between relative overflow-hidden">
+      <div className="relative hidden flex-col justify-between overflow-hidden bg-[#315f3b] p-12 text-[#fff8e8] lg:flex lg:w-1/2">
         {/* Background Pattern */}
-        <div className="absolute inset-0 bg-[url('data:image/svg+xml,%3Csvg%20width%3D%2260%22%20height%3D%2260%22%20viewBox%3D%220%200%2060%2060%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%3E%3Cg%20fill%3D%22none%22%20fill-rule%3D%22evenodd%22%3E%3Cg%20fill%3D%22%23ffffff%22%20fill-opacity%3D%220.08%22%3E%3Cpath%20d%3D%22M36%2034v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6%2034v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6%204V0H4v4H0v2h4v4h2V6h4V4H6z%22%2F%3E%3C%2Fg%3E%3C%2Fg%3E%3C%2Fsvg%3E')] opacity-40" />
+        <div className="absolute inset-0 opacity-20 [background-image:linear-gradient(rgba(255,248,232,0.16)_1px,transparent_1px),linear-gradient(90deg,rgba(255,248,232,0.16)_1px,transparent_1px)] [background-size:42px_42px]" />
         
         {/* Floating Elements */}
-        <div className="absolute top-20 right-20 w-32 h-32 bg-secondary/20 rounded-full blur-2xl" />
-        <div className="absolute bottom-40 left-20 w-40 h-40 bg-accent/20 rounded-full blur-3xl" />
+        <div className="absolute right-16 top-20 h-32 w-32 rounded-full border border-[#d89b2b]/25 bg-[#d89b2b]/10" />
+        <div className="absolute bottom-40 left-16 h-40 w-40 rotate-6 border border-[#fff8e8]/15 bg-[#fff8e8]/5" />
         
         <div className="relative z-10 isolate">
           <Link to="/" className="mb-12 block group" aria-label="GaonBazaar home">
@@ -427,7 +428,7 @@ const Register = () => {
         </div>
 
         <div className="relative z-10">
-          <div className="inline-flex items-center gap-2 bg-white/15 backdrop-blur-md px-4 py-2 rounded-full mb-6 border border-white/20">
+          <div className="mb-6 inline-flex items-center gap-2 rounded-md border border-[#fff8e8]/25 bg-[#fff8e8]/10 px-4 py-2">
             <Sparkles className="w-4 h-4" />
             <span className="text-sm font-semibold">
               {currentLanguage === 'en' ? 'Join Our Community' : 'हमारे समुदाय में शामिल हों'}
@@ -456,12 +457,12 @@ const Register = () => {
               const StepIcon = stepIcons[s - 1].icon;
               return (
                 <div key={s} className="flex items-center gap-2 flex-1">
-                  <div className={`w-12 h-12 rounded-xl flex flex-col items-center justify-center font-medium transition-all duration-300 ${
+                  <div className={`flex h-12 w-12 flex-col items-center justify-center rounded-md font-medium transition-all duration-300 ${
                     s === step 
-                      ? 'bg-secondary text-secondary-foreground shadow-lg scale-110' 
+                      ? 'bg-[#d89b2b] text-[#24170c] shadow-sm scale-110' 
                       : s < step 
-                        ? 'bg-white/30 text-primary-foreground' 
-                        : 'bg-white/10 text-primary-foreground/50'
+                        ? 'bg-[#fff8e8]/25 text-[#fff8e8]' 
+                        : 'bg-[#fff8e8]/10 text-[#fff8e8]/50'
                   }`}>
                     {s < step ? (
                       <CheckCircle className="w-6 h-6" />
@@ -474,7 +475,7 @@ const Register = () => {
                   </div>
                   {s < 4 && (
                     <div className={`h-1 flex-1 rounded-full transition-all ${
-                      s < step ? 'bg-white/30' : 'bg-white/10'
+                      s < step ? 'bg-[#d89b2b]/70' : 'bg-[#fff8e8]/10'
                     }`} />
                   )}
                 </div>
@@ -508,12 +509,12 @@ const Register = () => {
                   const StepIcon = stepIcons[s - 1].icon;
                   return (
                     <div key={s} className="flex shrink-0 items-center gap-1 sm:gap-2">
-                      <div className={`flex h-9 w-9 items-center justify-center rounded-xl transition-all sm:h-10 sm:w-10 ${
+                      <div className={`flex h-9 w-9 items-center justify-center rounded-md transition-all sm:h-10 sm:w-10 ${
                         s === step 
-                          ? 'bg-primary text-primary-foreground shadow-lg scale-110' 
+                          ? 'bg-[#315f3b] text-[#fff8e8] shadow-sm scale-110' 
                           : s < step 
-                            ? 'bg-primary/30 text-primary' 
-                            : 'bg-muted text-muted-foreground'
+                            ? 'bg-[#315f3b]/20 text-[#315f3b]' 
+                            : 'bg-[#f1e5cc] text-muted-foreground'
                       }`}>
                         {s < step ? (
                           <CheckCircle className="w-5 h-5" />
@@ -523,7 +524,7 @@ const Register = () => {
                       </div>
                       {s < 4 && (
                         <div className={`h-1 w-5 shrink-0 rounded-full sm:w-8 ${
-                          s < step ? 'bg-primary' : 'bg-border'
+                          s < step ? 'bg-[#315f3b]' : 'bg-[#d7c7a8]'
                         }`} />
                       )}
                     </div>
@@ -535,18 +536,18 @@ const Register = () => {
 
           <AnimateOnScroll animation="slide-up" delay={0.2}>
             <div className="mb-8 text-center sm:mb-10">
-              <div className="inline-flex items-center gap-2 bg-primary/10 px-4 py-2 rounded-full mb-4">
-                <Shield className="w-4 h-4 text-primary" />
-                <span className="text-sm font-semibold text-primary">
-                  {currentLanguage === 'en' ? 'Step' : 'चरण'} {step} {currentLanguage === 'en' ? 'of' : 'का'} 4
+              <div className="mb-4 inline-flex items-center gap-2 rounded-md border border-[#315f3b]/20 bg-[#315f3b]/10 px-4 py-2">
+                <Shield className="w-4 h-4 text-[#315f3b]" />
+                <span className="text-sm font-semibold text-[#315f3b]">
+                  {enHi(currentLanguage, 'Step', 'चरण')} {step} {enHi(currentLanguage, 'of', 'का')} 4
                 </span>
               </div>
               <h1
-                className={`mb-3 text-3xl font-extrabold text-foreground sm:text-4xl md:text-5xl ${currentLanguage === 'hi' ? 'font-hindi' : ''}`}
+                className={`mb-3 text-3xl font-extrabold text-foreground sm:text-4xl md:text-5xl ${scriptFontClass(currentLanguage)}`}
               >
                 {t.title}
               </h1>
-              <p className={`text-lg text-muted-foreground ${currentLanguage === 'hi' ? 'font-hindi' : ''}`}>
+              <p className={`text-lg text-muted-foreground ${scriptFontClass(currentLanguage)}`}>
                 {step === 1 && t.step1}
                 {step === 2 && t.step2}
                 {step === 3 && t.step3}
@@ -560,10 +561,10 @@ const Register = () => {
             <AnimateOnScroll animation="fade-in">
               <div className="space-y-4">
                 <Card 
-                  className={`cursor-pointer hover:shadow-xl hover:scale-105 transition-all duration-300 border-2 ${
+                  className={`cursor-pointer rounded-lg bg-[#fffaf0] transition-all duration-300 hover:-translate-y-1 hover:shadow-md border-2 ${
                     role === 'farmer' 
-                      ? 'border-primary bg-gradient-to-br from-primary/10 to-primary/5 shadow-lg' 
-                      : 'border-border hover:border-primary/50'
+                      ? 'border-[#315f3b] bg-[#315f3b]/10 shadow-sm' 
+                      : 'border-[#d7c7a8] hover:border-[#315f3b]/50'
                   }`}
                   onClick={() => setRole('farmer')}
                 >
@@ -571,16 +572,16 @@ const Register = () => {
                     <div className="flex items-start gap-3 sm:items-center sm:gap-4">
                       <div className="shrink-0 text-4xl sm:text-5xl">🧑‍🌾</div>
                       <div className="min-w-0 flex-1">
-                        <h3 className={`font-bold text-xl mb-2 ${currentLanguage === 'hi' ? 'font-hindi' : ''}`}>
+                        <h3 className={`font-bold text-xl mb-2 ${scriptFontClass(currentLanguage)}`}>
                           {t.farmer}
                         </h3>
-                        <p className={`text-sm text-muted-foreground ${currentLanguage === 'hi' ? 'font-hindi' : ''}`}>
+                        <p className={`text-sm text-muted-foreground ${scriptFontClass(currentLanguage)}`}>
                           {t.farmerDesc}
                         </p>
                       </div>
                       {role === 'farmer' && (
-                        <div className="w-10 h-10 bg-primary rounded-full flex items-center justify-center">
-                          <CheckCircle className="w-6 h-6 text-primary-foreground" />
+                        <div className="flex h-10 w-10 items-center justify-center rounded-md bg-[#315f3b]">
+                          <CheckCircle className="w-6 h-6 text-[#fff8e8]" />
                         </div>
                       )}
                     </div>
@@ -588,10 +589,10 @@ const Register = () => {
                 </Card>
 
                 <Card 
-                  className={`cursor-pointer hover:shadow-xl hover:scale-105 transition-all duration-300 border-2 ${
+                  className={`cursor-pointer rounded-lg bg-[#fffaf0] transition-all duration-300 hover:-translate-y-1 hover:shadow-md border-2 ${
                     role === 'buyer' 
-                      ? 'border-primary bg-gradient-to-br from-primary/10 to-primary/5 shadow-lg' 
-                      : 'border-border hover:border-primary/50'
+                      ? 'border-[#315f3b] bg-[#315f3b]/10 shadow-sm' 
+                      : 'border-[#d7c7a8] hover:border-[#315f3b]/50'
                   }`}
                   onClick={() => setRole('buyer')}
                 >
@@ -599,16 +600,16 @@ const Register = () => {
                     <div className="flex items-start gap-3 sm:items-center sm:gap-4">
                       <div className="shrink-0 text-4xl sm:text-5xl">🛒</div>
                       <div className="min-w-0 flex-1">
-                        <h3 className={`font-bold text-xl mb-2 ${currentLanguage === 'hi' ? 'font-hindi' : ''}`}>
+                        <h3 className={`font-bold text-xl mb-2 ${scriptFontClass(currentLanguage)}`}>
                           {t.buyer}
                         </h3>
-                        <p className={`text-sm text-muted-foreground ${currentLanguage === 'hi' ? 'font-hindi' : ''}`}>
+                        <p className={`text-sm text-muted-foreground ${scriptFontClass(currentLanguage)}`}>
                           {t.buyerDesc}
                         </p>
                       </div>
                       {role === 'buyer' && (
-                        <div className="w-10 h-10 bg-primary rounded-full flex items-center justify-center">
-                          <CheckCircle className="w-6 h-6 text-primary-foreground" />
+                        <div className="flex h-10 w-10 items-center justify-center rounded-md bg-[#315f3b]">
+                          <CheckCircle className="w-6 h-6 text-[#fff8e8]" />
                         </div>
                       )}
                     </div>
@@ -621,7 +622,7 @@ const Register = () => {
           {/* Step 2: Basic Info */}
           {step === 2 && (
             <AnimateOnScroll animation="fade-in">
-              <Card className="border-2 shadow-lg">
+              <Card className="rounded-lg border-2 border-[#d7c7a8] bg-[#fffaf0] shadow-sm">
                 <CardContent className="p-4 sm:p-6">
                   <div className="space-y-5">
                     <div>
@@ -634,7 +635,7 @@ const Register = () => {
                         placeholder={currentLanguage === 'en' ? 'Enter your full name' : 'अपना पूरा नाम दर्ज करें'}
                         value={formData.name}
                         onChange={handleInputChange}
-                        className="border-2 focus:border-primary py-6"
+                        className="rounded-md border-2 border-[#d7c7a8] bg-[#fffdf7] py-6 focus:border-[#315f3b]"
                       />
                     </div>
                     <div>
@@ -642,7 +643,7 @@ const Register = () => {
                         {currentLanguage === 'en' ? 'Phone Number' : 'फ़ोन नंबर'}
                       </Label>
                       <div className="flex min-w-0 gap-2">
-                        <div className="flex shrink-0 items-center rounded-xl border-2 border-input bg-muted px-3 font-medium sm:px-4">
+                        <div className="flex shrink-0 items-center rounded-md border-2 border-[#d7c7a8] bg-[#f1e5cc] px-3 font-medium sm:px-4">
                           <span className="text-sm text-foreground">+91</span>
                         </div>
                         <Input
@@ -652,7 +653,7 @@ const Register = () => {
                           placeholder="98765 43210"
                           value={formData.phone}
                           onChange={handleInputChange}
-                          className="min-w-0 flex-1 border-2 py-5 focus:border-primary sm:py-6"
+                          className="min-w-0 flex-1 rounded-md border-2 border-[#d7c7a8] bg-[#fffdf7] py-5 focus:border-[#315f3b] sm:py-6"
                         />
                       </div>
                     </div>
@@ -669,7 +670,7 @@ const Register = () => {
                         placeholder="your@email.com"
                         value={formData.email}
                         onChange={handleInputChange}
-                        className="border-2 focus:border-primary py-6"
+                        className="rounded-md border-2 border-[#d7c7a8] bg-[#fffdf7] py-6 focus:border-[#315f3b]"
                         required
                       />
                       <p className="text-xs text-muted-foreground mt-1.5">
@@ -693,7 +694,7 @@ const Register = () => {
                         }
                         value={formData.password}
                         onChange={handleInputChange}
-                        className="border-2 focus:border-primary py-6"
+                        className="rounded-md border-2 border-[#d7c7a8] bg-[#fffdf7] py-6 focus:border-[#315f3b]"
                       />
                     </div>
                     <div>
@@ -711,7 +712,7 @@ const Register = () => {
                         }
                         value={formData.confirmPassword}
                         onChange={handleInputChange}
-                        className="border-2 focus:border-primary py-6"
+                        className="rounded-md border-2 border-[#d7c7a8] bg-[#fffdf7] py-6 focus:border-[#315f3b]"
                       />
                     </div>
                     {role === 'buyer' && (
@@ -726,7 +727,7 @@ const Register = () => {
                             placeholder={currentLanguage === 'en' ? 'Your business name' : 'अपना व्यवसाय नाम'}
                             value={formData.businessName}
                             onChange={handleInputChange}
-                            className="border-2 focus:border-primary py-6"
+                            className="rounded-md border-2 border-[#d7c7a8] bg-[#fffdf7] py-6 focus:border-[#315f3b]"
                           />
                         </div>
                         <div>
@@ -738,7 +739,7 @@ const Register = () => {
                             name="businessType"
                             value={formData.businessType}
                             onChange={handleInputChange}
-                            className="w-full px-4 py-6 bg-background border-2 border-input rounded-xl focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary"
+                            className="w-full rounded-md border-2 border-[#d7c7a8] bg-[#fffdf7] px-4 py-6 focus:border-[#315f3b] focus:outline-none focus:ring-2 focus:ring-[#315f3b]/30"
                           >
                             <option value="retailer">Retailer</option>
                             <option value="wholesaler">Wholesaler</option>
@@ -757,7 +758,7 @@ const Register = () => {
           {/* Step 3: Location */}
           {step === 3 && (
             <AnimateOnScroll animation="fade-in">
-              <Card className="border-2 shadow-lg">
+              <Card className="rounded-lg border-2 border-[#d7c7a8] bg-[#fffaf0] shadow-sm">
                 <CardContent className="p-4 sm:p-6">
                   <div className="space-y-5">
                     <div>
@@ -769,7 +770,7 @@ const Register = () => {
                         name="state"
                         value={formData.state}
                         onChange={handleInputChange}
-                        className="w-full px-4 py-6 bg-background border-2 border-input rounded-xl focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary"
+                        className="w-full rounded-md border-2 border-[#d7c7a8] bg-[#fffdf7] px-4 py-6 focus:border-[#315f3b] focus:outline-none focus:ring-2 focus:ring-[#315f3b]/30"
                       >
                         <option value="">{currentLanguage === 'en' ? 'Select State' : 'राज्य चुनें'}</option>
                         {states.map((state) => (
@@ -787,7 +788,7 @@ const Register = () => {
                         placeholder={currentLanguage === 'en' ? 'Enter your district' : 'अपना जिला दर्ज करें'}
                         value={formData.district}
                         onChange={handleInputChange}
-                        className="border-2 focus:border-primary py-6"
+                        className="rounded-md border-2 border-[#d7c7a8] bg-[#fffdf7] py-6 focus:border-[#315f3b]"
                       />
                     </div>
                     {role === 'farmer' && (
@@ -802,7 +803,7 @@ const Register = () => {
                             placeholder={currentLanguage === 'en' ? 'Enter your village' : 'अपना गाँव दर्ज करें'}
                             value={formData.village}
                             onChange={handleInputChange}
-                            className="border-2 focus:border-primary py-6"
+                            className="rounded-md border-2 border-[#d7c7a8] bg-[#fffdf7] py-6 focus:border-[#315f3b]"
                           />
                         </div>
                         <div>
@@ -815,7 +816,7 @@ const Register = () => {
                             placeholder={currentLanguage === 'en' ? 'e.g., 5 acres' : 'उदाहरण: 5 एकड़'}
                             value={formData.farmSize}
                             onChange={handleInputChange}
-                            className="border-2 focus:border-primary py-6"
+                            className="rounded-md border-2 border-[#d7c7a8] bg-[#fffdf7] py-6 focus:border-[#315f3b]"
                           />
                         </div>
                       </>
@@ -829,7 +830,7 @@ const Register = () => {
           {/* Step 4: Email OTP + optional farmer KYC */}
           {step === 4 && (
             <AnimateOnScroll animation="fade-in">
-              <Card className="border-2 shadow-lg">
+              <Card className="rounded-lg border-2 border-[#d7c7a8] bg-[#fffaf0] shadow-sm">
                 <CardContent className="p-4 sm:p-6">
                   <div className="space-y-6">
                     <div className="space-y-2">
@@ -849,7 +850,7 @@ const Register = () => {
                         onChange={(e) =>
                           setEmailVerificationCode(e.target.value.replace(/\D/g, '').slice(0, 6))
                         }
-                        className="text-center text-lg tracking-[0.35em] font-mono border-2 focus:border-primary py-6"
+                        className="rounded-md border-2 border-[#d7c7a8] bg-[#fffdf7] py-6 text-center font-mono text-lg tracking-[0.35em] focus:border-[#315f3b]"
                       />
                       <Button
                         type="button"
@@ -894,7 +895,7 @@ const Register = () => {
                             onChange={(e) =>
                               setKycDocType(e.target.value === 'kisan' ? 'kisan' : 'aadhaar')
                             }
-                            className="w-full px-4 py-4 bg-background border-2 border-input rounded-xl focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary"
+                            className="w-full rounded-md border-2 border-[#d7c7a8] bg-[#fffdf7] px-4 py-4 focus:border-[#315f3b] focus:outline-none focus:ring-2 focus:ring-[#315f3b]/30"
                           >
                             <option value="aadhaar">{t.kycAadhaar}</option>
                             <option value="kisan">{t.kycKisan}</option>
@@ -921,22 +922,22 @@ const Register = () => {
                           <button
                             type="button"
                             onClick={() => kycInputRef.current?.click()}
-                            className={`w-full cursor-pointer rounded-xl border-2 border-dashed p-5 text-center transition-all duration-300 hover:scale-[1.01] sm:p-8 ${
+                            className={`w-full cursor-pointer rounded-lg border-2 border-dashed p-5 text-center transition-all duration-300 hover:scale-[1.01] sm:p-8 ${
                               kycFile
-                                ? 'border-primary bg-primary/5'
-                                : 'border-border hover:border-primary/50 hover:bg-muted/50'
+                                ? 'border-[#315f3b] bg-[#315f3b]/5'
+                                : 'border-[#d7c7a8] hover:border-[#315f3b]/50 hover:bg-[#f1e5cc]/60'
                             }`}
                           >
                             {kycFile ? (
                               <div className="text-foreground">
-                                <CheckCircle className="w-14 h-14 mx-auto mb-3 text-primary" />
+                                <CheckCircle className="w-14 h-14 mx-auto mb-3 text-[#315f3b]" />
                                 <p className="font-semibold text-lg mb-1">
                                   {currentLanguage === 'en' ? 'Ready to submit' : 'जमा करने के लिए तैयार'}
                                 </p>
                                 <p className="text-sm text-muted-foreground break-all px-2">
                                   {t.kycSelected}: {kycFile.name}
                                 </p>
-                                <p className="text-xs text-primary mt-3 font-medium">
+                                <p className="text-xs text-[#315f3b] mt-3 font-medium">
                                   {currentLanguage === 'en' ? 'Tap to choose a different file' : 'दूसरी फ़ाइल चुनने के लिए टैप करें'}
                                 </p>
                               </div>
@@ -966,7 +967,7 @@ const Register = () => {
                 <Button
                   variant="outline"
                   onClick={handleBack}
-                  className="w-full border-2 py-5 hover:bg-muted sm:flex-1 sm:py-6"
+                  className="w-full rounded-md border-2 border-[#315f3b] py-5 text-[#315f3b] hover:bg-[#315f3b] hover:text-[#fff8e8] sm:flex-1 sm:py-6"
                   disabled={isLoading}
                 >
                   <ArrowLeft className="mr-2 h-5 w-5" />
@@ -976,11 +977,11 @@ const Register = () => {
               <Button
                 onClick={handleNext}
                 disabled={isLoading}
-                className="w-full py-6 text-base font-semibold shadow-lg transition-transform btn-primary-gradient sm:flex-1 sm:py-7 sm:text-lg sm:hover:scale-[1.02]"
+                className="w-full rounded-md bg-[#d89b2b] py-6 text-base font-bold text-[#24170c] shadow-md transition-transform hover:bg-[#c8871f] sm:flex-1 sm:py-7 sm:text-lg sm:hover:scale-[1.02]"
               >
                 {isLoading ? (
                   <>
-                    <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin mr-2" />
+                    <div className="mr-2 h-5 w-5 animate-spin rounded-full border-2 border-[#24170c]/30 border-t-[#24170c]" />
                     {currentLanguage === 'en' ? 'Processing...' : 'प्रोसेसिंग...'}
                   </>
                 ) : step === 4 ? (
@@ -1000,9 +1001,9 @@ const Register = () => {
 
           {/* Login Link */}
           <AnimateOnScroll animation="fade-in" delay={0.4}>
-            <p className={`text-center mt-8 text-muted-foreground ${currentLanguage === 'hi' ? 'font-hindi' : ''}`}>
+            <p className={`text-center mt-8 text-muted-foreground ${scriptFontClass(currentLanguage)}`}>
               {t.hasAccount}{' '}
-              <Link to="/login" className="text-primary font-semibold hover:underline hover:text-primary/80 transition-colors">
+              <Link to="/login" className="font-semibold text-[#315f3b] transition-colors hover:text-[#8a4f2a] hover:underline">
                 {t.login}
               </Link>
             </p>

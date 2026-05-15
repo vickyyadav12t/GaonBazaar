@@ -16,14 +16,14 @@ export default function AdminOrdersTab() {
   return (
     <div className="space-y-6">
   <AnimateOnScroll animation="slide-up">
-    <Card className="border-2 shadow-lg">
-      <CardHeader className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between border-b bg-gradient-to-r from-accent/10 to-primary/5">
+    <Card className="border-[#d7c7a8] bg-[#fffaf0] shadow-[0_16px_40px_rgba(95,70,40,0.08)]">
+      <CardHeader className="flex flex-col gap-4 border-b border-[#e2d4b7] bg-[#f6eddc] sm:flex-row sm:items-start sm:justify-between">
         <div>
           <CardTitle className="flex items-center gap-2">
-            <ClipboardList className="w-5 h-5 text-primary" />
+            <ClipboardList className="w-5 h-5 text-[#315f3b]" />
             All orders
           </CardTitle>
-          <CardDescription>
+          <CardDescription className="text-[#6f6552]">
             Click a row for a quick view (timeline + summary). Full page has admin actions. Filters
             and CSV export match the list.
           </CardDescription>
@@ -32,7 +32,7 @@ export default function AdminOrdersTab() {
           type="button"
           variant="outline"
           size="sm"
-          className="shrink-0"
+          className="shrink-0 border-[#d7c7a8] bg-[#fffdf7] text-[#315f3b] hover:bg-[#f3ebdd] hover:text-[#315f3b]"
           disabled={vm.csvExporting === 'orders'}
           onClick={() => void vm.handleExportOrdersCsv()}
         >
@@ -47,7 +47,7 @@ export default function AdminOrdersTab() {
       <CardContent className="pt-6 space-y-6">
         <div className="flex flex-col gap-4 xl:flex-row xl:flex-wrap xl:items-end">
           <div className="space-y-2 min-w-[160px]">
-            <Label className="text-xs text-muted-foreground">Order status</Label>
+            <Label className="text-xs text-[#6f6552]">Order status</Label>
             <Select
               value={vm.orderStatusFilter}
               onValueChange={(v) => {
@@ -55,7 +55,7 @@ export default function AdminOrdersTab() {
                 vm.setAdminOrdersSkip(0);
               }}
             >
-              <SelectTrigger>
+              <SelectTrigger className="border-[#d7c7a8] bg-[#fffdf7] text-[#2f3a2f]">
                 <SelectValue placeholder="Status" />
               </SelectTrigger>
               <SelectContent>
@@ -69,7 +69,7 @@ export default function AdminOrdersTab() {
             </Select>
           </div>
           <div className="space-y-2 min-w-[160px]">
-            <Label className="text-xs text-muted-foreground">Payment status</Label>
+            <Label className="text-xs text-[#6f6552]">Payment status</Label>
             <Select
               value={vm.orderPaymentFilter}
               onValueChange={(v) => {
@@ -77,7 +77,7 @@ export default function AdminOrdersTab() {
                 vm.setAdminOrdersSkip(0);
               }}
             >
-              <SelectTrigger>
+              <SelectTrigger className="border-[#d7c7a8] bg-[#fffdf7] text-[#2f3a2f]">
                 <SelectValue placeholder="Payment" />
               </SelectTrigger>
               <SelectContent>
@@ -90,7 +90,7 @@ export default function AdminOrdersTab() {
             </Select>
           </div>
           <div className="space-y-2 min-w-[180px]">
-            <Label className="text-xs text-muted-foreground">Placed in</Label>
+            <Label className="text-xs text-[#6f6552]">Placed in</Label>
             <Select
               value={vm.orderDatePreset}
               onValueChange={(v) => {
@@ -98,7 +98,7 @@ export default function AdminOrdersTab() {
                 vm.setAdminOrdersSkip(0);
               }}
             >
-              <SelectTrigger>
+              <SelectTrigger className="border-[#d7c7a8] bg-[#fffdf7] text-[#2f3a2f]">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
@@ -113,7 +113,7 @@ export default function AdminOrdersTab() {
           {vm.orderDatePreset === 'custom' && (
             <>
               <div className="space-y-2 min-w-[160px]">
-                <Label className="text-xs text-muted-foreground">From</Label>
+                <Label className="text-xs text-[#6f6552]">From</Label>
                 <Input
                   type="date"
                   value={vm.orderDateFrom}
@@ -121,10 +121,11 @@ export default function AdminOrdersTab() {
                     vm.setOrderDateFrom(e.target.value);
                     vm.setAdminOrdersSkip(0);
                   }}
+                  className="border-[#d7c7a8] bg-[#fffdf7] text-[#2f3a2f] focus-visible:ring-[#315f3b]"
                 />
               </div>
               <div className="space-y-2 min-w-[160px]">
-                <Label className="text-xs text-muted-foreground">To</Label>
+                <Label className="text-xs text-[#6f6552]">To</Label>
                 <Input
                   type="date"
                   value={vm.orderDateTo}
@@ -132,6 +133,7 @@ export default function AdminOrdersTab() {
                     vm.setOrderDateTo(e.target.value);
                     vm.setAdminOrdersSkip(0);
                   }}
+                  className="border-[#d7c7a8] bg-[#fffdf7] text-[#2f3a2f] focus-visible:ring-[#315f3b]"
                 />
               </div>
             </>
@@ -139,17 +141,17 @@ export default function AdminOrdersTab() {
         </div>
 
         {vm.ordersTabLoading && (
-          <div className="flex items-center gap-2 text-sm text-muted-foreground">
+          <div className="flex items-center gap-2 text-sm text-[#6f6552]">
             <Loader2 className="h-4 w-4 animate-spin shrink-0" />
             Loading orders…
           </div>
         )}
 
-        <div className="rounded-xl border border-border overflow-hidden">
+        <div className="overflow-hidden rounded-xl border border-[#d7c7a8] bg-[#fffdf7]">
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
               <thead>
-                <tr className="bg-muted/50 border-b text-left">
+                <tr className="border-b border-[#e2d4b7] bg-[#f6eddc] text-left">
                   <th className="p-3 font-semibold whitespace-nowrap">Placed</th>
                   <th className="p-3 font-semibold whitespace-nowrap">Order</th>
                   <th className="p-3 font-semibold min-w-[200px]">Parties</th>
@@ -166,7 +168,7 @@ export default function AdminOrdersTab() {
                     role="button"
                     tabIndex={0}
                     title="Click for quick view (timeline)"
-                    className="border-b border-border/80 hover:bg-muted/30 cursor-pointer"
+                    className="cursor-pointer border-b border-[#eee2c8] hover:bg-[#f6eddc]"
                     onClick={() => vm.setAdminOrderPreviewId(o.id)}
                     onKeyDown={(e) => {
                       if (e.key === 'Enter' || e.key === ' ') {
@@ -175,7 +177,7 @@ export default function AdminOrdersTab() {
                       }
                     }}
                   >
-                    <td className="p-3 whitespace-nowrap text-muted-foreground">
+                    <td className="whitespace-nowrap p-3 text-[#6f6552]">
                       {new Date(o.createdAt).toLocaleString('en-IN', {
                         dateStyle: 'short',
                         timeStyle: 'short',
@@ -183,10 +185,10 @@ export default function AdminOrdersTab() {
                     </td>
                     <td className="p-3 font-mono text-xs">#{o.id.slice(-8)}</td>
                     <td className="p-3">
-                      <span className="text-foreground">{o.buyerName}</span>
-                      <span className="text-muted-foreground mx-1">→</span>
-                      <span className="text-foreground">{o.farmerName}</span>
-                      <p className="text-xs text-muted-foreground mt-0.5 line-clamp-1">
+                      <span className="text-[#2f3a2f]">{o.buyerName}</span>
+                      <span className="mx-1 text-[#6f6552]">→</span>
+                      <span className="text-[#2f3a2f]">{o.farmerName}</span>
+                      <p className="mt-0.5 line-clamp-1 text-xs text-[#6f6552]">
                         {o.productName}
                         {o.quantity > 1 ? ` × ${o.quantity} ${o.unit}` : ''}
                       </p>
@@ -198,22 +200,22 @@ export default function AdminOrdersTab() {
                       <Badge
                         className={
                           o.status === 'delivered'
-                            ? 'bg-success/10 text-success'
+                            ? 'bg-[#eaf5ec] text-[#315f3b]'
                             : o.status === 'cancelled'
-                              ? 'bg-destructive/10 text-destructive'
-                              : 'bg-warning/10 text-warning'
+                              ? 'bg-[#f6e5dc] text-[#8a4f2a]'
+                              : 'bg-[#fff4dd] text-[#9a6b12]'
                         }
                       >
                         {o.status}
                       </Badge>
                     </td>
                     <td className="p-3">
-                      <Badge variant="outline" className="capitalize">
+                      <Badge variant="outline" className="capitalize border-[#d7c7a8] bg-[#fffaf0] text-[#6c5a3d]">
                         {o.paymentStatus}
                       </Badge>
                     </td>
                     <td className="p-3 text-right" onClick={(e) => e.stopPropagation()}>
-                      <Button variant="ghost" size="sm" asChild>
+                      <Button variant="ghost" size="sm" className="text-[#315f3b] hover:bg-[#f3ebdd] hover:text-[#315f3b]" asChild>
                         <Link to={`/admin/orders/${o.id}`}>
                           <ExternalLink className="w-4 h-4 mr-1" />
                           Open
@@ -226,7 +228,7 @@ export default function AdminOrdersTab() {
             </table>
           </div>
           {!vm.ordersTabLoading && vm.adminOrders.length === 0 && (
-            <div className="p-12 text-center text-muted-foreground">
+            <div className="p-12 text-center text-[#6f6552]">
               No orders match these filters.
             </div>
           )}

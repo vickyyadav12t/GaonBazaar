@@ -26,7 +26,11 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { useAppSelector, useAppDispatch } from '@/hooks/useRedux';
-import { toggleLanguage, setLanguage } from '@/store/slices/languageSlice';
+import { setLanguage } from '@/store/slices/languageSlice';
+import type { Language } from '@/types';
+import { getSettingsStrings } from '@/i18n/locales/settingsLocales';
+import { LANGUAGES } from '@/lib/i18n';
+import { enHi, scriptFontClass } from '@/lib/i18n';
 import { logout, updateUser } from '@/store/slices/authSlice';
 import { clearCart } from '@/store/slices/cartSlice';
 import { useToast } from '@/hooks/use-toast';
@@ -81,6 +85,8 @@ const Settings = () => {
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
 
+  const t = getSettingsStrings(currentLanguage);
+
   // Load latest profile from backend on mount
   useEffect(() => {
     const fetchProfile = async () => {
@@ -103,11 +109,9 @@ const Settings = () => {
         const message =
           error?.response?.data?.message ||
           error?.message ||
-          (currentLanguage === 'en'
-            ? 'Failed to load profile.'
-            : 'प्रोफ़ाइल लोड करने में विफल।');
+          enHi(currentLanguage, 'Failed to load profile.', 'प्रोफ़ाइल लोड करने में विफल।');
         toast({
-          title: currentLanguage === 'en' ? 'Error' : 'त्रुटि',
+          title: enHi(currentLanguage, 'Error', 'त्रुटि'),
           description: message,
           variant: 'destructive',
         });
@@ -138,24 +142,24 @@ const Settings = () => {
         }
 
         toast({
-          title:
-            currentLanguage === 'en'
-              ? 'Settings Saved'
-              : 'सेटिंग्स सहेजी गईं',
-          description:
-            currentLanguage === 'en'
-              ? 'Your account settings have been updated.'
-              : 'आपकी खाता सेटिंग्स अपडेट की गई हैं।',
+          title: enHi(currentLanguage, 'Settings Saved', 'सेटिंग्स सहेजी गईं'),
+          description: enHi(
+            currentLanguage,
+            'Your account settings have been updated.',
+            'आपकी खाता सेटिंग्स अपडेट की गई हैं।',
+          ),
         });
       } catch (error: any) {
         const message =
           error?.response?.data?.message ||
           error?.message ||
-          (currentLanguage === 'en'
-            ? 'Failed to update account settings.'
-            : 'खाता सेटिंग्स अपडेट करने में विफल।');
+          enHi(
+            currentLanguage,
+            'Failed to update account settings.',
+            'खाता सेटिंग्स अपडेट करने में विफल।',
+          );
         toast({
-          title: currentLanguage === 'en' ? 'Error' : 'त्रुटि',
+          title: enHi(currentLanguage, 'Error', 'त्रुटि'),
           description: message,
           variant: 'destructive',
         });
@@ -187,24 +191,24 @@ const Settings = () => {
           }));
         }
         toast({
-          title:
-            currentLanguage === 'en'
-              ? 'Settings Saved'
-              : 'सेटिंग्स सहेजी गईं',
-          description:
-            currentLanguage === 'en'
-              ? 'Your notification preferences have been updated.'
-              : 'आपकी सूचना सेटिंग्स अपडेट की गई हैं।',
+          title: enHi(currentLanguage, 'Settings Saved', 'सेटिंग्स सहेजी गईं'),
+          description: enHi(
+            currentLanguage,
+            'Your notification preferences have been updated.',
+            'आपकी सूचना सेटिंग्स अपडेट की गई हैं।',
+          ),
         });
       } catch (error: unknown) {
         const message =
           (error as { response?: { data?: { message?: string } } })?.response?.data?.message ||
           (error instanceof Error ? error.message : '') ||
-          (currentLanguage === 'en'
-            ? 'Failed to save notification settings.'
-            : 'सूचना सेटिंग्स सहेजने में विफल।');
+          enHi(
+            currentLanguage,
+            'Failed to save notification settings.',
+            'सूचना सेटिंग्स सहेजने में विफल।',
+          );
         toast({
-          title: currentLanguage === 'en' ? 'Error' : 'त्रुटि',
+          title: enHi(currentLanguage, 'Error', 'त्रुटि'),
           description: message,
           variant: 'destructive',
         });
@@ -219,10 +223,12 @@ const Settings = () => {
     setTimeout(() => {
       setIsSaving(false);
       toast({
-        title: currentLanguage === 'en' ? 'Settings Saved' : 'सेटिंग्स सहेजी गईं',
-        description: currentLanguage === 'en' 
-          ? `Your ${section} settings have been updated.`
-          : `आपकी ${section} सेटिंग्स अपडेट की गई हैं।`,
+        title: enHi(currentLanguage, 'Settings Saved', 'सेटिंग्स सहेजी गईं'),
+        description: enHi(
+          currentLanguage,
+          `Your ${section} settings have been updated.`,
+          `आपकी ${section} सेटिंग्स अपडेट की गई हैं।`,
+        ),
       });
     }, 1000);
   };
@@ -230,10 +236,12 @@ const Settings = () => {
   const handleChangePassword = () => {
     if (settings.newPassword !== settings.confirmPassword) {
       toast({
-        title: currentLanguage === 'en' ? 'Password Mismatch' : 'पासवर्ड मेल नहीं खाता',
-        description: currentLanguage === 'en' 
-          ? 'New password and confirm password do not match.'
-          : 'नया पासवर्ड और पुष्टि पासवर्ड मेल नहीं खाते।',
+        title: enHi(currentLanguage, 'Password Mismatch', 'पासवर्ड मेल नहीं खाता'),
+        description: enHi(
+          currentLanguage,
+          'New password and confirm password do not match.',
+          'नया पासवर्ड और पुष्टि पासवर्ड मेल नहीं खाते।',
+        ),
         variant: 'destructive',
       });
       return;
@@ -241,10 +249,12 @@ const Settings = () => {
 
     if (settings.newPassword.length < 8) {
       toast({
-        title: currentLanguage === 'en' ? 'Password Too Short' : 'पासवर्ड बहुत छोटा',
-        description: currentLanguage === 'en' 
-          ? 'Password must be at least 8 characters long.'
-          : 'पासवर्ड कम से कम 8 वर्ण लंबा होना चाहिए।',
+        title: enHi(currentLanguage, 'Password Too Short', 'पासवर्ड बहुत छोटा'),
+        description: enHi(
+          currentLanguage,
+          'Password must be at least 8 characters long.',
+          'पासवर्ड कम से कम 8 वर्ण लंबा होना चाहिए।',
+        ),
         variant: 'destructive',
       });
       return;
@@ -269,11 +279,12 @@ const Settings = () => {
     if (!file) return;
     if (!file.type.startsWith('image/')) {
       toast({
-        title: currentLanguage === 'en' ? 'Invalid file' : 'अमान्य फ़ाइल',
-        description:
-          currentLanguage === 'en'
-            ? 'Please choose an image (JPEG, PNG, WebP, or GIF).'
-            : 'कृपया एक छवि चुनें।',
+        title: enHi(currentLanguage, 'Invalid file', 'अमान्य फ़ाइल'),
+        description: enHi(
+          currentLanguage,
+          'Please choose an image (JPEG, PNG, WebP, or GIF).',
+          'कृपया एक छवि चुनें।',
+        ),
         variant: 'destructive',
       });
       return;
@@ -295,19 +306,20 @@ const Settings = () => {
       }
 
       toast({
-        title: currentLanguage === 'en' ? 'Photo updated' : 'फोटो अपडेट',
-        description:
-          currentLanguage === 'en'
-            ? 'Your profile picture has been saved.'
-            : 'आपकी प्रोफ़ाइल फोटो सहेजी गई।',
+        title: enHi(currentLanguage, 'Photo updated', 'फोटो अपडेट'),
+        description: enHi(
+          currentLanguage,
+          'Your profile picture has been saved.',
+          'आपकी प्रोफ़ाइल फोटो सहेजी गई।',
+        ),
       });
     } catch (error: unknown) {
       const message =
         (error as { response?: { data?: { message?: string } } })?.response?.data?.message ||
         (error as Error)?.message ||
-        (currentLanguage === 'en' ? 'Upload failed.' : 'अपलोड विफल।');
+        enHi(currentLanguage, 'Upload failed.', 'अपलोड विफल।');
       toast({
-        title: currentLanguage === 'en' ? 'Error' : 'त्रुटि',
+        title: enHi(currentLanguage, 'Error', 'त्रुटि'),
         description: message,
         variant: 'destructive',
       });
@@ -330,18 +342,19 @@ const Settings = () => {
         if (u) dispatch(updateUser(mapApiUserToAuth(u)));
       }
       toast({
-        title: currentLanguage === 'en' ? 'Photo removed' : 'फोटो हटाई गई',
-        description:
-          currentLanguage === 'en'
-            ? 'Your profile picture was cleared.'
-            : 'आपकी प्रोफ़ाइल फोटो हटा दी गई।',
+        title: enHi(currentLanguage, 'Photo removed', 'फोटो हटाई गई'),
+        description: enHi(
+          currentLanguage,
+          'Your profile picture was cleared.',
+          'आपकी प्रोफ़ाइल फोटो हटा दी गई।',
+        ),
       });
     } catch (error: unknown) {
       const message =
         (error as { response?: { data?: { message?: string } } })?.response?.data?.message ||
-        (currentLanguage === 'en' ? 'Could not remove photo.' : 'फोटो नहीं हटा सके।');
+        enHi(currentLanguage, 'Could not remove photo.', 'फोटो नहीं हटा सके।');
       toast({
-        title: currentLanguage === 'en' ? 'Error' : 'त्रुटि',
+        title: enHi(currentLanguage, 'Error', 'त्रुटि'),
         description: message,
         variant: 'destructive',
       });
@@ -363,139 +376,52 @@ const Settings = () => {
     dispatch(logout());
     navigate('/');
     toast({
-      title: currentLanguage === 'en' ? 'Account Deleted' : 'खाता हटा दिया गया',
-      description: currentLanguage === 'en' 
-        ? 'Your account has been deleted successfully.'
-        : 'आपका खाता सफलतापूर्वक हटा दिया गया है।',
+      title: enHi(currentLanguage, 'Account Deleted', 'खाता हटा दिया गया'),
+      description: enHi(
+        currentLanguage,
+        'Your account has been deleted successfully.',
+        'आपका खाता सफलतापूर्वक हटा दिया गया है।',
+      ),
     });
   };
 
-  const content = {
-    en: {
-      title: 'Settings',
-      subtitle: 'Manage your account settings and preferences',
-      account: 'Account',
-      notifications: 'Notifications',
-      privacy: 'Privacy',
-      security: 'Security',
-      language: 'Language',
-      profileInfo: 'Profile Information',
-      name: 'Full Name',
-      email: 'Email Address',
-      phone: 'Phone Number',
-      save: 'Save Changes',
-      emailNotif: 'Email Notifications',
-      pushNotif: 'Push Notifications',
-      orderUpdates: 'Order Updates',
-      messageNotif: 'Message Notifications',
-      reviewNotif: 'Review Notifications',
-      promoEmails: 'Promotional Emails',
-      profileVisibility: 'Profile Visibility',
-      public: 'Public',
-      private: 'Private',
-      showPhone: 'Show Phone Number',
-      showLocation: 'Show Location',
-      changePassword: 'Change Password',
-      currentPassword: 'Current Password',
-      newPassword: 'New Password',
-      confirmPassword: 'Confirm Password',
-      deleteAccount: 'Delete Account',
-      deleteWarning: 'Are you sure you want to delete your account?',
-      deleteDescription: 'This action cannot be undone. All your data will be permanently deleted.',
-      cancel: 'Cancel',
-      delete: 'Delete',
-      english: 'English',
-      hindi: 'Hindi',
-      logOut: 'Log out',
-      logOutHint: 'Sign out on this device. You can sign in again anytime.',
-      profilePhoto: 'Profile photo',
-      uploadPhoto: 'Upload photo',
-      removePhoto: 'Remove photo',
-      photoHint: 'JPG, PNG, WebP or GIF. Max 2 MB.',
-      promoHint:
-        'When off, you will not be included in admin announcement broadcasts in the app. Order and account messages are not affected.',
-    },
-    hi: {
-      title: 'सेटिंग्स',
-      subtitle: 'अपनी खाता सेटिंग्स और प्राथमिकताएं प्रबंधित करें',
-      account: 'खाता',
-      notifications: 'सूचनाएं',
-      privacy: 'गोपनीयता',
-      security: 'सुरक्षा',
-      language: 'भाषा',
-      profileInfo: 'प्रोफ़ाइल जानकारी',
-      name: 'पूरा नाम',
-      email: 'ईमेल पता',
-      phone: 'फोन नंबर',
-      save: 'परिवर्तन सहेजें',
-      emailNotif: 'ईमेल सूचनाएं',
-      pushNotif: 'पुश सूचनाएं',
-      orderUpdates: 'ऑर्डर अपडेट',
-      messageNotif: 'संदेश सूचनाएं',
-      reviewNotif: 'समीक्षा सूचनाएं',
-      promoEmails: 'प्रचार ईमेल',
-      profileVisibility: 'प्रोफ़ाइल दृश्यता',
-      public: 'सार्वजनिक',
-      private: 'निजी',
-      showPhone: 'फोन नंबर दिखाएं',
-      showLocation: 'स्थान दिखाएं',
-      changePassword: 'पासवर्ड बदलें',
-      currentPassword: 'वर्तमान पासवर्ड',
-      newPassword: 'नया पासवर्ड',
-      confirmPassword: 'पासवर्ड की पुष्टि करें',
-      deleteAccount: 'खाता हटाएं',
-      deleteWarning: 'क्या आप वाकई अपना खाता हटाना चाहते हैं?',
-      deleteDescription: 'यह क्रिया पूर्ववत नहीं की जा सकती। आपका सभी डेटा स्थायी रूप से हटा दिया जाएगा।',
-      cancel: 'रद्द करें',
-      delete: 'हटाएं',
-      english: 'अंग्रेजी',
-      hindi: 'हिंदी',
-      logOut: 'लॉग आउट',
-      logOutHint: 'इस डिवाइस से साइन आउट करें। आप कभी भी फिर से लॉग इन कर सकते हैं।',
-      profilePhoto: 'प्रोफ़ाइल फोटो',
-      uploadPhoto: 'फोटो अपलोड करें',
-      removePhoto: 'फोटो हटाएं',
-      photoHint: 'JPG, PNG, WebP या GIF। अधिकतम 2 MB।',
-      promoHint:
-        'बंद होने पर ऐप में व्यवस्थापक की घोषणा प्रसारण सूचनाओं में आप शामिल नहीं होंगे। ऑर्डर और खाता संबंधी संदेश पर असर नहीं पड़ता।',
-    },
-  };
-
-  const t = content[currentLanguage];
-
   return (
     <Layout>
+      <div className="min-h-screen bg-[#f6f1e7] bg-[linear-gradient(rgba(138,79,42,0.05)_1px,transparent_1px),linear-gradient(90deg,rgba(138,79,42,0.05)_1px,transparent_1px)] bg-[size:24px_24px]">
       <div className="container mx-auto min-w-0 max-w-4xl px-3 py-5 sm:px-4 sm:py-6">
         {/* Header */}
         <div className="flex items-center gap-4 mb-6">
-          <button onClick={() => navigate(-1)} className="p-2 hover:bg-muted rounded-lg">
+          <button
+            onClick={() => navigate(-1)}
+            className="rounded-lg border border-[#d7c7a8] bg-[#fffaf0] p-2 text-[#315f3b] transition hover:bg-[#f6eddc]"
+          >
             <ArrowLeft className="w-5 h-5" />
           </button>
           <div>
-            <h1 className={`text-2xl font-bold ${currentLanguage === 'hi' ? 'font-hindi' : ''}`}>
+            <h1 className={`text-2xl font-bold text-[#2f3a2f] ${scriptFontClass(currentLanguage)}`}>
               {t.title}
             </h1>
-            <p className={`text-muted-foreground ${currentLanguage === 'hi' ? 'font-hindi' : ''}`}>
+            <p className={`text-[#6f6552] ${scriptFontClass(currentLanguage)}`}>
               {t.subtitle}
             </p>
           </div>
         </div>
 
         <Tabs defaultValue="account" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-4">
-            <TabsTrigger value="account" className="flex items-center gap-2">
+          <TabsList className="grid w-full grid-cols-4 border border-[#d7c7a8] bg-[#f4ead7] p-1">
+            <TabsTrigger value="account" className="flex items-center gap-2 text-[#6c5a3d] data-[state=active]:bg-[#fffaf0] data-[state=active]:text-[#315f3b]">
               <User className="w-4 h-4" />
               <span className="hidden sm:inline">{t.account}</span>
             </TabsTrigger>
-            <TabsTrigger value="notifications" className="flex items-center gap-2">
+            <TabsTrigger value="notifications" className="flex items-center gap-2 text-[#6c5a3d] data-[state=active]:bg-[#fffaf0] data-[state=active]:text-[#315f3b]">
               <Bell className="w-4 h-4" />
               <span className="hidden sm:inline">{t.notifications}</span>
             </TabsTrigger>
-            <TabsTrigger value="privacy" className="flex items-center gap-2">
+            <TabsTrigger value="privacy" className="flex items-center gap-2 text-[#6c5a3d] data-[state=active]:bg-[#fffaf0] data-[state=active]:text-[#315f3b]">
               <Shield className="w-4 h-4" />
               <span className="hidden sm:inline">{t.privacy}</span>
             </TabsTrigger>
-            <TabsTrigger value="security" className="flex items-center gap-2">
+            <TabsTrigger value="security" className="flex items-center gap-2 text-[#6c5a3d] data-[state=active]:bg-[#fffaf0] data-[state=active]:text-[#315f3b]">
               <Lock className="w-4 h-4" />
               <span className="hidden sm:inline">{t.security}</span>
             </TabsTrigger>
@@ -503,14 +429,10 @@ const Settings = () => {
 
           {/* Account Settings */}
           <TabsContent value="account" className="space-y-6">
-            <Card>
+            <Card className="border-[#d7c7a8] bg-[#fffaf0] shadow-[0_16px_40px_rgba(95,70,40,0.08)]">
               <CardHeader>
-                <CardTitle>{t.profileInfo}</CardTitle>
-                <CardDescription>
-                  {currentLanguage === 'en' 
-                    ? 'Update your profile information' 
-                    : 'अपनी प्रोफ़ाइल जानकारी अपडेट करें'}
-                </CardDescription>
+                <CardTitle className="text-[#2f3a2f]">{t.profileInfo}</CardTitle>
+                <CardDescription className="text-[#6f6552]">{t.profileInfoDesc}</CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="flex flex-col sm:flex-row sm:items-center gap-4 pb-2">
@@ -518,17 +440,17 @@ const Settings = () => {
                     <img
                       src={displayAvatarUrl}
                       alt=""
-                      className="h-24 w-24 rounded-full object-cover border-2 border-border bg-muted"
+                      className="h-24 w-24 rounded-full border-2 border-[#d7c7a8] bg-[#f3ebdd] object-cover"
                     />
                     {avatarUploading && (
-                      <div className="absolute inset-0 rounded-full bg-background/70 flex items-center justify-center">
-                        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+                      <div className="absolute inset-0 flex items-center justify-center rounded-full bg-[#fffaf0]/80">
+                        <Loader2 className="h-8 w-8 animate-spin text-[#315f3b]" />
                       </div>
                     )}
                   </div>
                   <div className="space-y-2 flex-1 min-w-0">
                     <Label>{t.profilePhoto}</Label>
-                    <p className="text-xs text-muted-foreground">{t.photoHint}</p>
+                    <p className="text-xs text-[#6f6552]">{t.photoHint}</p>
                     <div className="flex flex-wrap gap-2">
                       <input
                         ref={avatarFileRef}
@@ -543,6 +465,7 @@ const Settings = () => {
                         size="sm"
                         disabled={avatarUploading}
                         onClick={() => avatarFileRef.current?.click()}
+                        className="border-[#d7c7a8] bg-[#fffdf7] text-[#315f3b] hover:bg-[#f3ebdd] hover:text-[#315f3b]"
                       >
                         <Camera className="w-4 h-4 mr-2" />
                         {t.uploadPhoto}
@@ -552,7 +475,7 @@ const Settings = () => {
                           type="button"
                           variant="ghost"
                           size="sm"
-                          className="text-destructive hover:text-destructive"
+                          className="text-[#8a4f2a] hover:bg-[#f6e5dc] hover:text-[#8a4f2a]"
                           disabled={avatarUploading}
                           onClick={() => void handleRemoveAvatar()}
                         >
@@ -569,7 +492,7 @@ const Settings = () => {
                     id="name"
                     value={settings.name}
                     onChange={(e) => setSettings(prev => ({ ...prev, name: e.target.value }))}
-                    className="mt-1.5"
+                    className="mt-1.5 border-[#d7c7a8] bg-[#fffdf7] text-[#2f3a2f] focus-visible:ring-[#315f3b]"
                   />
                 </div>
                 <div>
@@ -579,7 +502,7 @@ const Settings = () => {
                     type="email"
                     value={settings.email}
                     onChange={(e) => setSettings(prev => ({ ...prev, email: e.target.value }))}
-                    className="mt-1.5"
+                    className="mt-1.5 border-[#d7c7a8] bg-[#fffdf7] text-[#2f3a2f] focus-visible:ring-[#315f3b]"
                   />
                 </div>
                 <div>
@@ -589,16 +512,16 @@ const Settings = () => {
                     type="tel"
                     value={settings.phone}
                     onChange={(e) => setSettings(prev => ({ ...prev, phone: e.target.value }))}
-                    className="mt-1.5"
+                    className="mt-1.5 border-[#d7c7a8] bg-[#fffdf7] text-[#2f3a2f] focus-visible:ring-[#315f3b]"
                   />
                 </div>
                 <Button 
                   onClick={() => handleSave('account')} 
                   disabled={isSaving}
-                  className="btn-primary-gradient"
+                  className="border border-[#b68222] bg-[#d89b2b] text-[#2f2416] hover:bg-[#c88d22]"
                 >
                   {isSaving ? (
-                    <span className="animate-pulse">{currentLanguage === 'en' ? 'Saving...' : 'सहेजा जा रहा है...'}</span>
+                    <span className="animate-pulse">{enHi(currentLanguage, 'Saving...', 'सहेजा जा रहा है...')}</span>
                   ) : (
                     <>
                       <Save className="w-4 h-4 mr-2" />
@@ -610,44 +533,43 @@ const Settings = () => {
             </Card>
 
             {/* Language Settings */}
-            <Card>
+            <Card className="border-[#d7c7a8] bg-[#fffaf0] shadow-[0_16px_40px_rgba(95,70,40,0.08)]">
               <CardHeader>
-                <CardTitle className="flex items-center gap-2">
+                <CardTitle className="flex items-center gap-2 text-[#2f3a2f]">
                   <Globe className="w-5 h-5" />
                   {t.language}
                 </CardTitle>
-                <CardDescription>
-                  {currentLanguage === 'en' 
-                    ? 'Choose your preferred language' 
-                    : 'अपनी पसंदीदा भाषा चुनें'}
-                </CardDescription>
+                <CardDescription className="text-[#6f6552]">{t.chooseLanguage}</CardDescription>
               </CardHeader>
               <CardContent>
-                <Select 
-                  value={currentLanguage} 
-                  onValueChange={(value: 'en' | 'hi') => dispatch(setLanguage(value))}
+                <Select
+                  value={currentLanguage}
+                  onValueChange={(value) => dispatch(setLanguage(value as Language))}
                 >
-                  <SelectTrigger>
+                  <SelectTrigger className="border-[#d7c7a8] bg-[#fffdf7] text-[#2f3a2f]">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="en">{t.english}</SelectItem>
-                    <SelectItem value="hi">{t.hindi}</SelectItem>
+                    {LANGUAGES.map((l) => (
+                      <SelectItem key={l.code} value={l.code}>
+                        {l.native}
+                      </SelectItem>
+                    ))}
                   </SelectContent>
                 </Select>
               </CardContent>
             </Card>
 
-            <Card className="border-border">
+            <Card className="border-[#d7c7a8] bg-[#fffaf0] shadow-[0_16px_40px_rgba(95,70,40,0.08)]">
               <CardHeader>
-                <CardTitle className="flex items-center gap-2">
+                <CardTitle className="flex items-center gap-2 text-[#2f3a2f]">
                   <LogOut className="w-5 h-5" />
                   {t.logOut}
                 </CardTitle>
-                <CardDescription>{t.logOutHint}</CardDescription>
+                <CardDescription className="text-[#6f6552]">{t.logOutHint}</CardDescription>
               </CardHeader>
               <CardContent>
-                <Button type="button" variant="outline" onClick={handleLogout} className="gap-2">
+                <Button type="button" variant="outline" onClick={handleLogout} className="gap-2 border-[#d7c7a8] bg-[#fffdf7] text-[#315f3b] hover:bg-[#f3ebdd] hover:text-[#315f3b]">
                   <LogOut className="w-4 h-4" />
                   {t.logOut}
                 </Button>
@@ -657,24 +579,16 @@ const Settings = () => {
 
           {/* Notification Settings */}
           <TabsContent value="notifications" className="space-y-6">
-            <Card>
+            <Card className="border-[#d7c7a8] bg-[#fffaf0] shadow-[0_16px_40px_rgba(95,70,40,0.08)]">
               <CardHeader>
-                <CardTitle>{t.notifications}</CardTitle>
-                <CardDescription>
-                  {currentLanguage === 'en' 
-                    ? 'Manage your notification preferences' 
-                    : 'अपनी सूचना प्राथमिकताएं प्रबंधित करें'}
-                </CardDescription>
+                <CardTitle className="text-[#2f3a2f]">{t.notifications}</CardTitle>
+                <CardDescription className="text-[#6f6552]">{t.notificationsTabDesc}</CardDescription>
               </CardHeader>
               <CardContent className="space-y-6">
                 <div className="flex items-center justify-between">
                   <div className="space-y-0.5">
                     <Label>{t.emailNotif}</Label>
-                    <p className="text-sm text-muted-foreground">
-                      {currentLanguage === 'en'
-                        ? 'Order and account emails go to the address in Profile. The server must have SMTP configured (not only this toggle).'
-                        : 'ऑर्डर और खाता ईमेल प्रोफ़ाइल में दिए ईमेल पर जाते हैं। सर्वर पर SMTP सेट होना चाहिए (केवल यह स्विच पर्याप्त नहीं)।'}
-                    </p>
+                    <p className="text-sm text-[#6f6552]">{t.emailNotifHelp}</p>
                   </div>
                   <Switch
                     checked={settings.emailNotifications}
@@ -689,11 +603,7 @@ const Settings = () => {
                 <div className="flex items-center justify-between">
                   <div className="space-y-0.5">
                     <Label>{t.pushNotif}</Label>
-                    <p className="text-sm text-muted-foreground">
-                      {currentLanguage === 'en' 
-                        ? 'Receive push notifications in browser' 
-                        : 'ब्राउज़र में पुश सूचनाएं प्राप्त करें'}
-                    </p>
+                    <p className="text-sm text-[#6f6552]">{t.pushNotifHelp}</p>
                   </div>
                   <Switch
                     checked={settings.pushNotifications}
@@ -708,11 +618,7 @@ const Settings = () => {
                 <div className="flex items-center justify-between">
                   <div className="space-y-0.5">
                     <Label>{t.orderUpdates}</Label>
-                    <p className="text-sm text-muted-foreground">
-                      {currentLanguage === 'en' 
-                        ? 'Get notified about order status changes' 
-                        : 'ऑर्डर स्थिति परिवर्तन के बारे में सूचना प्राप्त करें'}
-                    </p>
+                    <p className="text-sm text-[#6f6552]">{t.orderUpdatesHelp}</p>
                   </div>
                   <Switch
                     checked={settings.orderUpdates}
@@ -727,11 +633,7 @@ const Settings = () => {
                 <div className="flex items-center justify-between">
                   <div className="space-y-0.5">
                     <Label>{t.messageNotif}</Label>
-                    <p className="text-sm text-muted-foreground">
-                      {currentLanguage === 'en' 
-                        ? 'Notifications for new messages' 
-                        : 'नए संदेशों के लिए सूचनाएं'}
-                    </p>
+                    <p className="text-sm text-[#6f6552]">{t.messageNotifHelp}</p>
                   </div>
                   <Switch
                     checked={settings.messageNotifications}
@@ -746,11 +648,7 @@ const Settings = () => {
                 <div className="flex items-center justify-between">
                   <div className="space-y-0.5">
                     <Label>{t.reviewNotif}</Label>
-                    <p className="text-sm text-muted-foreground">
-                      {currentLanguage === 'en' 
-                        ? 'Notifications for new reviews' 
-                        : 'नई समीक्षाओं के लिए सूचनाएं'}
-                    </p>
+                    <p className="text-sm text-[#6f6552]">{t.reviewNotifHelp}</p>
                   </div>
                   <Switch
                     checked={settings.reviewNotifications}
@@ -765,12 +663,8 @@ const Settings = () => {
                 <div className="flex items-center justify-between gap-4">
                   <div className="space-y-0.5 min-w-0">
                     <Label>{t.promoEmails}</Label>
-                    <p className="text-sm text-muted-foreground">
-                      {currentLanguage === 'en' 
-                        ? 'Receive promotional emails and offers' 
-                        : 'प्रचार ईमेल और ऑफ़र प्राप्त करें'}
-                    </p>
-                    <p className={`text-xs text-muted-foreground pt-1 ${currentLanguage === 'hi' ? 'font-hindi' : ''}`}>
+                    <p className="text-sm text-[#6f6552]">{t.promoNotifHelp}</p>
+                    <p className={`pt-1 text-xs text-[#6f6552] ${scriptFontClass(currentLanguage)}`}>
                       {t.promoHint}
                     </p>
                   </div>
@@ -786,10 +680,10 @@ const Settings = () => {
                 <Button 
                   onClick={() => handleSave('notifications')} 
                   disabled={isSaving}
-                  className="btn-primary-gradient mt-4"
+                  className="mt-4 border border-[#b68222] bg-[#d89b2b] text-[#2f2416] hover:bg-[#c88d22]"
                 >
                   {isSaving ? (
-                    <span className="animate-pulse">{currentLanguage === 'en' ? 'Saving...' : 'सहेजा जा रहा है...'}</span>
+                    <span className="animate-pulse">{enHi(currentLanguage, 'Saving...', 'सहेजा जा रहा है...')}</span>
                   ) : (
                     <>
                       <Save className="w-4 h-4 mr-2" />
@@ -803,14 +697,10 @@ const Settings = () => {
 
           {/* Privacy Settings */}
           <TabsContent value="privacy" className="space-y-6">
-            <Card>
+            <Card className="border-[#d7c7a8] bg-[#fffaf0] shadow-[0_16px_40px_rgba(95,70,40,0.08)]">
               <CardHeader>
-                <CardTitle>{t.privacy}</CardTitle>
-                <CardDescription>
-                  {currentLanguage === 'en' 
-                    ? 'Control your privacy settings' 
-                    : 'अपनी गोपनीयता सेटिंग्स नियंत्रित करें'}
-                </CardDescription>
+                <CardTitle className="text-[#2f3a2f]">{t.privacy}</CardTitle>
+                <CardDescription className="text-[#6f6552]">{t.privacyTabDesc}</CardDescription>
               </CardHeader>
               <CardContent className="space-y-6">
                 <div>
@@ -822,7 +712,7 @@ const Settings = () => {
                     }
                     className="mt-1.5"
                   >
-                    <SelectTrigger>
+                    <SelectTrigger className="border-[#d7c7a8] bg-[#fffdf7] text-[#2f3a2f]">
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
@@ -830,11 +720,7 @@ const Settings = () => {
                       <SelectItem value="private">{t.private}</SelectItem>
                     </SelectContent>
                   </Select>
-                  <p className="text-sm text-muted-foreground mt-2">
-                    {currentLanguage === 'en' 
-                      ? 'Control who can see your profile information' 
-                      : 'नियंत्रित करें कि आपकी प्रोफ़ाइल जानकारी कौन देख सकता है'}
-                  </p>
+                  <p className="mt-2 text-sm text-[#6f6552]">{t.visibilityHelp}</p>
                 </div>
 
                 <Separator />
@@ -842,11 +728,7 @@ const Settings = () => {
                 <div className="flex items-center justify-between">
                   <div className="space-y-0.5">
                     <Label>{t.showPhone}</Label>
-                    <p className="text-sm text-muted-foreground">
-                      {currentLanguage === 'en' 
-                        ? 'Show your phone number on your profile' 
-                        : 'अपने प्रोफ़ाइल पर अपना फोन नंबर दिखाएं'}
-                    </p>
+                    <p className="text-sm text-[#6f6552]">{t.showPhoneHelp}</p>
                   </div>
                   <Switch
                     checked={settings.showPhoneNumber}
@@ -861,11 +743,7 @@ const Settings = () => {
                 <div className="flex items-center justify-between">
                   <div className="space-y-0.5">
                     <Label>{t.showLocation}</Label>
-                    <p className="text-sm text-muted-foreground">
-                      {currentLanguage === 'en' 
-                        ? 'Show your location on your profile' 
-                        : 'अपने प्रोफ़ाइल पर अपना स्थान दिखाएं'}
-                    </p>
+                    <p className="text-sm text-[#6f6552]">{t.showLocationHelp}</p>
                   </div>
                   <Switch
                     checked={settings.showLocation}
@@ -878,10 +756,10 @@ const Settings = () => {
                 <Button 
                   onClick={() => handleSave('privacy')} 
                   disabled={isSaving}
-                  className="btn-primary-gradient mt-4"
+                  className="mt-4 border border-[#b68222] bg-[#d89b2b] text-[#2f2416] hover:bg-[#c88d22]"
                 >
                   {isSaving ? (
-                    <span className="animate-pulse">{currentLanguage === 'en' ? 'Saving...' : 'सहेजा जा रहा है...'}</span>
+                    <span className="animate-pulse">{enHi(currentLanguage, 'Saving...', 'सहेजा जा रहा है...')}</span>
                   ) : (
                     <>
                       <Save className="w-4 h-4 mr-2" />
@@ -895,14 +773,10 @@ const Settings = () => {
 
           {/* Security Settings */}
           <TabsContent value="security" className="space-y-6">
-            <Card>
+            <Card className="border-[#d7c7a8] bg-[#fffaf0] shadow-[0_16px_40px_rgba(95,70,40,0.08)]">
               <CardHeader>
-                <CardTitle>{t.changePassword}</CardTitle>
-                <CardDescription>
-                  {currentLanguage === 'en' 
-                    ? 'Update your password to keep your account secure' 
-                    : 'अपना खाता सुरक्षित रखने के लिए अपना पासवर्ड अपडेट करें'}
-                </CardDescription>
+                <CardTitle className="text-[#2f3a2f]">{t.changePassword}</CardTitle>
+                <CardDescription className="text-[#6f6552]">{t.securityTabDesc}</CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div>
@@ -913,11 +787,12 @@ const Settings = () => {
                       type={showCurrentPassword ? 'text' : 'password'}
                       value={settings.currentPassword}
                       onChange={(e) => setSettings(prev => ({ ...prev, currentPassword: e.target.value }))}
+                      className="border-[#d7c7a8] bg-[#fffdf7] text-[#2f3a2f] focus-visible:ring-[#315f3b]"
                     />
                     <button
                       type="button"
                       onClick={() => setShowCurrentPassword(!showCurrentPassword)}
-                      className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-[#8b816f] hover:text-[#2f3a2f]"
                     >
                       {showCurrentPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                     </button>
@@ -932,20 +807,17 @@ const Settings = () => {
                       type={showNewPassword ? 'text' : 'password'}
                       value={settings.newPassword}
                       onChange={(e) => setSettings(prev => ({ ...prev, newPassword: e.target.value }))}
+                      className="border-[#d7c7a8] bg-[#fffdf7] text-[#2f3a2f] focus-visible:ring-[#315f3b]"
                     />
                     <button
                       type="button"
                       onClick={() => setShowNewPassword(!showNewPassword)}
-                      className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-[#8b816f] hover:text-[#2f3a2f]"
                     >
                       {showNewPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                     </button>
                   </div>
-                  <p className="text-xs text-muted-foreground mt-1">
-                    {currentLanguage === 'en' 
-                      ? 'Password must be at least 8 characters' 
-                      : 'पासवर्ड कम से कम 8 वर्ण होना चाहिए'}
-                  </p>
+                  <p className="mt-1 text-xs text-[#6f6552]">{t.passwordLengthHint}</p>
                 </div>
 
                 <div>
@@ -956,11 +828,12 @@ const Settings = () => {
                       type={showConfirmPassword ? 'text' : 'password'}
                       value={settings.confirmPassword}
                       onChange={(e) => setSettings(prev => ({ ...prev, confirmPassword: e.target.value }))}
+                      className="border-[#d7c7a8] bg-[#fffdf7] text-[#2f3a2f] focus-visible:ring-[#315f3b]"
                     />
                     <button
                       type="button"
                       onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                      className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-[#8b816f] hover:text-[#2f3a2f]"
                     >
                       {showConfirmPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                     </button>
@@ -970,10 +843,10 @@ const Settings = () => {
                 <Button 
                   onClick={handleChangePassword} 
                   disabled={isSaving}
-                  className="btn-primary-gradient"
+                  className="border border-[#b68222] bg-[#d89b2b] text-[#2f2416] hover:bg-[#c88d22]"
                 >
                   {isSaving ? (
-                    <span className="animate-pulse">{currentLanguage === 'en' ? 'Saving...' : 'सहेजा जा रहा है...'}</span>
+                    <span className="animate-pulse">{enHi(currentLanguage, 'Saving...', 'सहेजा जा रहा है...')}</span>
                   ) : (
                     <>
                       <Lock className="w-4 h-4 mr-2" />
@@ -985,24 +858,20 @@ const Settings = () => {
             </Card>
 
             {/* Danger Zone */}
-            <Card className="border-destructive">
+            <Card className="border-[#d8b0a0] bg-[#fffaf0] shadow-[0_16px_40px_rgba(95,70,40,0.08)]">
               <CardHeader>
-                <CardTitle className="text-destructive">{t.deleteAccount}</CardTitle>
-                <CardDescription>
-                  {currentLanguage === 'en' 
-                    ? 'Permanently delete your account and all associated data' 
-                    : 'अपना खाता और सभी संबद्ध डेटा स्थायी रूप से हटाएं'}
-                </CardDescription>
+                <CardTitle className="text-[#8a4f2a]">{t.deleteAccount}</CardTitle>
+                <CardDescription className="text-[#6f6552]">{t.deleteZoneDesc}</CardDescription>
               </CardHeader>
               <CardContent>
                 <AlertDialog>
                   <AlertDialogTrigger asChild>
-                    <Button variant="destructive">
+                    <Button className="bg-[#8a4f2a] text-[#fffaf0] hover:bg-[#784223]">
                       <Trash2 className="w-4 h-4 mr-2" />
                       {t.deleteAccount}
                     </Button>
                   </AlertDialogTrigger>
-                  <AlertDialogContent>
+                  <AlertDialogContent className="border-[#d7c7a8] bg-[#fffaf0]">
                     <AlertDialogHeader>
                       <AlertDialogTitle>{t.deleteWarning}</AlertDialogTitle>
                       <AlertDialogDescription>
@@ -1013,7 +882,7 @@ const Settings = () => {
                       <AlertDialogCancel>{t.cancel}</AlertDialogCancel>
                       <AlertDialogAction
                         onClick={handleDeleteAccount}
-                        className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                        className="bg-[#8a4f2a] text-[#fffaf0] hover:bg-[#784223]"
                       >
                         {t.delete}
                       </AlertDialogAction>
@@ -1025,12 +894,12 @@ const Settings = () => {
           </TabsContent>
         </Tabs>
       </div>
+      </div>
     </Layout>
   );
 };
 
 export default Settings;
-
 
 
 

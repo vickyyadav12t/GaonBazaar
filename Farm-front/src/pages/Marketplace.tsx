@@ -15,6 +15,7 @@ import { resolveFarmerAvatarUrl } from '@/lib/farmerAvatarUrl';
 import { sanitizeImageUrlList } from '@/lib/productImageUrl';
 import { farmerRatingFromApi } from '@/lib/farmerRatingFromApi';
 import { useCopilot } from '@/context/CopilotContext';
+import { enHi, scriptFontClass, toNewsApiLang } from '@/lib/i18n';
 
 const PAGE_SIZE = 30;
 
@@ -282,7 +283,7 @@ const Marketplace = () => {
     },
   };
 
-  const t = content[currentLanguage];
+  const t = content[toNewsApiLang(currentLanguage)];
 
   const displayTotal = totalMatchCount ?? products.length;
   const uniqueFarmers = new Set(products.map((p) => p.farmerId)).size;
@@ -309,25 +310,26 @@ const Marketplace = () => {
 
   return (
     <Layout>
-      <div className="min-h-screen min-w-0 overflow-x-hidden bg-gradient-to-b from-background to-muted/20">
-        <div className="container mx-auto min-w-0 px-3 py-6 sm:px-4 sm:py-8">
+      <div className="min-h-screen min-w-0 overflow-x-hidden bg-[#fbf7eb] text-[#213525]">
+        <div className="absolute inset-0 opacity-50 [background-image:linear-gradient(rgba(49,95,59,0.06)_1px,transparent_1px),linear-gradient(90deg,rgba(49,95,59,0.06)_1px,transparent_1px)] [background-size:42px_42px]" />
+        <div className="container relative z-10 mx-auto min-w-0 px-3 py-6 sm:px-4 sm:py-8">
           {/* Header Section */}
           <AnimateOnScroll animation="fade-in">
             <div className="mb-8">
               <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-6">
                 <div>
                   <h1
-                    className={`mb-2 text-3xl font-extrabold text-foreground sm:text-4xl md:text-5xl ${currentLanguage === 'hi' ? 'font-hindi' : ''}`}
+                    className={`mb-2 text-3xl font-extrabold text-foreground sm:text-4xl md:text-5xl ${scriptFontClass(currentLanguage)}`}
                   >
                     {t.title}
                   </h1>
-                  <p className={`text-lg text-muted-foreground ${currentLanguage === 'hi' ? 'font-hindi' : ''}`}>
+                  <p className={`text-lg text-muted-foreground ${scriptFontClass(currentLanguage)}`}>
                     {t.subtitle}
                   </p>
                 </div>
                 {/* Stats */}
                 <div className="flex w-full min-w-0 flex-wrap gap-3 sm:w-auto sm:flex-nowrap sm:gap-4">
-                  <div className="min-w-0 flex-1 rounded-xl border border-border bg-card p-3 shadow-sm sm:flex-none sm:p-4">
+                  <div className="min-w-0 flex-1 rounded-lg border border-[#d7c7a8] bg-[#fffaf0] p-3 shadow-sm sm:flex-none sm:p-4">
                     <div className="flex items-center gap-2 text-muted-foreground mb-1">
                       <Package className="w-4 h-4" />
                       <span className="text-xs">{t.totalProducts}</span>
@@ -336,7 +338,7 @@ const Marketplace = () => {
                       {isLoading ? '…' : displayTotal}
                     </p>
                   </div>
-                  <div className="min-w-0 flex-1 rounded-xl border border-border bg-card p-3 shadow-sm sm:flex-none sm:p-4">
+                  <div className="min-w-0 flex-1 rounded-lg border border-[#d7c7a8] bg-[#fffaf0] p-3 shadow-sm sm:flex-none sm:p-4">
                     <div className="mb-1 flex items-center gap-2 text-muted-foreground">
                       <TrendingUp className="w-4 h-4" />
                       <span className="text-xs">{t.activeFarmers}</span>
@@ -350,11 +352,11 @@ const Marketplace = () => {
               </div>
             </div>
             {farmerShopId ? (
-              <div className="mb-6 flex flex-col gap-3 rounded-xl border border-primary/30 bg-primary/5 px-4 py-3 sm:flex-row sm:items-center sm:justify-between">
-                <p className={`text-sm text-foreground/90 ${currentLanguage === 'hi' ? 'font-hindi' : ''}`}>
+              <div className="mb-6 flex flex-col gap-3 rounded-lg border border-[#315f3b]/30 bg-[#315f3b]/10 px-4 py-3 sm:flex-row sm:items-center sm:justify-between">
+                <p className={`text-sm text-foreground/90 ${scriptFontClass(currentLanguage)}`}>
                   {t.farmerShopBanner}
                 </p>
-                <Button type="button" variant="outline" size="sm" className="shrink-0" onClick={clearFarmerShop}>
+                <Button type="button" variant="outline" size="sm" className="shrink-0 rounded-md border-[#315f3b] text-[#315f3b] hover:bg-[#315f3b] hover:text-[#fff8e8]" onClick={clearFarmerShop}>
                   {t.clearShopFilter}
                 </Button>
               </div>
@@ -371,31 +373,31 @@ const Marketplace = () => {
                   placeholder={t.search}
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="border-2 py-5 pl-12 text-base transition-colors focus:border-primary sm:py-6 sm:text-lg"
+                  className="rounded-md border-2 border-[#d7c7a8] bg-[#fffdf7] py-5 pl-12 text-base transition-colors focus:border-[#315f3b] sm:py-6 sm:text-lg"
                 />
               </div>
               <div className="flex min-w-0 w-full gap-2 md:w-auto md:shrink-0">
                 <Button
                   variant="outline"
                   onClick={() => setShowFilters(!showFilters)}
-                  className={`flex flex-1 items-center justify-center gap-2 px-4 py-5 sm:flex-none sm:px-6 sm:py-6 ${showFilters ? 'bg-primary text-primary-foreground' : ''}`}
+                  className={`flex flex-1 items-center justify-center gap-2 rounded-md border-2 border-[#315f3b] px-4 py-5 sm:flex-none sm:px-6 sm:py-6 ${showFilters ? 'bg-[#315f3b] text-[#fff8e8]' : 'text-[#315f3b] hover:bg-[#315f3b] hover:text-[#fff8e8]'}`}
                 >
                   <SlidersHorizontal className="w-5 h-5" />
                   {t.filters}
                   {(filtersActive || !!searchQuery) && (
-                    <span className="w-2 h-2 bg-primary rounded-full" />
+                    <span className="h-2 w-2 rounded-full bg-[#d89b2b]" />
                   )}
                 </Button>
-                <div className="flex border border-border rounded-lg overflow-hidden">
+                <div className="flex overflow-hidden rounded-md border border-[#d7c7a8] bg-[#fffaf0]">
                   <button
                     onClick={() => setViewMode('grid')}
-                    className={`p-3 transition-colors ${viewMode === 'grid' ? 'bg-primary text-primary-foreground' : 'bg-background hover:bg-muted'}`}
+                    className={`p-3 transition-colors ${viewMode === 'grid' ? 'bg-[#315f3b] text-[#fff8e8]' : 'bg-[#fffaf0] hover:bg-[#f1e5cc]'}`}
                   >
                     <Grid3x3 className="w-5 h-5" />
                   </button>
                   <button
                     onClick={() => setViewMode('list')}
-                    className={`p-3 transition-colors ${viewMode === 'list' ? 'bg-primary text-primary-foreground' : 'bg-background hover:bg-muted'}`}
+                    className={`p-3 transition-colors ${viewMode === 'list' ? 'bg-[#315f3b] text-[#fff8e8]' : 'bg-[#fffaf0] hover:bg-[#f1e5cc]'}`}
                   >
                     <List className="w-5 h-5" />
                   </button>
@@ -409,10 +411,10 @@ const Marketplace = () => {
             <div className="flex gap-3 overflow-x-auto pb-4 scrollbar-hide mb-6">
               <button
                 onClick={() => setMarketplaceCategory('all')}
-                className={`px-6 py-3 rounded-full whitespace-nowrap transition-all duration-300 hover:scale-105 flex items-center gap-2 font-medium ${
+                className={`flex items-center gap-2 whitespace-nowrap rounded-md px-6 py-3 font-medium transition-all duration-300 hover:-translate-y-0.5 ${
                   selectedCategory === 'all'
-                    ? 'bg-gradient-to-r from-primary to-primary-light text-primary-foreground shadow-lg scale-105'
-                    : 'bg-card border border-border text-foreground hover:bg-muted hover:border-primary/50'
+                    ? 'bg-[#315f3b] text-[#fff8e8] shadow-sm'
+                    : 'border border-[#d7c7a8] bg-[#fffaf0] text-foreground hover:border-[#315f3b]/50 hover:bg-[#f1e5cc]'
                 }`}
               >
                 <Sparkles className="w-4 h-4" />
@@ -422,15 +424,15 @@ const Marketplace = () => {
                 <button
                   key={category.id}
                   onClick={() => setMarketplaceCategory(category.id as CropCategory)}
-                  className={`px-6 py-3 rounded-full whitespace-nowrap transition-all duration-300 hover:scale-105 flex items-center gap-2 font-medium ${
+                  className={`flex items-center gap-2 whitespace-nowrap rounded-md px-6 py-3 font-medium transition-all duration-300 hover:-translate-y-0.5 ${
                     selectedCategory === category.id
-                      ? 'bg-gradient-to-r from-primary to-primary-light text-primary-foreground shadow-lg scale-105'
-                      : 'bg-card border border-border text-foreground hover:bg-muted hover:border-primary/50'
+                      ? 'bg-[#315f3b] text-[#fff8e8] shadow-sm'
+                      : 'border border-[#d7c7a8] bg-[#fffaf0] text-foreground hover:border-[#315f3b]/50 hover:bg-[#f1e5cc]'
                   }`}
                 >
                   <span className="text-xl">{category.icon}</span>
-                  <span className={currentLanguage === 'hi' ? 'font-hindi' : ''}>
-                    {currentLanguage === 'hi' ? category.nameHindi : category.name}
+                  <span className={scriptFontClass(currentLanguage)}>
+                    {enHi(currentLanguage, category.name, category.nameHindi)}
                   </span>
                 </button>
               ))}
@@ -440,15 +442,15 @@ const Marketplace = () => {
           {/* Filters Panel */}
           {showFilters && (
             <AnimateOnScroll animation="slide-up">
-              <div className="card-elevated p-6 mb-6 border-2 border-primary/20 bg-gradient-to-br from-card to-muted/30">
+              <div className="mb-6 rounded-lg border-2 border-[#d7c7a8] bg-[#fffaf0] p-6 shadow-sm">
                 <div className="flex items-center justify-between mb-6">
-                  <h3 className={`text-xl font-bold flex items-center gap-2 ${currentLanguage === 'hi' ? 'font-hindi' : ''}`}>
-                    <SlidersHorizontal className="w-5 h-5 text-primary" />
+                  <h3 className={`text-xl font-bold flex items-center gap-2 ${scriptFontClass(currentLanguage)}`}>
+                    <SlidersHorizontal className="w-5 h-5 text-[#315f3b]" />
                     {t.filters}
                   </h3>
                   <button 
                     onClick={() => setShowFilters(false)}
-                    className="p-2 hover:bg-muted rounded-lg transition-colors"
+                    className="rounded-md p-2 transition-colors hover:bg-[#f1e5cc]"
                   >
                     <X className="w-5 h-5 text-muted-foreground" />
                   </button>
@@ -457,13 +459,13 @@ const Marketplace = () => {
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-6">
                   {/* Sort */}
                   <div>
-                    <label className={`text-sm font-semibold mb-2 block text-foreground ${currentLanguage === 'hi' ? 'font-hindi' : ''}`}>
+                    <label className={`text-sm font-semibold mb-2 block text-foreground ${scriptFontClass(currentLanguage)}`}>
                       {t.sortBy}
                     </label>
                     <select
                       value={sortBy}
                       onChange={(e) => setSortBy(e.target.value as typeof sortBy)}
-                      className="w-full px-4 py-3 bg-background border-2 border-input rounded-xl focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary transition-all"
+                      className="w-full rounded-md border-2 border-[#d7c7a8] bg-[#fffdf7] px-4 py-3 transition-all focus:border-[#315f3b] focus:outline-none focus:ring-2 focus:ring-[#315f3b]/30"
                     >
                       <option value="newest">{t.newest}</option>
                       <option value="price_low">{t.priceLow}</option>
@@ -474,7 +476,7 @@ const Marketplace = () => {
 
                   {/* Price Range */}
                   <div>
-                    <label className={`text-sm font-semibold mb-2 block text-foreground ${currentLanguage === 'hi' ? 'font-hindi' : ''}`}>
+                    <label className={`text-sm font-semibold mb-2 block text-foreground ${scriptFontClass(currentLanguage)}`}>
                       {t.priceRange}
                     </label>
                     <div className="flex gap-2">
@@ -483,28 +485,28 @@ const Marketplace = () => {
                         placeholder={t.minPrice}
                         value={priceRange.min}
                         onChange={(e) => setPriceRange({ ...priceRange, min: e.target.value })}
-                        className="border-2 focus:border-primary"
+                        className="rounded-md border-2 border-[#d7c7a8] bg-[#fffdf7] focus:border-[#315f3b]"
                       />
                       <Input
                         type="number"
                         placeholder={t.maxPrice}
                         value={priceRange.max}
                         onChange={(e) => setPriceRange({ ...priceRange, max: e.target.value })}
-                        className="border-2 focus:border-primary"
+                        className="rounded-md border-2 border-[#d7c7a8] bg-[#fffdf7] focus:border-[#315f3b]"
                       />
                     </div>
                   </div>
 
                   {/* Organic Toggle */}
                   <div className="flex items-end">
-                    <label className="flex items-center gap-3 cursor-pointer p-4 rounded-xl border-2 border-border hover:border-primary/50 transition-colors w-full">
+                    <label className="flex w-full cursor-pointer items-center gap-3 rounded-md border-2 border-[#d7c7a8] p-4 transition-colors hover:border-[#315f3b]/50 hover:bg-[#f1e5cc]/60">
                       <input
                         type="checkbox"
                         checked={organicOnly}
                         onChange={(e) => setOrganicOnly(e.target.checked)}
-                        className="w-5 h-5 rounded border-2 border-primary text-primary focus:ring-primary"
+                        className="h-5 w-5 rounded border-2 border-[#315f3b] text-[#315f3b] focus:ring-[#315f3b]"
                       />
-                      <span className={`text-sm font-semibold flex items-center gap-2 ${currentLanguage === 'hi' ? 'font-hindi' : ''}`}>
+                      <span className={`text-sm font-semibold flex items-center gap-2 ${scriptFontClass(currentLanguage)}`}>
                         <span className="text-xl">🌿</span>
                         {t.organicOnly}
                       </span>
@@ -513,14 +515,14 @@ const Marketplace = () => {
 
                   {/* Negotiable */}
                   <div className="flex items-end">
-                    <label className="flex items-center gap-3 cursor-pointer p-4 rounded-xl border-2 border-border hover:border-primary/50 transition-colors w-full">
+                    <label className="flex w-full cursor-pointer items-center gap-3 rounded-md border-2 border-[#d7c7a8] p-4 transition-colors hover:border-[#315f3b]/50 hover:bg-[#f1e5cc]/60">
                       <input
                         type="checkbox"
                         checked={negotiableOnly}
                         onChange={(e) => setNegotiableOnly(e.target.checked)}
-                        className="w-5 h-5 rounded border-2 border-primary text-primary focus:ring-primary"
+                        className="h-5 w-5 rounded border-2 border-[#315f3b] text-[#315f3b] focus:ring-[#315f3b]"
                       />
-                      <span className={`text-sm font-semibold ${currentLanguage === 'hi' ? 'font-hindi' : ''}`}>
+                      <span className={`text-sm font-semibold ${scriptFontClass(currentLanguage)}`}>
                         {t.negotiableOnly}
                       </span>
                     </label>
@@ -538,7 +540,7 @@ const Marketplace = () => {
                         setNegotiableOnly(false);
                         setSearchQuery('');
                       }}
-                      className="w-full py-3 border-2 hover:bg-destructive hover:text-destructive-foreground hover:border-destructive"
+                      className="w-full rounded-md border-2 border-[#8a4f2a] py-3 text-[#8a4f2a] hover:border-[#8a4f2a] hover:bg-[#8a4f2a] hover:text-[#fff8e8]"
                     >
                       {t.clearFilters}
                     </Button>
@@ -551,14 +553,14 @@ const Marketplace = () => {
           {/* Results Count & View Toggle */}
             <div className="flex items-center justify-between mb-6">
             <div className="flex items-center gap-4">
-              <p className={`text-lg font-semibold text-foreground ${currentLanguage === 'hi' ? 'font-hindi' : ''}`}>
-                <span className="text-primary">
+              <p className={`text-lg font-semibold text-foreground ${scriptFontClass(currentLanguage)}`}>
+                <span className="text-[#315f3b]">
                   {isLoading ? '…' : displayTotal}
                 </span>{' '}
                 {t.results}
                 {!isLoading && hasMore && products.length < displayTotal && (
                   <span className="text-sm font-normal text-muted-foreground ml-2">
-                    ({products.length} {currentLanguage === 'en' ? 'loaded' : 'लोड'})
+                    ({products.length} {enHi(currentLanguage, 'loaded', 'लोड')})
                   </span>
                 )}
               </p>
@@ -583,7 +585,7 @@ const Marketplace = () => {
                   {organicOnly && (
                     <>
                       <span>•</span>
-                      <span>🌿 {currentLanguage === 'en' ? 'Organic' : 'जैविक'}</span>
+                      <span>🌿 {enHi(currentLanguage, 'Organic', 'जैविक')}</span>
                     </>
                   )}
                   {negotiableOnly && (
@@ -600,19 +602,21 @@ const Marketplace = () => {
           {/* Products Grid/List */}
           {isLoading ? (
             <div className="text-center py-20">
-              <p className={`text-muted-foreground ${currentLanguage === 'hi' ? 'font-hindi' : ''}`}>
-                {currentLanguage === 'en' ? 'Loading products...' : 'उत्पाद लोड हो रहे हैं...'}
+              <p className={`text-muted-foreground ${scriptFontClass(currentLanguage)}`}>
+                {enHi(currentLanguage, 'Loading products...', 'उत्पाद लोड हो रहे हैं...')}
               </p>
             </div>
           ) : isError ? (
             <div className="text-center py-16 space-y-4">
               <p className="text-muted-foreground">
-                {currentLanguage === 'en'
-                  ? 'Could not load products. Check your connection and try again.'
-                  : 'उत्पाद लोड नहीं हो सके। कनेक्शन जाँचकर दोबारा कोशिश करें।'}
+                {enHi(
+                  currentLanguage,
+                  'Could not load products. Check your connection and try again.',
+                  'उत्पाद लोड नहीं हो सके। कनेक्शन जाँचकर दोबारा कोशिश करें।',
+                )}
               </p>
-              <Button variant="outline" onClick={() => void refetch()}>
-                {currentLanguage === 'en' ? 'Retry' : 'फिर कोशिश करें'}
+              <Button variant="outline" className="rounded-md border-2 border-[#315f3b] text-[#315f3b] hover:bg-[#315f3b] hover:text-[#fff8e8]" onClick={() => void refetch()}>
+                {enHi(currentLanguage, 'Retry', 'फिर कोशिश करें')}
               </Button>
             </div>
           ) : products.length > 0 ? (
@@ -634,13 +638,13 @@ const Marketplace = () => {
           ) : (
             <AnimateOnScroll animation="zoom-in">
               <div className="text-center py-20 animate-fade-in">
-                <div className="inline-flex items-center justify-center w-24 h-24 bg-muted rounded-full mb-6">
+                <div className="mb-6 inline-flex h-24 w-24 items-center justify-center rounded-md border border-[#d7c7a8] bg-[#f1e5cc]">
                   <Search className="w-12 h-12 text-muted-foreground" />
                 </div>
-                <h3 className={`text-2xl font-bold text-foreground mb-3 ${currentLanguage === 'hi' ? 'font-hindi' : ''}`}>
+                <h3 className={`text-2xl font-bold text-foreground mb-3 ${scriptFontClass(currentLanguage)}`}>
                   {t.noResults}
                 </h3>
-                <p className={`text-muted-foreground mb-6 max-w-md mx-auto ${currentLanguage === 'hi' ? 'font-hindi' : ''}`}>
+                <p className={`text-muted-foreground mb-6 max-w-md mx-auto ${scriptFontClass(currentLanguage)}`}>
                   {t.tryDifferent}
                 </p>
                 <Button
@@ -654,7 +658,7 @@ const Marketplace = () => {
                     setSearchQuery('');
                     setShowFilters(false);
                   }}
-                  className="gap-2"
+                  className="gap-2 rounded-md border-2 border-[#315f3b] text-[#315f3b] hover:bg-[#315f3b] hover:text-[#fff8e8]"
                 >
                   <X className="w-4 h-4" />
                   {t.clearFilters}
@@ -668,7 +672,7 @@ const Marketplace = () => {
               <Button
                 variant="outline"
                 size="lg"
-                className="min-w-[200px] border-2"
+                className="min-w-[200px] rounded-md border-2 border-[#315f3b] text-[#315f3b] hover:bg-[#315f3b] hover:text-[#fff8e8]"
                 onClick={loadMoreProducts}
                 disabled={isLoadingMore}
               >

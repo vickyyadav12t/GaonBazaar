@@ -247,11 +247,11 @@ const BuyerDashboard = () => {
 
   return (
     <Layout>
-      <div className="min-h-screen min-w-0 overflow-x-hidden bg-gradient-to-b from-blue-50/50 to-background dark:from-background">
+      <div className="min-h-screen min-w-0 overflow-x-hidden bg-[linear-gradient(rgba(251,247,235,0.97),rgba(251,247,235,0.97)),linear-gradient(rgba(138,79,42,0.07)_1px,transparent_1px),linear-gradient(90deg,rgba(138,79,42,0.07)_1px,transparent_1px)] bg-[size:auto,24px_24px,24px_24px]">
         <div className="container mx-auto min-w-0 px-3 py-6 sm:px-4 sm:py-8">
           {!initialLoading ? (
-            <div className="mb-6 flex flex-col gap-3 rounded-xl border border-primary/20 bg-primary/5 px-4 py-3 md:hidden">
-              <p className={`text-sm text-muted-foreground ${currentLanguage === 'hi' ? 'font-hindi' : ''}`}>
+            <div className="mb-6 flex flex-col gap-3 rounded-xl border border-[#d7c7a8] bg-[#fffaf0] px-4 py-3 shadow-[0_10px_26px_rgba(95,70,40,0.06)] md:hidden">
+              <p className={`text-sm text-[#6f6552] ${currentLanguage === 'hi' ? 'font-hindi' : ''}`}>
                 {currentLanguage === 'en'
                   ? 'Pull down from the top of the page to refresh, or tap Refresh.'
                   : 'पेज के ऊपर से नीचे खींचकर रिफ्रेश करें, या रिफ्रेश दबाएँ।'}
@@ -259,7 +259,7 @@ const BuyerDashboard = () => {
               <Button
                 type="button"
                 variant="secondary"
-                className="w-full gap-2 sm:w-auto"
+                className="w-full gap-2 border border-[#c8d8cb] bg-[#eef5ee] text-[#315f3b] hover:bg-[#e3eee4] sm:w-auto"
                 onClick={() => void loadDashboard()}
                 disabled={isRefreshing}
               >
@@ -277,9 +277,9 @@ const BuyerDashboard = () => {
           <AnimateOnScroll animation="fade-in">
             <div className="mb-8 flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
               <div>
-              <div className="inline-flex items-center gap-2 bg-primary/10 px-4 py-2 rounded-full mb-4">
-                <Calendar className="w-4 h-4 text-primary" />
-                <span className="text-sm font-semibold text-primary">
+              <div className="mb-4 inline-flex items-center gap-2 rounded-full border border-[#d7c7a8] bg-[#fffaf0] px-4 py-2">
+                <Calendar className="w-4 h-4 text-[#315f3b]" />
+                <span className="text-sm font-semibold text-[#315f3b]">
                   {new Date().toLocaleDateString(currentLanguage === 'en' ? 'en-US' : 'hi-IN', { 
                     weekday: 'long', 
                     year: 'numeric', 
@@ -288,13 +288,13 @@ const BuyerDashboard = () => {
                   })}
                 </span>
               </div>
-              <h1 className={`text-4xl md:text-5xl font-extrabold text-foreground mb-2 ${currentLanguage === 'hi' ? 'font-hindi' : ''}`}>
+              <h1 className={`mb-2 text-4xl font-extrabold text-[#2f3a2f] md:text-5xl ${currentLanguage === 'hi' ? 'font-hindi' : ''}`}>
                 {currentLanguage === 'en' ? `Welcome back, ${user?.name?.split(' ')[0]}!` : `वापसी पर स्वागत है, ${user?.name?.split(' ')[0]}!`}
               </h1>
-              <p className={`text-lg text-muted-foreground ${currentLanguage === 'hi' ? 'font-hindi' : ''}`}>
+              <p className={`text-lg text-[#6f6552] ${currentLanguage === 'hi' ? 'font-hindi' : ''}`}>
                 {currentLanguage === 'en' ? 'Find fresh produce directly from farmers' : 'किसानों से सीधे ताज़ा उपज पाएं'}
               </p>
-              <p className="text-sm text-blue-700 dark:text-blue-400 font-medium mt-2">
+              <p className="mt-2 text-sm font-medium text-[#8a4f2a]">
                 {currentLanguage === 'en' ? 'Buyer Workspace' : 'खरीदार कार्यक्षेत्र'}
               </p>
               </div>
@@ -302,7 +302,7 @@ const BuyerDashboard = () => {
                 type="button"
                 variant="outline"
                 size="icon"
-                className="h-12 w-12 shrink-0 rounded-xl"
+                className="h-12 w-12 shrink-0 rounded-xl border-[#d7c7a8] bg-[#fffaf0] text-[#315f3b] hover:bg-[#f6eddc] hover:text-[#315f3b]"
                 onClick={() => void loadDashboard()}
                 disabled={isRefreshing}
                 title={currentLanguage === 'en' ? 'Refresh dashboard' : 'डैशबोर्ड रिफ्रेश'}
@@ -348,8 +348,8 @@ const BuyerDashboard = () => {
 
           {/* Orders & chat — actionable (parity with farmer operations board) */}
           <AnimateOnScroll animation="slide-up" delay={0.15}>
-            <Card className="border-2 border-blue-200/70 dark:border-blue-900/40 shadow-lg mb-10">
-              <CardHeader className="bg-gradient-to-r from-blue-500/10 to-cyan-500/10 border-b">
+            <Card className="mb-10 border-2 border-[#d7c7a8] bg-[#fffaf0] shadow-[0_18px_42px_rgba(95,70,40,0.08)]">
+              <CardHeader className="border-b border-[#e2d4b7] bg-[#f7eedf]">
                 <CardTitle>
                   {currentLanguage === 'en' ? 'Orders & chat' : 'ऑर्डर और चैट'}
                 </CardTitle>
@@ -367,20 +367,20 @@ const BuyerDashboard = () => {
                       ? `In progress, ${processingOrderCount} orders. Open orders filtered by processing.`
                       : `प्रगति में, ${processingOrderCount} ऑर्डर। प्रोसेसिंग ऑर्डर खोलें।`
                   }
-                  className="group relative flex flex-col rounded-xl border bg-card p-4 text-left shadow-sm transition-all hover:border-primary/45 hover:bg-primary/[0.04] hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                  className="group relative flex flex-col rounded-xl border border-[#d7c7a8] bg-[#fffdf7] p-4 text-left shadow-sm transition-all hover:border-[#315f3b]/45 hover:bg-[#f5eee0] hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#315f3b] focus-visible:ring-offset-2"
                 >
                   <div className="flex items-start justify-between gap-2">
                     <div className="min-w-0">
-                      <p className="text-sm text-muted-foreground">
+                      <p className="text-sm text-[#6f6552]">
                         {currentLanguage === 'en' ? 'In progress' : 'प्रगति में'}
                       </p>
-                      <p className="text-2xl font-bold mt-1 tabular-nums">{processingOrderCount}</p>
-                      <p className="text-xs text-muted-foreground mt-1">
+                      <p className="mt-1 text-2xl font-bold tabular-nums text-[#2f3a2f]">{processingOrderCount}</p>
+                      <p className="mt-1 text-xs text-[#6f6552]">
                         {currentLanguage === 'en' ? 'Processing orders' : 'प्रोसेसिंग ऑर्डर'}
                       </p>
                     </div>
                     <ArrowRight
-                      className="mt-0.5 h-5 w-5 shrink-0 text-muted-foreground transition-transform group-hover:translate-x-0.5 group-hover:text-primary"
+                      className="mt-0.5 h-5 w-5 shrink-0 text-[#6f6552] transition-transform group-hover:translate-x-0.5 group-hover:text-[#315f3b]"
                       aria-hidden
                     />
                   </div>
@@ -392,20 +392,20 @@ const BuyerDashboard = () => {
                       ? `Payment pending, ${paymentPendingCount} orders. Open orders awaiting payment.`
                       : `भुगतान लंबित, ${paymentPendingCount} ऑर्डर। लंबित भुगतान खोलें।`
                   }
-                  className="group relative flex flex-col rounded-xl border bg-card p-4 text-left shadow-sm transition-all hover:border-primary/45 hover:bg-primary/[0.04] hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                  className="group relative flex flex-col rounded-xl border border-[#d7c7a8] bg-[#fffdf7] p-4 text-left shadow-sm transition-all hover:border-[#315f3b]/45 hover:bg-[#f5eee0] hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#315f3b] focus-visible:ring-offset-2"
                 >
                   <div className="flex items-start justify-between gap-2">
                     <div className="min-w-0">
-                      <p className="text-sm text-muted-foreground">
+                      <p className="text-sm text-[#6f6552]">
                         {currentLanguage === 'en' ? 'Payment pending' : 'भुगतान लंबित'}
                       </p>
-                      <p className="text-2xl font-bold mt-1 tabular-nums">{paymentPendingCount}</p>
-                      <p className="text-xs text-muted-foreground mt-1">
+                      <p className="mt-1 text-2xl font-bold tabular-nums text-[#2f3a2f]">{paymentPendingCount}</p>
+                      <p className="mt-1 text-xs text-[#6f6552]">
                         {currentLanguage === 'en' ? 'Awaiting payment' : 'भुगतान की प्रतीक्षा'}
                       </p>
                     </div>
                     <ArrowRight
-                      className="mt-0.5 h-5 w-5 shrink-0 text-muted-foreground transition-transform group-hover:translate-x-0.5 group-hover:text-primary"
+                      className="mt-0.5 h-5 w-5 shrink-0 text-[#6f6552] transition-transform group-hover:translate-x-0.5 group-hover:text-[#315f3b]"
                       aria-hidden
                     />
                   </div>
@@ -417,20 +417,20 @@ const BuyerDashboard = () => {
                       ? `Chats, ${unreadChatCount} unread. Open messages.`
                       : `चैट, ${unreadChatCount} अनपढ़। संदेश खोलें।`
                   }
-                  className="group relative flex flex-col rounded-xl border bg-card p-4 text-left shadow-sm transition-all hover:border-primary/45 hover:bg-primary/[0.04] hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                  className="group relative flex flex-col rounded-xl border border-[#d7c7a8] bg-[#fffdf7] p-4 text-left shadow-sm transition-all hover:border-[#315f3b]/45 hover:bg-[#f5eee0] hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#315f3b] focus-visible:ring-offset-2"
                 >
                   <div className="flex items-start justify-between gap-2">
                     <div className="min-w-0">
-                      <p className="text-sm text-muted-foreground">
+                      <p className="text-sm text-[#6f6552]">
                         {currentLanguage === 'en' ? 'Chats' : 'चैट'}
                       </p>
-                      <p className="text-2xl font-bold mt-1 tabular-nums">{unreadChatCount}</p>
-                      <p className="text-xs text-muted-foreground mt-1">
+                      <p className="mt-1 text-2xl font-bold tabular-nums text-[#2f3a2f]">{unreadChatCount}</p>
+                      <p className="mt-1 text-xs text-[#6f6552]">
                         {currentLanguage === 'en' ? 'Unread messages' : 'अपठित संदेश'}
                       </p>
                     </div>
                     <ArrowRight
-                      className="mt-0.5 h-5 w-5 shrink-0 text-muted-foreground transition-transform group-hover:translate-x-0.5 group-hover:text-primary"
+                      className="mt-0.5 h-5 w-5 shrink-0 text-[#6f6552] transition-transform group-hover:translate-x-0.5 group-hover:text-[#315f3b]"
                       aria-hidden
                     />
                   </div>
@@ -441,10 +441,10 @@ const BuyerDashboard = () => {
 
           {/* Quick Actions */}
           <AnimateOnScroll animation="slide-up" delay={0.2}>
-            <Card className="border-2 shadow-lg mb-10">
-              <CardHeader className="bg-gradient-to-r from-primary/10 to-secondary/10 border-b">
+            <Card className="mb-10 border-2 border-[#d7c7a8] bg-[#fffaf0] shadow-[0_18px_42px_rgba(95,70,40,0.08)]">
+              <CardHeader className="border-b border-[#e2d4b7] bg-[#f7eedf]">
                 <CardTitle className="flex items-center gap-2">
-                  <Sparkles className="w-5 h-5 text-primary" />
+                  <Sparkles className="w-5 h-5 text-[#315f3b]" />
                   {currentLanguage === 'en' ? 'Quick Actions' : 'त्वरित कार्य'}
                 </CardTitle>
                 <CardDescription>
@@ -462,54 +462,60 @@ const BuyerDashboard = () => {
                       icon: Search,
                       label: currentLanguage === 'en' ? 'Browse Marketplace' : 'बाज़ार खोजें',
                       path: '/marketplace',
-                      color: 'from-primary/20 to-primary/10',
+                      color: 'from-[#dfeadc] to-[#eef5ee]',
+                      iconColor: 'text-[#315f3b]',
                     },
                     {
                       icon: ShoppingCart,
                       label: currentLanguage === 'en' ? 'Cart' : 'कार्ट',
                       path: '/buyer/cart',
-                      color: 'from-accent/20 to-accent/10',
+                      color: 'from-[#fff0cc] to-[#fff7e3]',
+                      iconColor: 'text-[#d89b2b]',
                       badge: cartItemCount,
                     },
                     {
                       icon: Heart,
                       label: currentLanguage === 'en' ? 'Wishlist' : 'इच्छा सूची',
                       path: '/buyer/wishlist',
-                      color: 'from-rose-500/20 to-rose-500/10',
+                      color: 'from-[#f8e1d9] to-[#fff3ee]',
+                      iconColor: 'text-[#8a4f2a]',
                       badge: wishlistCount,
                     },
                     {
                       icon: Package,
                       label: currentLanguage === 'en' ? 'My Orders' : 'मेरे ऑर्डर',
                       path: '/buyer/orders',
-                      color: 'from-success/20 to-success/10',
+                      color: 'from-[#dfeadc] to-[#eef5ee]',
+                      iconColor: 'text-[#315f3b]',
                     },
                     {
                       icon: MessageCircle,
                       label: currentLanguage === 'en' ? 'Chats' : 'चैट',
                       path: '/buyer/chats',
                       badge: unreadChatCount,
-                      color: 'from-purple-500/20 to-purple-500/10',
+                      color: 'from-[#efe5d2] to-[#fbf3e6]',
+                      iconColor: 'text-[#6c5a3d]',
                     },
                     {
                       icon: Star,
                       label: currentLanguage === 'en' ? 'Reviews' : 'समीक्षाएं',
                       path: '/buyer/reviews',
-                      color: 'from-warning/20 to-warning/10',
+                      color: 'from-[#fff0cc] to-[#fff7e3]',
+                      iconColor: 'text-[#d89b2b]',
                     },
                   ].map((item) => (
                     <Link
                       key={item.path}
                       to={item.path}
-                      className="group relative flex h-full min-h-[124px] flex-col items-center justify-center gap-3 rounded-xl border-2 border-border bg-gradient-to-br from-card to-muted/30 p-5 transition-all duration-300 hover:scale-105 hover:border-primary/50 hover:shadow-xl"
+                      className="group relative flex h-full min-h-[124px] flex-col items-center justify-center gap-3 rounded-xl border-2 border-[#d7c7a8] bg-[#fffdf7] p-5 transition-all duration-300 hover:scale-105 hover:border-[#315f3b]/40 hover:shadow-xl"
                     >
                       <div
                         className={`flex h-14 w-14 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br ${item.color} transition-transform group-hover:scale-110`}
                       >
-                        <item.icon className="h-6 w-6 shrink-0 text-primary" strokeWidth={2} />
+                        <item.icon className={`h-6 w-6 shrink-0 ${item.iconColor}`} strokeWidth={2} />
                       </div>
                       {typeof item.badge === 'number' && item.badge > 0 ? (
-                        <Badge className="absolute -right-2 -top-2 bg-accent px-2 py-0.5 text-xs font-bold text-accent-foreground">
+                        <Badge className="absolute -right-2 -top-2 bg-[#d89b2b] px-2 py-0.5 text-xs font-bold text-[#2f2416]">
                           {item.badge > 99 ? '99+' : item.badge}
                         </Badge>
                       ) : null}
@@ -527,12 +533,12 @@ const BuyerDashboard = () => {
 
           {/* Recent Orders */}
           <AnimateOnScroll animation="slide-up" delay={0.3}>
-            <Card className="border-2 shadow-lg mb-8">
-              <CardHeader className="bg-gradient-to-r from-success/10 to-success/5 border-b">
+            <Card className="mb-8 border-2 border-[#d7c7a8] bg-[#fffaf0] shadow-[0_18px_42px_rgba(95,70,40,0.08)]">
+              <CardHeader className="border-b border-[#e2d4b7] bg-[#f7eedf]">
                 <div className="flex items-center justify-between">
                   <div>
                     <CardTitle className="flex items-center gap-2">
-                      <ShoppingCart className="w-5 h-5 text-success" />
+                      <ShoppingCart className="w-5 h-5 text-[#315f3b]" />
                       {currentLanguage === 'en' ? 'My Orders' : 'मेरे ऑर्डर'}
                     </CardTitle>
                     <CardDescription>
@@ -540,7 +546,7 @@ const BuyerDashboard = () => {
                     </CardDescription>
                   </div>
                   <Link to="/buyer/orders">
-                    <Button variant="ghost" size="sm" className="gap-2">
+                    <Button variant="ghost" size="sm" className="gap-2 text-[#315f3b] hover:bg-[#f3ebdd] hover:text-[#315f3b]">
                       {currentLanguage === 'en' ? 'View All' : 'सभी देखें'}
                       <ArrowRight className="w-4 h-4" />
                     </Button>
@@ -556,12 +562,12 @@ const BuyerDashboard = () => {
                   </div>
                 ) : (
                   <div className="text-center py-12">
-                    <ShoppingCart className="w-16 h-16 text-muted-foreground mx-auto mb-4" />
-                    <p className={`text-muted-foreground mb-4 ${currentLanguage === 'hi' ? 'font-hindi' : ''}`}>
+                    <ShoppingCart className="mx-auto mb-4 h-16 w-16 text-[#b8ad97]" />
+                    <p className={`mb-4 text-[#6f6552] ${currentLanguage === 'hi' ? 'font-hindi' : ''}`}>
                       {currentLanguage === 'en' ? 'No orders yet' : 'अभी तक कोई ऑर्डर नहीं'}
                     </p>
                     <Link to="/marketplace">
-                      <Button className="gap-2">
+                      <Button className="gap-2 border border-[#b68222] bg-[#d89b2b] text-[#2f2416] hover:bg-[#c88d22]">
                         {currentLanguage === 'en' ? 'Start Shopping' : 'खरीदारी शुरू करें'}
                         <ArrowRight className="w-4 h-4" />
                       </Button>
@@ -574,18 +580,18 @@ const BuyerDashboard = () => {
 
           {/* Marketplace listings — ranked by wishlist + order categories when possible */}
           <AnimateOnScroll animation="slide-up" delay={0.4}>
-            <Card className="border-2 shadow-lg">
-              <CardHeader className="bg-gradient-to-r from-primary/10 to-primary/5 border-b">
+            <Card className="border-2 border-[#d7c7a8] bg-[#fffaf0] shadow-[0_18px_42px_rgba(95,70,40,0.08)]">
+              <CardHeader className="border-b border-[#e2d4b7] bg-[#f7eedf]">
                 <div className="flex items-center justify-between gap-3">
                   <div className="min-w-0">
                     <CardTitle className="flex flex-wrap items-center gap-2">
-                      <Package className="w-5 h-5 shrink-0 text-primary" />
+                      <Package className="w-5 h-5 shrink-0 text-[#315f3b]" />
                       {picksPersonalized ? (
                         <>
                           <span className={currentLanguage === 'hi' ? 'font-hindi' : ''}>
                             {currentLanguage === 'en' ? 'Picked for you' : 'आपके लिए चयन'}
                           </span>
-                          <Badge variant="secondary" className="text-xs font-normal">
+                          <Badge variant="secondary" className="border-[#d7c7a8] bg-[#fffdf7] text-xs font-normal text-[#6f6552]">
                             {currentLanguage === 'en' ? 'Your tastes' : 'आपकी पसंद'}
                           </Badge>
                         </>
@@ -606,7 +612,7 @@ const BuyerDashboard = () => {
                     </CardDescription>
                   </div>
                   <Link to="/marketplace">
-                    <Button variant="ghost" size="sm" className="gap-2 shrink-0">
+                    <Button variant="ghost" size="sm" className="gap-2 shrink-0 text-[#315f3b] hover:bg-[#f3ebdd] hover:text-[#315f3b]">
                       {currentLanguage === 'en' ? 'View All' : 'सभी देखें'}
                       <ArrowRight className="w-4 h-4" />
                     </Button>

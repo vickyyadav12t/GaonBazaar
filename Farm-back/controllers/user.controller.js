@@ -8,6 +8,13 @@ const sanitizeUser = (user) => {
   if (plain.avatar) {
     plain.avatar = rewriteLocalhostUploadUrl(String(plain.avatar));
   }
+  if (Array.isArray(plain.kycDocuments)) {
+    for (const doc of plain.kycDocuments) {
+      if (doc && typeof doc === "object" && doc.fileUrl) {
+        doc.fileUrl = rewriteLocalhostUploadUrl(String(doc.fileUrl));
+      }
+    }
+  }
   return plain;
 };
 

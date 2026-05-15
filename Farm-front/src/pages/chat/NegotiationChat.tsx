@@ -659,13 +659,13 @@ const NegotiationChat = () => {
   const getMessageBubble = (msg: ChatMessage) => {
     const isOwn = msg.senderRole === (user?.role || 'buyer');
     const ownBubbleClass = isFarmer
-      ? 'bg-secondary text-secondary-foreground rounded-br-md'
-      : 'bg-primary text-primary-foreground rounded-br-md';
+      ? 'bg-[#e9efe1] text-[#2f3a2f] rounded-br-md border border-[#cfd9c2]'
+      : 'bg-[#315f3b] text-white rounded-br-md';
     
     if (msg.type === 'offer' || msg.type === 'counter_offer') {
       return (
         <div className={`flex ${isOwn ? 'justify-end' : 'justify-start'} mb-4`}>
-          <div className={`max-w-[85%] rounded-2xl p-4 ${isOwn ? 'bg-primary text-primary-foreground' : 'bg-accent/20 border border-accent'}`}>
+          <div className={`max-w-[85%] rounded-2xl p-4 ${isOwn ? 'border border-[#c8d8cb] bg-[#315f3b] text-white' : 'border border-[#ead5a6] bg-[#fff4dd] text-[#2f2416]'}`}>
             <div className="flex items-center gap-2 mb-2">
               <span className="w-4 h-4 inline-flex items-center justify-center font-semibold">₹</span>
               <span className="text-sm font-medium">
@@ -685,7 +685,7 @@ const NegotiationChat = () => {
     if (msg.type === 'deal_accepted') {
       return (
         <div className="flex justify-center mb-4">
-          <div className="bg-success/10 border border-success text-success rounded-2xl px-6 py-3 flex items-center gap-2">
+          <div className="flex items-center gap-2 rounded-2xl border border-[#a9c8ae] bg-[#eaf5ec] px-6 py-3 text-[#315f3b]">
             <Check className="w-5 h-5" />
             <span className="font-medium">{msg.content}</span>
           </div>
@@ -698,12 +698,12 @@ const NegotiationChat = () => {
       return (
         <div className={`flex ${isOwn ? 'justify-end' : 'justify-start'} mb-4`}>
           <div
-            className={`max-w-[min(100%,20rem)] rounded-2xl overflow-hidden border shadow-sm ${
-              isOwn ? 'border-secondary/40' : 'border-border'
+            className={`max-w-[min(100%,20rem)] overflow-hidden rounded-2xl border shadow-sm ${
+              isOwn ? 'border-[#cfd9c2]' : 'border-[#d7c7a8]'
             }`}
           >
             {!isOwn && (
-              <p className="text-xs font-medium px-3 pt-2 bg-muted/50 text-muted-foreground">
+              <p className="bg-[#f7eedf] px-3 pt-2 text-xs font-medium text-[#6f6552]">
                 {msg.senderName}
               </p>
             )}
@@ -711,7 +711,7 @@ const NegotiationChat = () => {
               <img
                 src={imgSrc}
                 alt={currentLanguage === 'en' ? 'Product photo from farmer' : 'किसान की उत्पाद फोटो'}
-                className="w-full max-h-72 object-cover bg-muted"
+                className="max-h-72 w-full bg-[#f3ebdd] object-cover"
                 loading="lazy"
                 onError={(ev) => {
                   const el = ev.currentTarget;
@@ -720,7 +720,7 @@ const NegotiationChat = () => {
                 }}
               />
             </a>
-            <p className="text-xs opacity-70 px-3 py-2 bg-muted/30 text-right">
+            <p className="bg-[#fbf6eb] px-3 py-2 text-right text-xs text-[#6f6552]">
               {new Date(msg.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
             </p>
           </div>
@@ -730,7 +730,7 @@ const NegotiationChat = () => {
 
     return (
       <div className={`flex ${isOwn ? 'justify-end' : 'justify-start'} mb-4`}>
-        <div className={`max-w-[75%] rounded-2xl px-4 py-3 ${isOwn ? ownBubbleClass : 'bg-muted rounded-bl-md'}`}>
+        <div className={`max-w-[75%] rounded-2xl px-4 py-3 ${isOwn ? ownBubbleClass : 'rounded-bl-md border border-[#d7c7a8] bg-[#fffaf0] text-[#2f3a2f]'}`}>
           {!isOwn && (
             <p className="text-xs font-medium mb-1 opacity-70">{msg.senderName}</p>
           )}
@@ -746,10 +746,12 @@ const NegotiationChat = () => {
   if (isLoading || !chat || !product) {
     return (
       <Layout>
-        <div className="container mx-auto min-w-0 px-3 py-12 text-center sm:px-4 sm:py-16">
-          <h1 className="text-2xl font-bold">
+        <div className="min-h-screen bg-[linear-gradient(rgba(251,247,235,0.97),rgba(251,247,235,0.97)),linear-gradient(rgba(138,79,42,0.07)_1px,transparent_1px),linear-gradient(90deg,rgba(138,79,42,0.07)_1px,transparent_1px)] bg-[size:auto,24px_24px,24px_24px]">
+          <div className="container mx-auto min-w-0 px-3 py-12 text-center sm:px-4 sm:py-16">
+          <h1 className="text-2xl font-bold text-[#2f3a2f]">
             {isLoading ? 'Loading chat...' : 'Chat not found'}
           </h1>
+        </div>
         </div>
       </Layout>
     );
@@ -783,17 +785,17 @@ const NegotiationChat = () => {
 
   return (
     <Layout>
-      <div className="flex h-[calc(100vh-140px)] min-h-0 min-w-0 flex-col overflow-x-hidden">
+      <div className="flex h-[calc(100vh-140px)] min-h-0 min-w-0 flex-col overflow-x-hidden bg-[linear-gradient(rgba(251,247,235,0.97),rgba(251,247,235,0.97)),linear-gradient(rgba(138,79,42,0.07)_1px,transparent_1px),linear-gradient(90deg,rgba(138,79,42,0.07)_1px,transparent_1px)] bg-[size:auto,24px_24px,24px_24px]">
         {/* Chat Header */}
-        <div className={`border-b border-border p-4 shrink-0 ${isFarmer ? 'bg-green-50/70 dark:bg-card' : 'bg-blue-50/70 dark:bg-card'}`}>
+        <div className="shrink-0 border-b border-[#d7c7a8] bg-[#fffaf0] p-4">
           <div className="container mx-auto flex min-w-0 items-center gap-2 px-2 sm:gap-4 sm:px-4">
-            <button onClick={() => navigate(-1)} className="p-2 hover:bg-muted rounded-lg">
+            <button onClick={() => navigate(-1)} className="rounded-lg border border-[#d7c7a8] bg-[#fffdf7] p-2 text-[#315f3b] hover:bg-[#f6eddc]">
               <ArrowLeft className="w-5 h-5" />
             </button>
             <img
               src={listingHeroImageUrlFromList(product?.images, 160)}
               alt={product?.name}
-              className="w-12 h-12 rounded-lg object-cover"
+              className="h-12 w-12 rounded-lg border border-[#e2d4b7] object-cover"
               onError={(e) => {
                 const el = e.currentTarget;
                 el.onerror = null;
@@ -801,15 +803,15 @@ const NegotiationChat = () => {
               }}
             />
             <div className="flex-1 min-w-0">
-              <h2 className="font-semibold truncate">{isFarmer ? chat.buyerName : chat.farmerName}</h2>
-              <p className="text-sm text-muted-foreground truncate">{product?.name}</p>
+              <h2 className="truncate font-semibold text-[#2f3a2f]">{isFarmer ? chat.buyerName : chat.farmerName}</h2>
+              <p className="truncate text-sm text-[#6f6552]">{product?.name}</p>
             </div>
             {(isBuyer || isFarmer) && (
               <Button
                 type="button"
                 variant={fairDealOpen ? 'secondary' : 'outline'}
                 size="sm"
-                className="shrink-0 gap-1"
+                className="shrink-0 gap-1 border-[#d7c7a8] bg-[#fffdf7] text-[#315f3b] hover:bg-[#f3ebdd] hover:text-[#315f3b]"
                 onClick={() => setFairDealOpen((o) => !o)}
                 title={
                   currentLanguage === 'en'
@@ -826,12 +828,12 @@ const NegotiationChat = () => {
             <Badge
               className={
                 negotiationStatus === 'accepted'
-                  ? 'bg-success/10 text-success'
+                  ? 'bg-[#eaf5ec] text-[#315f3b]'
                   : negotiationStatus === 'rejected'
-                    ? 'bg-destructive/10 text-destructive'
+                    ? 'bg-[#f6e5dc] text-[#8a4f2a]'
                     : negotiationStatus === 'completed'
-                      ? 'bg-secondary/20 text-secondary-foreground'
-                      : 'bg-warning/10 text-warning'
+                      ? 'bg-[#eee7d7] text-[#6c5a3d]'
+                      : 'bg-[#fff4dd] text-[#9a6b12]'
               }
             >
               {negotiationStatus === 'accepted'
@@ -848,20 +850,20 @@ const NegotiationChat = () => {
         <div className="flex flex-1 min-h-0 min-w-0">
           <div className="flex flex-1 flex-col min-h-0 min-w-0">
             {/* Product Info Bar */}
-            <div className="bg-muted/50 border-b border-border p-3 shrink-0">
+            <div className="shrink-0 border-b border-[#e2d4b7] bg-[#f7eedf] p-3">
               <div className="container mx-auto flex min-w-0 flex-col gap-2 px-2 sm:flex-row sm:items-center sm:justify-between sm:px-4">
                 <div className="flex min-w-0 items-center gap-2 sm:gap-3">
-                  <Package className="h-4 w-4 shrink-0 text-muted-foreground" />
+                  <Package className="h-4 w-4 shrink-0 text-[#6f6552]" />
                   <span className="min-w-0 text-sm break-words">
                     {currentLanguage === 'en' ? 'Original Price:' : 'मूल कीमत:'}{' '}
-                    <span className="font-semibold">₹{chat.originalPrice.toLocaleString()}/{product?.unit}</span>
+                    <span className="font-semibold text-[#2f3a2f]">₹{chat.originalPrice.toLocaleString()}/{product?.unit}</span>
                   </span>
                 </div>
                 {currentOffer != null && (
                   <div className="flex min-w-0 items-center gap-2 text-left sm:gap-3 sm:text-right">
                     <span className="min-w-0 text-sm break-words">
                       {offerPriceLabel}{' '}
-                      <span className="font-semibold text-primary">
+                      <span className="font-semibold text-[#315f3b]">
                         ₹{currentOffer.toLocaleString()}/{product?.unit}
                       </span>
                     </span>
@@ -869,7 +871,7 @@ const NegotiationChat = () => {
                 )}
               </div>
               {canBuyerMakeOffer && negotiationStatus !== 'ongoing' && (
-                <p className="text-xs text-muted-foreground mt-2 max-w-2xl">
+                <p className="mt-2 max-w-2xl text-xs text-[#6f6552]">
                   {currentLanguage === 'en'
                     ? 'Buying again? Tap “New offer” to propose a fresh price — the farmer can accept or decline like before.'
                     : 'फिर से खरीदना है? “नया प्रस्ताव” से नई कीमत भेजें — किसान पहले जैसे मान या अस्वीकार कर सकते हैं।'}
@@ -881,21 +883,21 @@ const NegotiationChat = () => {
             <div className="container mx-auto min-h-0 min-w-0 flex-1 overflow-y-auto overflow-x-hidden p-3 sm:p-4">
           {messages.length === 0 && isNewChat ? (
             <div className="flex flex-col items-center justify-center h-full text-center">
-              <div className="bg-muted/50 rounded-2xl p-6 max-w-md">
-                <Package className="w-12 h-12 text-primary mx-auto mb-4" />
-                <h3 className="font-semibold text-lg mb-2">
+              <div className="max-w-md rounded-2xl border border-[#d7c7a8] bg-[#fffaf0] p-6 shadow-[0_16px_40px_rgba(95,70,40,0.08)]">
+                <Package className="mx-auto mb-4 h-12 w-12 text-[#315f3b]" />
+                <h3 className="mb-2 text-lg font-semibold text-[#2f3a2f]">
                   {currentLanguage === 'en' ? 'Start Negotiation' : 'बातचीत शुरू करें'}
                 </h3>
-                <p className="text-muted-foreground text-sm mb-4">
+                <p className="mb-4 text-sm text-[#6f6552]">
                   {currentLanguage === 'en' 
                     ? `You're negotiating for ${product?.name} with ${chat.farmerName}. Send a message or make an offer to get started.`
                     : `आप ${product?.name} के लिए ${chat.farmerName} के साथ बातचीत कर रहे हैं। शुरू करने के लिए एक संदेश भेजें या प्रस्ताव दें।`}
                 </p>
-                <div className="bg-card rounded-lg p-4 mt-4">
-                  <p className="text-xs text-muted-foreground mb-1">
+                <div className="mt-4 rounded-lg border border-[#e2d4b7] bg-[#fffdf7] p-4">
+                  <p className="mb-1 text-xs text-[#6f6552]">
                     {currentLanguage === 'en' ? 'Original Price' : 'मूल कीमत'}
                   </p>
-                  <p className="text-2xl font-bold text-primary">
+                  <p className="text-2xl font-bold text-[#315f3b]">
                     ₹{chat.originalPrice.toLocaleString()}/{product?.unit}
                   </p>
                 </div>
@@ -913,20 +915,20 @@ const NegotiationChat = () => {
 
             {/* Accept Offer Banner (farmer side) */}
             {isFarmer && currentOffer && negotiationStatus === 'ongoing' && (
-              <div className="border-t border-border p-3 bg-accent/5 shrink-0">
+              <div className="shrink-0 border-t border-[#e2d4b7] bg-[#fff4dd] p-3">
                 <div className="container mx-auto flex min-w-0 flex-col gap-3 px-2 sm:flex-row sm:items-center sm:justify-between sm:px-4">
                   <div className="flex min-w-0 items-start gap-2 sm:items-center">
-                    <Info className="w-4 h-4 text-accent" />
+                    <Info className="w-4 h-4 text-[#d89b2b]" />
                     <span className="min-w-0 text-sm break-words">
                       {currentLanguage === 'en' ? 'Accept the offer to proceed?' : 'आगे बढ़ने के लिए प्रस्ताव स्वीकार करें?'}
                     </span>
                   </div>
                   <div className="flex shrink-0 flex-wrap gap-2">
-                    <Button size="sm" variant="outline" className="gap-1" onClick={handleDeclineOffer}>
+                    <Button size="sm" variant="outline" className="gap-1 border-[#dfc0af] bg-[#fff8f4] text-[#8a4f2a] hover:bg-[#f6e5dc] hover:text-[#8a4f2a]" onClick={handleDeclineOffer}>
                       <X className="w-4 h-4" />
                       {currentLanguage === 'en' ? 'Decline' : 'अस्वीकार'}
                     </Button>
-                    <Button size="sm" onClick={handleAcceptOffer} className="gap-1 bg-success hover:bg-success/90">
+                    <Button size="sm" onClick={handleAcceptOffer} className="gap-1 bg-[#315f3b] text-white hover:bg-[#274d30]">
                       <Check className="w-4 h-4" />
                       {currentLanguage === 'en' ? 'Accept' : 'स्वीकार'}
                     </Button>
@@ -936,25 +938,25 @@ const NegotiationChat = () => {
             )}
 
             {/* Input Area */}
-            <div className="shrink-0 border-t border-border bg-card p-3 sm:p-4">
+            <div className="shrink-0 border-t border-[#d7c7a8] bg-[#fffaf0] p-3 sm:p-4">
               <div className="container mx-auto min-w-0 px-1 sm:px-0">
                 {isOfferMode ? (
                   <div className="flex min-w-0 flex-col gap-2 sm:flex-row">
                     <div className="relative min-w-0 flex-1">
-                      <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">₹</span>
+                      <span className="absolute left-3 top-1/2 -translate-y-1/2 text-[#8b816f]">₹</span>
                       <Input
                         type="number"
                         value={offerPrice}
                         onChange={(e) => setOfferPrice(e.target.value)}
                         placeholder={currentLanguage === 'en' ? 'Enter your offer price' : 'अपनी प्रस्तावित कीमत दर्ज करें'}
-                        className="pl-8"
+                        className="border-[#d7c7a8] bg-[#fffdf7] pl-8 text-[#2f3a2f] placeholder:text-[#8b816f] focus-visible:ring-[#315f3b]"
                         autoFocus
                       />
                     </div>
-                    <Button variant="outline" className="w-full sm:w-auto" onClick={() => setIsOfferMode(false)}>
+                    <Button variant="outline" className="w-full border-[#d7c7a8] bg-[#fffdf7] text-[#315f3b] hover:bg-[#f3ebdd] hover:text-[#315f3b] sm:w-auto" onClick={() => setIsOfferMode(false)}>
                       {currentLanguage === 'en' ? 'Cancel' : 'रद्द'}
                     </Button>
-                    <Button onClick={handleSendOffer} className="w-full btn-primary-gradient sm:w-auto">
+                    <Button onClick={handleSendOffer} className="w-full border border-[#b68222] bg-[#d89b2b] text-[#2f2416] hover:bg-[#c88d22] sm:w-auto">
                       {currentLanguage === 'en' ? 'Send Offer' : 'प्रस्ताव भेजें'}
                     </Button>
                   </div>
@@ -972,14 +974,14 @@ const NegotiationChat = () => {
                       onChange={(e) => setNewMessage(e.target.value)}
                       placeholder={currentLanguage === 'en' ? 'Type a message...' : 'संदेश लिखें...'}
                       onKeyDown={(e) => e.key === 'Enter' && handleSendMessage()}
-                      className="min-w-0 flex-1"
+                      className="min-w-0 flex-1 border-[#d7c7a8] bg-[#fffdf7] text-[#2f3a2f] placeholder:text-[#8b816f] focus-visible:ring-[#315f3b]"
                     />
                     {isFarmer && (
                       <Button
                         type="button"
                         variant="outline"
                         size="icon"
-                        className="shrink-0"
+                        className="shrink-0 border-[#d7c7a8] bg-[#fffdf7] text-[#315f3b] hover:bg-[#f3ebdd] hover:text-[#315f3b]"
                         disabled={imageUploading}
                         title={
                           currentLanguage === 'en'
@@ -999,7 +1001,7 @@ const NegotiationChat = () => {
                       <Button
                         variant="outline"
                         onClick={() => setIsOfferMode(true)}
-                        className="gap-2 shrink-0"
+                        className="shrink-0 gap-2 border-[#d7c7a8] bg-[#fffdf7] text-[#315f3b] hover:bg-[#f3ebdd] hover:text-[#315f3b]"
                       >
                         <span className="font-semibold">₹</span>
                         <span className="hidden sm:inline">
@@ -1013,7 +1015,7 @@ const NegotiationChat = () => {
                         </span>
                       </Button>
                     )}
-                    <Button onClick={handleSendMessage} className="btn-primary-gradient">
+                    <Button onClick={handleSendMessage} className="border border-[#b68222] bg-[#d89b2b] text-[#2f2416] hover:bg-[#c88d22]">
                       <Send className="w-4 h-4" />
                     </Button>
                   </div>
@@ -1023,7 +1025,7 @@ const NegotiationChat = () => {
           </div>
 
           {fairDealOpen && !isNarrowViewport && (
-            <aside className="hidden lg:flex w-[min(100%,20rem)] shrink-0 border-l border-border flex-col min-h-0 bg-card">
+            <aside className="hidden lg:flex w-[min(100%,20rem)] shrink-0 border-l border-[#d7c7a8] bg-[#fffaf0] flex-col min-h-0">
               <FairDealHelperPanel
                 chatId={chat.id}
                 lang={currentLanguage === 'en' ? 'en' : 'hi'}

@@ -16,20 +16,20 @@ export default function AdminKycTab() {
   return (
     <div className="space-y-6">
   <AnimateOnScroll animation="slide-up">
-    <Card className="border-2 shadow-lg">
-      <CardHeader className="bg-gradient-to-r from-warning/10 to-warning/5 border-b">
+    <Card className="border-[#d7c7a8] bg-[#fffaf0] shadow-[0_16px_40px_rgba(95,70,40,0.08)]">
+      <CardHeader className="border-b border-[#e2d4b7] bg-[#f6eddc]">
         <CardTitle className="flex items-center gap-2">
-          <Shield className="w-5 h-5 text-warning" />
+          <Shield className="w-5 h-5 text-[#d89b2b]" />
           KYC Management
         </CardTitle>
-        <CardDescription>
+        <CardDescription className="text-[#6f6552]">
           Approve when the farmer has uploaded at least one of Aadhaar or Kisan ID (bank statement not required).
         </CardDescription>
       </CardHeader>
       <CardContent>
         <div className="flex gap-4 mb-6">
           <Select value={vm.kycFilter} onValueChange={vm.setKycFilter}>
-            <SelectTrigger className="w-48">
+            <SelectTrigger className="w-48 border-[#d7c7a8] bg-[#fffdf7] text-[#2f3a2f]">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
@@ -42,7 +42,7 @@ export default function AdminKycTab() {
         </div>
 
         {vm.kycLoading && (
-          <div className="flex items-center gap-2 text-sm text-muted-foreground mb-4">
+          <div className="mb-4 flex items-center gap-2 text-sm text-[#6f6552]">
             <Loader2 className="h-4 w-4 animate-spin shrink-0" />
             Loading farmers…
           </div>
@@ -51,12 +51,12 @@ export default function AdminKycTab() {
         <div className="space-y-4">
           {vm.kycFarmersPage.length > 0 ? (
             vm.kycFarmersPage.map((farmer) => (
-              <div key={farmer.id} className="card-elevated p-6 border-2 border-border hover:shadow-lg transition-shadow">
+              <div key={farmer.id} className="rounded-lg border border-[#d7c7a8] bg-[#fffdf7] p-6 transition-all hover:border-[#c8b38b] hover:shadow-[0_16px_40px_rgba(95,70,40,0.12)]">
                 <div className="flex items-start gap-4">
                   <img
                     src={resolveBackendAssetUrl(farmer.avatar)}
                     alt={farmer.name}
-                    className="w-20 h-20 rounded-full object-cover border-2 border-warning/20"
+                    className="h-20 w-20 rounded-full border-2 border-[#e8cf96] object-cover"
                     loading="lazy"
                     decoding="async"
                     onError={(e) => {
@@ -70,19 +70,19 @@ export default function AdminKycTab() {
                       <p className="font-semibold text-lg">{farmer.name}</p>
                       {vm.getKycBadge(farmer.kycStatus)}
                     </div>
-                    <p className="text-sm text-muted-foreground mb-1">{farmer.email}</p>
-                    <p className="text-sm text-muted-foreground mb-1">{farmer.phone}</p>
+                    <p className="mb-1 text-sm text-[#6f6552]">{farmer.email}</p>
+                    <p className="mb-1 text-sm text-[#6f6552]">{farmer.phone}</p>
                     <p className="text-sm mb-3">
                       {[farmer.location?.village, farmer.location?.district, farmer.location?.state]
                         .filter(Boolean)
                         .join(', ') || '—'}
                     </p>
                     <div className="flex flex-wrap gap-2">
-                      <Badge variant="outline" className="bg-muted">Farm: {farmer.farmSize}</Badge>
-                      <Badge variant="outline" className="bg-muted">Crops: {farmer.crops || '—'}</Badge>
+                      <Badge variant="outline" className="border-[#d7c7a8] bg-[#f3ebdd] text-[#6c5a3d]">Farm: {farmer.farmSize}</Badge>
+                      <Badge variant="outline" className="border-[#d7c7a8] bg-[#f3ebdd] text-[#6c5a3d]">Crops: {farmer.crops || '—'}</Badge>
                     </div>
                     {farmer.kycStatus === 'rejected' && farmer.kycRejectionReason ? (
-                      <p className="text-sm text-destructive mt-3 rounded-md border border-destructive/20 bg-destructive/5 px-3 py-2">
+                      <p className="mt-3 rounded-md border border-[#d8b0a0] bg-[#f6e5dc] px-3 py-2 text-sm text-[#8a4f2a]">
                         <span className="font-semibold">Rejection reason: </span>
                         {farmer.kycRejectionReason}
                       </p>
@@ -91,19 +91,19 @@ export default function AdminKycTab() {
                   <div className="flex flex-col gap-2">
                     <Dialog>
                       <DialogTrigger asChild>
-                        <Button size="sm" variant="outline">
+                        <Button size="sm" variant="outline" className="border-[#d7c7a8] bg-[#fffaf0] text-[#315f3b] hover:bg-[#f3ebdd] hover:text-[#315f3b]">
                           <Eye className="w-4 h-4 mr-1" /> View Docs
                         </Button>
                       </DialogTrigger>
-                      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+                      <DialogContent className="max-h-[90vh] max-w-2xl overflow-y-auto border-[#d7c7a8] bg-[#fffaf0]">
                         <DialogHeader>
                           <DialogTitle>KYC Documents — {farmer.name}</DialogTitle>
                         </DialogHeader>
                         <div className="space-y-4 py-4">
                           {(
                             [
-                              { type: 'aadhaar', title: 'Aadhaar Card', color: 'text-primary' },
-                              { type: 'kisan', title: 'Kisan ID / PM-KISAN', color: 'text-success' },
+                              { type: 'aadhaar', title: 'Aadhaar Card', color: 'text-[#315f3b]' },
+                              { type: 'kisan', title: 'Kisan ID / PM-KISAN', color: 'text-[#58774e]' },
                             ] as const
                           ).map(({ type, title, color }) => {
                             const doc = (farmer.kycDocuments || []).find(
@@ -112,7 +112,7 @@ export default function AdminKycTab() {
                             return (
                               <div
                                 key={type}
-                                className="p-4 bg-muted rounded-lg border-2 border-border"
+                                className="rounded-lg border border-[#e2d4b7] bg-[#fffdf7] p-4"
                               >
                                 <div className="flex items-center gap-3 mb-3">
                                   <Shield className={`w-5 h-5 ${color}`} />
@@ -125,7 +125,7 @@ export default function AdminKycTab() {
                                 </div>
                                 {doc?.fileUrl ? (
                                   <div className="space-y-2">
-                                    <p className="text-xs text-muted-foreground">
+                                    <p className="text-xs text-[#6f6552]">
                                       {doc.originalName || 'Uploaded file'}
                                     </p>
                                     <AdminKycPreview url={doc.fileUrl} />
@@ -133,13 +133,13 @@ export default function AdminKycTab() {
                                       href={doc.fileUrl}
                                       target="_blank"
                                       rel="noopener noreferrer"
-                                      className="text-sm text-primary font-medium inline-block"
+                                      className="inline-block text-sm font-medium text-[#315f3b]"
                                     >
                                       Open in new tab
                                     </a>
                                   </div>
                                 ) : (
-                                  <p className="text-sm text-muted-foreground py-4 text-center border border-dashed rounded-lg">
+                                  <p className="rounded-lg border border-dashed border-[#d7c7a8] py-4 text-center text-sm text-[#6f6552]">
                                     Not uploaded
                                   </p>
                                 )}
@@ -151,12 +151,12 @@ export default function AdminKycTab() {
                     </Dialog>
                     {farmer.kycStatus === 'pending' && (
                       <>
-                        <Button size="sm" className="bg-success hover:bg-success/90" onClick={() => void vm.handleKycApprove(farmer.id)}>
+                        <Button size="sm" className="border border-[#315f3b] bg-[#315f3b] text-[#fffaf0] hover:bg-[#284e31]" onClick={() => void vm.handleKycApprove(farmer.id)}>
                           <CheckCircle className="w-4 h-4 mr-1" /> Approve
                         </Button>
                         <Button
                           size="sm"
-                          variant="destructive"
+                          className="bg-[#8a4f2a] text-[#fffaf0] hover:bg-[#784223]"
                           onClick={() => {
                             vm.setKycRejectTarget({ id: farmer.id, name: farmer.name });
                             vm.setKycRejectReason('');
@@ -171,9 +171,9 @@ export default function AdminKycTab() {
               </div>
             ))
           ) : (
-            <div className="text-center py-12">
-              <Shield className="w-16 h-16 text-muted-foreground mx-auto mb-4" />
-              <p className="text-muted-foreground">
+            <div className="py-12 text-center">
+              <Shield className="mx-auto mb-4 h-16 w-16 text-[#8b816f]" />
+              <p className="text-[#6f6552]">
                 {vm.kycFilter === 'all'
                   ? 'No farmers match this view.'
                   : `No ${vm.kycFilter} KYC requests`}

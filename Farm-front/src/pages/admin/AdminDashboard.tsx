@@ -911,17 +911,17 @@ const AdminDashboard = () => {
     }
     return (
       <div className="space-y-1 text-xs leading-snug">
-        <p className="text-muted-foreground">
-          <span className="text-warning font-medium">Pending {ob.pending}</span>
+        <p className="text-[#6f6552]">
+          <span className="font-medium text-[#9a6b12]">Pending {ob.pending}</span>
           {' · '}
           <span>Processing {ob.processing}</span>
           {' · '}
           <span>Shipped {ob.shipped}</span>
         </p>
-        <p className="text-muted-foreground">
-          <span className="text-success font-medium">Delivered {ob.delivered}</span>
+        <p className="text-[#6f6552]">
+          <span className="font-medium text-[#315f3b]">Delivered {ob.delivered}</span>
           {' · '}
-          <span className="text-destructive font-medium">Cancelled {ob.cancelled}</span>
+          <span className="font-medium text-[#8a4f2a]">Cancelled {ob.cancelled}</span>
         </p>
       </div>
     );
@@ -1209,22 +1209,22 @@ const AdminDashboard = () => {
 
   const getKycBadge = (status: string) => {
     switch (status) {
-      case 'approved': return <Badge className="bg-success/10 text-success">Verified</Badge>;
-      case 'rejected': return <Badge className="bg-destructive/10 text-destructive">Rejected</Badge>;
-      default: return <Badge className="bg-warning/10 text-warning">Pending</Badge>;
+      case 'approved': return <Badge className="bg-[#eaf5ec] text-[#315f3b]">Verified</Badge>;
+      case 'rejected': return <Badge className="bg-[#f6e5dc] text-[#8a4f2a]">Rejected</Badge>;
+      default: return <Badge className="bg-[#fff4dd] text-[#9a6b12]">Pending</Badge>;
     }
   };
 
   const supportStatusBadgeClass = (status: string) => {
     switch (status) {
       case 'resolved':
-        return 'bg-success/10 text-success border-success/20';
+        return 'bg-[#eaf5ec] text-[#315f3b] border-[#bfd2bf]';
       case 'closed':
-        return 'bg-muted text-muted-foreground';
+        return 'bg-[#f3ebdd] text-[#6c5a3d]';
       case 'in_progress':
-        return 'bg-primary/10 text-primary border-primary/20';
+        return 'bg-[#eef5ee] text-[#58774e] border-[#c9d8c5]';
       default:
-        return 'bg-warning/10 text-warning border-warning/20';
+        return 'bg-[#fff4dd] text-[#9a6b12] border-[#e8cf96]';
     }
   };
 
@@ -1521,17 +1521,17 @@ const AdminDashboard = () => {
 
   return (
     <Layout showMobileNav={false}>
-      <div className="min-h-screen min-w-0 overflow-x-hidden bg-gradient-to-b from-background to-muted/20">
+      <div className="min-h-screen min-w-0 overflow-x-hidden bg-[#f6f1e7] bg-[linear-gradient(rgba(138,79,42,0.05)_1px,transparent_1px),linear-gradient(90deg,rgba(138,79,42,0.05)_1px,transparent_1px)] bg-[size:24px_24px]">
         <div className="container mx-auto min-w-0 px-3 py-6 sm:px-4 sm:py-8">
           {!initialLoading ? (
-            <div className="mb-6 flex flex-col gap-3 rounded-xl border border-primary/20 bg-primary/5 px-4 py-3 md:hidden">
-              <p className="text-sm text-muted-foreground">
+            <div className="mb-6 flex flex-col gap-3 rounded-xl border border-[#d7c7a8] bg-[#fff7e8] px-4 py-3 md:hidden">
+              <p className="text-sm text-[#6f6552]">
                 Pull down from the top of the page to refresh, or tap Refresh.
               </p>
               <Button
                 type="button"
                 variant="secondary"
-                className="w-full gap-2 sm:w-auto"
+                className="w-full gap-2 border border-[#d7c7a8] bg-[#fffaf0] text-[#315f3b] hover:bg-[#f3ebdd] hover:text-[#315f3b] sm:w-auto"
                 onClick={() => void loadAdminShellData()}
                 disabled={isRefreshing}
               >
@@ -1548,9 +1548,9 @@ const AdminDashboard = () => {
               <AnimateOnScroll animation="fade-in">
                 <div className="mb-8 flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
                   <div className="min-w-0 flex-1">
-                    <div className="mb-4 inline-flex max-w-full items-center gap-2 rounded-full bg-primary/10 px-3 py-2 sm:px-4">
-                      <Calendar className="h-4 w-4 shrink-0 text-primary" />
-                      <span className="text-xs font-semibold text-primary sm:text-sm">
+                    <div className="mb-4 inline-flex max-w-full items-center gap-2 rounded-full border border-[#d7c7a8] bg-[#fffaf0] px-3 py-2 sm:px-4">
+                      <Calendar className="h-4 w-4 shrink-0 text-[#315f3b]" />
+                      <span className="text-xs font-semibold text-[#315f3b] sm:text-sm">
                         {new Date().toLocaleDateString('en-US', {
                           weekday: 'long',
                           year: 'numeric',
@@ -1559,10 +1559,10 @@ const AdminDashboard = () => {
                         })}
                       </span>
                     </div>
-                    <h1 className="mb-2 text-2xl font-extrabold text-foreground sm:text-3xl md:text-5xl">
+                    <h1 className="mb-2 text-2xl font-extrabold text-[#2f3a2f] sm:text-3xl md:text-5xl">
                       Admin Dashboard
                     </h1>
-                    <p className="text-sm text-muted-foreground sm:text-lg">
+                    <p className="text-sm text-[#6f6552] sm:text-lg">
                       Platform overview and management
                     </p>
                   </div>
@@ -1570,7 +1570,7 @@ const AdminDashboard = () => {
                     type="button"
                     variant="outline"
                     size="icon"
-                    className="h-12 w-12 shrink-0 rounded-xl"
+                    className="h-12 w-12 shrink-0 rounded-xl border-[#d7c7a8] bg-[#fffaf0] text-[#315f3b] hover:bg-[#f3ebdd] hover:text-[#315f3b]"
                     onClick={() => void loadAdminShellData()}
                     disabled={isRefreshing}
                     title="Refresh dashboard"
@@ -1615,78 +1615,78 @@ const AdminDashboard = () => {
 
               <AdminDashboardProvider value={dashboardModel}>
           <Tabs value={adminTab} onValueChange={handleAdminTabChange} className="space-y-6">
-            <TabsList className="flex h-auto w-full max-w-full flex-nowrap items-stretch justify-start gap-1 overflow-x-auto overflow-y-hidden rounded-lg bg-muted/50 p-1 [-webkit-overflow-scrolling:touch] lg:grid lg:grid-cols-5 lg:overflow-x-visible xl:grid-cols-9">
+            <TabsList className="flex h-auto w-full max-w-full flex-nowrap items-stretch justify-start gap-1 overflow-x-auto overflow-y-hidden rounded-lg border border-[#d7c7a8] bg-[#f4ead7] p-1 [-webkit-overflow-scrolling:touch] lg:grid lg:grid-cols-5 lg:overflow-x-visible xl:grid-cols-9">
               <TabsTrigger
                 value="overview"
-                className="shrink-0 data-[state=active]:bg-background data-[state=active]:shadow-sm lg:min-w-0"
+                className="shrink-0 text-[#6c5a3d] data-[state=active]:bg-[#fffaf0] data-[state=active]:text-[#315f3b] data-[state=active]:shadow-sm lg:min-w-0"
               >
                 <Activity className="mr-2 h-4 w-4 shrink-0" />
                 Overview
               </TabsTrigger>
               <TabsTrigger
                 value="orders"
-                className="shrink-0 data-[state=active]:bg-background data-[state=active]:shadow-sm lg:min-w-0"
+                className="shrink-0 text-[#6c5a3d] data-[state=active]:bg-[#fffaf0] data-[state=active]:text-[#315f3b] data-[state=active]:shadow-sm lg:min-w-0"
               >
                 <ClipboardList className="mr-2 h-4 w-4 shrink-0" />
                 Orders
               </TabsTrigger>
               <TabsTrigger
                 value="users"
-                className="shrink-0 data-[state=active]:bg-background data-[state=active]:shadow-sm lg:min-w-0"
+                className="shrink-0 text-[#6c5a3d] data-[state=active]:bg-[#fffaf0] data-[state=active]:text-[#315f3b] data-[state=active]:shadow-sm lg:min-w-0"
               >
                 <Users className="mr-2 h-4 w-4 shrink-0" />
                 Users
               </TabsTrigger>
               <TabsTrigger
                 value="kyc"
-                className="shrink-0 data-[state=active]:bg-background data-[state=active]:shadow-sm lg:min-w-0"
+                className="shrink-0 text-[#6c5a3d] data-[state=active]:bg-[#fffaf0] data-[state=active]:text-[#315f3b] data-[state=active]:shadow-sm lg:min-w-0"
               >
                 <Shield className="mr-2 h-4 w-4 shrink-0" />
                 KYC
                 {pendingKYC > 0 && (
-                  <Badge className="ml-2 bg-warning text-warning-foreground">{pendingKYC}</Badge>
+                  <Badge className="ml-2 bg-[#fff4dd] text-[#9a6b12]">{pendingKYC}</Badge>
                 )}
               </TabsTrigger>
               <TabsTrigger
                 value="payouts"
-                className="shrink-0 data-[state=active]:bg-background data-[state=active]:shadow-sm lg:min-w-0"
+                className="shrink-0 text-[#6c5a3d] data-[state=active]:bg-[#fffaf0] data-[state=active]:text-[#315f3b] data-[state=active]:shadow-sm lg:min-w-0"
               >
                 <Wallet className="mr-2 h-4 w-4 shrink-0" />
                 Payouts
                 {pendingWithdrawals > 0 && (
-                  <Badge className="ml-2 bg-accent text-accent-foreground">{pendingWithdrawals}</Badge>
+                  <Badge className="ml-2 bg-[#f6e5dc] text-[#8a4f2a]">{pendingWithdrawals}</Badge>
                 )}
               </TabsTrigger>
               <TabsTrigger
                 value="listings"
-                className="shrink-0 data-[state=active]:bg-background data-[state=active]:shadow-sm lg:min-w-0"
+                className="shrink-0 text-[#6c5a3d] data-[state=active]:bg-[#fffaf0] data-[state=active]:text-[#315f3b] data-[state=active]:shadow-sm lg:min-w-0"
               >
                 <Package className="mr-2 h-4 w-4 shrink-0" />
                 Listings
               </TabsTrigger>
               <TabsTrigger
                 value="reviews"
-                className="shrink-0 data-[state=active]:bg-background data-[state=active]:shadow-sm lg:min-w-0"
+                className="shrink-0 text-[#6c5a3d] data-[state=active]:bg-[#fffaf0] data-[state=active]:text-[#315f3b] data-[state=active]:shadow-sm lg:min-w-0"
               >
                 <Star className="mr-2 h-4 w-4 shrink-0" />
                 Reviews
                 {pendingReviewsCount > 0 && (
-                  <Badge className="ml-2 bg-warning text-warning-foreground">{pendingReviewsCount}</Badge>
+                  <Badge className="ml-2 bg-[#fff4dd] text-[#9a6b12]">{pendingReviewsCount}</Badge>
                 )}
               </TabsTrigger>
               <TabsTrigger
                 value="support"
-                className="shrink-0 data-[state=active]:bg-background data-[state=active]:shadow-sm lg:min-w-0"
+                className="shrink-0 text-[#6c5a3d] data-[state=active]:bg-[#fffaf0] data-[state=active]:text-[#315f3b] data-[state=active]:shadow-sm lg:min-w-0"
               >
                 <MessageCircle className="mr-2 h-4 w-4 shrink-0" />
                 Support
                 {openSupportTickets > 0 && (
-                  <Badge className="ml-2 bg-accent text-accent-foreground">{openSupportTickets}</Badge>
+                  <Badge className="ml-2 bg-[#f6e5dc] text-[#8a4f2a]">{openSupportTickets}</Badge>
                 )}
               </TabsTrigger>
               <TabsTrigger
                 value="audit"
-                className="shrink-0 data-[state=active]:bg-background data-[state=active]:shadow-sm lg:min-w-0"
+                className="shrink-0 text-[#6c5a3d] data-[state=active]:bg-[#fffaf0] data-[state=active]:text-[#315f3b] data-[state=active]:shadow-sm lg:min-w-0"
               >
                 <History className="mr-2 h-4 w-4 shrink-0" />
                 Audit log
@@ -1702,13 +1702,13 @@ const AdminDashboard = () => {
                 }
               }}
             >
-              <DialogContent>
+              <DialogContent className="border-[#d7c7a8] bg-[#fffaf0]">
                 <DialogHeader>
                   <DialogTitle>Reject withdrawal</DialogTitle>
                 </DialogHeader>
                 <div className="space-y-2 py-2">
-                  <p className="text-sm text-muted-foreground">
-                    Farmer: <span className="font-medium text-foreground">{rejectTarget?.farmerName}</span> — ₹
+                  <p className="text-sm text-[#6f6552]">
+                    Farmer: <span className="font-medium text-[#2f3a2f]">{rejectTarget?.farmerName}</span> — ₹
                     {rejectTarget?.amount.toLocaleString('en-IN')}
                   </p>
                   <Label htmlFor="reject-reason">Reason (optional)</Label>
@@ -1718,14 +1718,15 @@ const AdminDashboard = () => {
                     value={rejectReason}
                     onChange={(e) => setRejectReason(e.target.value)}
                     rows={3}
+                    className="border-[#d7c7a8] bg-[#fffdf7] text-[#2f3a2f] placeholder:text-[#8b816f] focus-visible:ring-[#315f3b]"
                   />
                 </div>
                 <DialogFooter className="gap-2 sm:gap-0">
-                  <Button variant="outline" onClick={() => setRejectTarget(null)}>
+                  <Button variant="outline" className="border-[#d7c7a8] bg-[#fffdf7] text-[#315f3b] hover:bg-[#f3ebdd] hover:text-[#315f3b]" onClick={() => setRejectTarget(null)}>
                     Cancel
                   </Button>
                   <Button
-                    variant="destructive"
+                    className="bg-[#8a4f2a] text-[#fffaf0] hover:bg-[#784223]"
                     disabled={!rejectTarget || withdrawalActionId === rejectTarget.id}
                     onClick={() =>
                       rejectTarget &&
@@ -1751,14 +1752,14 @@ const AdminDashboard = () => {
                 }
               }}
             >
-              <DialogContent>
+              <DialogContent className="border-[#d7c7a8] bg-[#fffaf0]">
                 <DialogHeader>
                   <DialogTitle>Reject KYC</DialogTitle>
                 </DialogHeader>
                 <div className="space-y-2 py-2">
-                  <p className="text-sm text-muted-foreground">
+                  <p className="text-sm text-[#6f6552]">
                     Farmer:{' '}
-                    <span className="font-medium text-foreground">{kycRejectTarget?.name}</span>
+                    <span className="font-medium text-[#2f3a2f]">{kycRejectTarget?.name}</span>
                   </p>
                   <Label htmlFor="kyc-reject-reason">Reason (optional)</Label>
                   <Textarea
@@ -1767,11 +1768,13 @@ const AdminDashboard = () => {
                     value={kycRejectReason}
                     onChange={(e) => setKycRejectReason(e.target.value)}
                     rows={4}
+                    className="border-[#d7c7a8] bg-[#fffdf7] text-[#2f3a2f] placeholder:text-[#8b816f] focus-visible:ring-[#315f3b]"
                   />
                 </div>
                 <DialogFooter className="gap-2 sm:gap-0">
                   <Button
                     variant="outline"
+                    className="border-[#d7c7a8] bg-[#fffdf7] text-[#315f3b] hover:bg-[#f3ebdd] hover:text-[#315f3b]"
                     onClick={() => {
                       setKycRejectTarget(null);
                       setKycRejectReason('');
@@ -1780,7 +1783,7 @@ const AdminDashboard = () => {
                     Cancel
                   </Button>
                   <Button
-                    variant="destructive"
+                    className="bg-[#8a4f2a] text-[#fffaf0] hover:bg-[#784223]"
                     disabled={!kycRejectTarget || kycRejectSubmitting}
                     onClick={() => void handleKycRejectSubmit()}
                   >
@@ -1862,7 +1865,7 @@ const AdminDashboard = () => {
       >
         <SheetContent
           side="right"
-          className="flex w-full flex-col gap-0 overflow-y-auto p-0 sm:max-w-lg"
+          className="flex w-full flex-col gap-0 overflow-y-auto border-[#d7c7a8] bg-[#fffaf0] p-0 sm:max-w-lg"
         >
           {listingDrawerProduct ? (
             <>
@@ -1875,14 +1878,14 @@ const AdminDashboard = () => {
                     Product images, farmer details, and moderation actions.
                   </SheetDescription>
                   {listingDrawerProduct.nameHindi ? (
-                    <p className="text-base text-muted-foreground">{listingDrawerProduct.nameHindi}</p>
+                    <p className="text-base text-[#6f6552]">{listingDrawerProduct.nameHindi}</p>
                   ) : null}
                   <div className="flex flex-wrap items-center gap-2 pt-1">
                     <Badge
-                      variant="outline"
+                        variant="outline"
                       className={
                         listingDrawerProduct.status === 'active'
-                          ? 'border-success/50 bg-success/10 text-success'
+                          ? 'border-[#bfd2bf] bg-[#eaf5ec] text-[#315f3b]'
                           : ''
                       }
                     >
@@ -1907,7 +1910,7 @@ const AdminDashboard = () => {
                   const mainSrc = imgs[safeIdx] ?? imgs[0];
                   return (
                     <div className="space-y-2">
-                      <div className="overflow-hidden rounded-xl border bg-muted">
+                      <div className="overflow-hidden rounded-xl border border-[#d7c7a8] bg-[#f3ebdd]">
                         <img
                           src={mainSrc}
                           alt={listingDrawerProduct.name}
@@ -1927,7 +1930,7 @@ const AdminDashboard = () => {
                               type="button"
                               onClick={() => setListingDrawerImageIndex(i)}
                               className={`h-16 w-16 shrink-0 overflow-hidden rounded-md border-2 transition-colors ${
-                                i === safeIdx ? 'border-primary' : 'border-transparent opacity-80'
+                                i === safeIdx ? 'border-[#315f3b]' : 'border-transparent opacity-80'
                               }`}
                             >
                               <img
@@ -1956,36 +1959,36 @@ const AdminDashboard = () => {
                   <Users className="h-4 w-4" />
                   Farmer
                 </h3>
-                <div className="flex gap-4 rounded-xl border bg-muted/40 p-4">
+                <div className="flex gap-4 rounded-xl border border-[#e2d4b7] bg-[#fffdf7] p-4">
                   <img
                     src={
                       listingDrawerProduct.farmerAvatar ||
                       `https://ui-avatars.com/api/?name=${encodeURIComponent(listingDrawerProduct.farmerName)}`
                     }
                     alt=""
-                    className="h-16 w-16 rounded-full object-cover border-2 border-border shrink-0"
+                    className="h-16 w-16 shrink-0 rounded-full border-2 border-[#d7c7a8] object-cover"
                   />
                   <div className="min-w-0 flex-1 space-y-1 text-sm">
                     <p className="font-semibold text-base">{listingDrawerProduct.farmerName}</p>
-                    <p className="text-muted-foreground font-mono text-xs break-all">
+                    <p className="break-all font-mono text-xs text-[#6f6552]">
                       ID: {listingDrawerProduct.farmerId}
                     </p>
                     {listingDrawerProduct.farmerLocation ? (
-                      <p className="text-muted-foreground">{listingDrawerProduct.farmerLocation}</p>
+                      <p className="text-[#6f6552]">{listingDrawerProduct.farmerLocation}</p>
                     ) : null}
                     {listingDrawerProduct.farmerRating > 0 ? (
-                      <p className="text-muted-foreground flex items-center gap-1">
-                        <Star className="h-3.5 w-3.5 text-warning fill-warning shrink-0" />
+                      <p className="flex items-center gap-1 text-[#6f6552]">
+                        <Star className="h-3.5 w-3.5 shrink-0 fill-[#d89b2b] text-[#d89b2b]" />
                         {listingDrawerProduct.farmerRating} avg (approved reviews)
                       </p>
                     ) : (
-                      <p className="text-xs text-muted-foreground">No review average yet</p>
+                      <p className="text-xs text-[#6f6552]">No review average yet</p>
                     )}
                     {listingDrawerProduct.farmerPhone ? (
-                      <p className="text-muted-foreground">{listingDrawerProduct.farmerPhone}</p>
+                      <p className="text-[#6f6552]">{listingDrawerProduct.farmerPhone}</p>
                     ) : null}
                     {listingDrawerProduct.farmerEmail ? (
-                      <p className="text-muted-foreground break-all">{listingDrawerProduct.farmerEmail}</p>
+                      <p className="break-all text-[#6f6552]">{listingDrawerProduct.farmerEmail}</p>
                     ) : null}
                     {listingDrawerProduct.farmerKycStatus ? (
                       <Badge variant="outline" className="capitalize mt-1">
@@ -2000,26 +2003,26 @@ const AdminDashboard = () => {
 
               <div className="space-y-3 p-6">
                 <h3 className="text-sm font-semibold">Listing</h3>
-                <p className="text-sm text-muted-foreground leading-relaxed whitespace-pre-wrap">
+                <p className="whitespace-pre-wrap text-sm leading-relaxed text-[#6f6552]">
                   {listingDrawerProduct.description || 'No description.'}
                 </p>
                 <dl className="grid grid-cols-2 gap-x-4 gap-y-2 text-sm">
-                  <dt className="text-muted-foreground">Price</dt>
+                  <dt className="text-[#6f6552]">Price</dt>
                   <dd className="font-medium">
                     ₹{listingDrawerProduct.price}/{listingDrawerProduct.unit}
                   </dd>
-                  <dt className="text-muted-foreground">Available</dt>
+                  <dt className="text-[#6f6552]">Available</dt>
                   <dd className="font-medium">{listingDrawerProduct.availableQuantity}</dd>
-                  <dt className="text-muted-foreground">Min order</dt>
+                  <dt className="text-[#6f6552]">Min order</dt>
                   <dd className="font-medium">{listingDrawerProduct.minOrderQuantity}</dd>
-                  <dt className="text-muted-foreground">Category</dt>
+                  <dt className="text-[#6f6552]">Category</dt>
                   <dd className="font-medium capitalize">
                     {String(listingDrawerProduct.category).replace(/_/g, ' ')}
                   </dd>
-                  <dt className="text-muted-foreground">Views</dt>
+                  <dt className="text-[#6f6552]">Views</dt>
                   <dd className="font-medium">{listingDrawerProduct.views}</dd>
                 </dl>
-                <Button variant="outline" size="sm" className="w-full sm:w-auto" asChild>
+                <Button variant="outline" size="sm" className="w-full border-[#d7c7a8] bg-[#fffdf7] text-[#315f3b] hover:bg-[#f3ebdd] hover:text-[#315f3b] sm:w-auto" asChild>
                   <Link to={`/product/${listingDrawerProduct.id}`} target="_blank" rel="noreferrer">
                     <ExternalLink className="w-4 h-4 mr-2" />
                     Open public product page
@@ -2029,8 +2032,8 @@ const AdminDashboard = () => {
 
               <Separator />
 
-              <SheetFooter className="flex-col gap-2 border-t bg-muted/30 p-6 sm:flex-col">
-                <p className="w-full text-left text-xs text-muted-foreground">
+              <SheetFooter className="flex-col gap-2 border-t border-[#e2d4b7] bg-[#f6eddc] p-6 sm:flex-col">
+                <p className="w-full text-left text-xs text-[#6f6552]">
                   Suspend hides the listing from buyers. Remove deletes it permanently.
                 </p>
                 <div className="flex w-full flex-col gap-2 sm:flex-row sm:flex-wrap">
@@ -2046,7 +2049,7 @@ const AdminDashboard = () => {
                   ) : (
                     <Button
                       variant="secondary"
-                      className="flex-1 sm:flex-none"
+                      className="flex-1 bg-[#f3ebdd] text-[#315f3b] hover:bg-[#eadfc9] sm:flex-none"
                       onClick={() =>
                         void handleListingAction(listingDrawerProduct.id, 'suspend')
                       }
@@ -2055,8 +2058,7 @@ const AdminDashboard = () => {
                     </Button>
                   )}
                   <Button
-                    variant="destructive"
-                    className="flex-1 sm:flex-none"
+                    className="flex-1 bg-[#8a4f2a] text-[#fffaf0] hover:bg-[#784223] sm:flex-none"
                     onClick={() =>
                       void handleListingAction(listingDrawerProduct.id, 'remove')
                     }
@@ -2082,26 +2084,26 @@ const AdminDashboard = () => {
       >
         <SheetContent
           side="right"
-          className="flex w-full flex-col gap-0 overflow-y-auto p-0 sm:max-w-lg"
+          className="flex w-full flex-col gap-0 overflow-y-auto border-[#d7c7a8] bg-[#fffaf0] p-0 sm:max-w-lg"
         >
           <div className="space-y-4 p-6 pb-2">
             <SheetHeader className="space-y-1 text-left">
               <SheetTitle className="pr-8">
                 Order #{adminOrderPreviewDetail?.id.slice(-8) ?? adminOrderPreviewId?.slice(-8) ?? '—'}
               </SheetTitle>
-              <SheetDescription>
+              <SheetDescription className="text-[#6f6552]">
                 Quick view — timeline and summary. Use full page to change status or payment.
               </SheetDescription>
             </SheetHeader>
             {adminOrderPreviewLoading && (
-              <div className="flex items-center gap-2 text-sm text-muted-foreground py-6">
+              <div className="flex items-center gap-2 py-6 text-sm text-[#6f6552]">
                 <Loader2 className="h-4 w-4 animate-spin shrink-0" />
                 Loading order…
               </div>
             )}
             {!adminOrderPreviewLoading && adminOrderPreviewDetail && (
               <div className="space-y-3 text-sm">
-                <p className="text-muted-foreground">
+                <p className="text-[#6f6552]">
                   Placed{' '}
                   <span className="text-foreground font-medium">
                     {new Date(adminOrderPreviewDetail.createdAt).toLocaleString('en-IN', {
@@ -2113,12 +2115,12 @@ const AdminDashboard = () => {
                 <div>
                   <p className="font-medium text-foreground">
                     {adminOrderPreviewDetail.buyerName}
-                    <span className="text-muted-foreground font-normal mx-1">→</span>
+                    <span className="mx-1 font-normal text-[#6f6552]">→</span>
                     {adminOrderPreviewDetail.farmerName}
                   </p>
                 </div>
-                <div className="rounded-lg border bg-muted/40 p-3 space-y-2">
-                  <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">
+                <div className="space-y-2 rounded-lg border border-[#e2d4b7] bg-[#fffdf7] p-3">
+                  <p className="text-xs font-semibold uppercase tracking-wide text-[#6f6552]">
                     Line items
                   </p>
                   <ul className="space-y-2">
@@ -2133,18 +2135,18 @@ const AdminDashboard = () => {
                   </ul>
                   <Separator />
                   <div className="flex justify-between text-sm">
-                    <span className="text-muted-foreground">Subtotal</span>
+                    <span className="text-[#6f6552]">Subtotal</span>
                     <span className="font-semibold">{formatInrAdmin(adminOrderPreviewDetail.totalAmount)}</span>
                   </div>
                   {(adminOrderPreviewDetail.platformFee ?? 0) > 0 && (
-                    <div className="flex justify-between text-xs text-muted-foreground">
+                    <div className="flex justify-between text-xs text-[#6f6552]">
                       <span>Platform fee</span>
                       <span>{formatInrAdmin(adminOrderPreviewDetail.platformFee ?? 0)}</span>
                     </div>
                   )}
-                  <div className="flex justify-between text-sm pt-1 border-t border-border">
+                  <div className="flex justify-between border-t border-[#e2d4b7] pt-1 text-sm">
                     <span className="font-medium">Buyer pays</span>
-                    <span className="font-bold text-primary">
+                    <span className="font-bold text-[#315f3b]">
                       {formatInrAdmin(
                         adminOrderPreviewDetail.totalAmount + (adminOrderPreviewDetail.platformFee ?? 0)
                       )}
@@ -2152,7 +2154,7 @@ const AdminDashboard = () => {
                   </div>
                 </div>
                 <div>
-                  <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-1">
+                  <p className="mb-1 text-xs font-semibold uppercase tracking-wide text-[#6f6552]">
                     Delivery
                   </p>
                   <p className="text-sm whitespace-pre-wrap text-foreground">
@@ -2163,10 +2165,10 @@ const AdminDashboard = () => {
                   <Badge
                     className={
                       adminOrderPreviewDetail.status === 'delivered'
-                        ? 'bg-success/10 text-success'
+                        ? 'bg-[#eaf5ec] text-[#315f3b]'
                         : adminOrderPreviewDetail.status === 'cancelled'
-                          ? 'bg-destructive/10 text-destructive'
-                          : 'bg-warning/10 text-warning'
+                          ? 'bg-[#f6e5dc] text-[#8a4f2a]'
+                          : 'bg-[#fff4dd] text-[#9a6b12]'
                     }
                   >
                     {adminOrderPreviewDetail.status}
@@ -2191,8 +2193,8 @@ const AdminDashboard = () => {
                   paymentStatus={adminOrderPreviewDetail.paymentStatus}
                 />
               </div>
-              <SheetFooter className="flex-col gap-2 border-t bg-muted/30 p-6 sm:flex-col">
-                <Button className="w-full" asChild>
+              <SheetFooter className="flex-col gap-2 border-t border-[#e2d4b7] bg-[#f6eddc] p-6 sm:flex-col">
+                <Button className="w-full border border-[#b68222] bg-[#d89b2b] text-[#2f2416] hover:bg-[#c88d22]" asChild>
                   <Link to={`/admin/orders/${adminOrderPreviewDetail.id}`}>
                     <ExternalLink className="w-4 h-4 mr-2" />
                     Open full page (actions)
@@ -2217,14 +2219,14 @@ const AdminDashboard = () => {
       >
         <SheetContent
           side="right"
-          className="flex w-full flex-col gap-0 overflow-y-auto p-0 sm:max-w-lg"
+          className="flex w-full flex-col gap-0 overflow-y-auto border-[#d7c7a8] bg-[#fffaf0] p-0 sm:max-w-lg"
         >
           <div className="space-y-4 p-6 pb-2">
             <SheetHeader className="space-y-1 text-left">
               <SheetTitle className="pr-8 leading-tight">
                 {supportSheetTicket?.subject || 'Support ticket'}
               </SheetTitle>
-              <SheetDescription className="text-left">
+              <SheetDescription className="text-left text-[#6f6552]">
                 {supportSheetTicket?.id ? (
                   <span className="font-mono text-xs">#{supportSheetTicket.id.slice(-12)}</span>
                 ) : (
@@ -2234,7 +2236,7 @@ const AdminDashboard = () => {
             </SheetHeader>
 
             {supportSheetLoading && (
-              <div className="flex items-center gap-2 text-sm text-muted-foreground py-6">
+              <div className="flex items-center gap-2 py-6 text-sm text-[#6f6552]">
                 <Loader2 className="h-4 w-4 animate-spin shrink-0" />
                 Loading ticket…
               </div>
@@ -2243,13 +2245,13 @@ const AdminDashboard = () => {
             {!supportSheetLoading && supportSheetTicket && (
               <div className="space-y-4 text-sm">
                 <div className="flex flex-wrap items-center gap-2">
-                  <Label className="text-xs text-muted-foreground shrink-0">Status</Label>
+                  <Label className="shrink-0 text-xs text-[#6f6552]">Status</Label>
                   <Select
                     value={supportSheetTicket.status}
                     disabled={supportStatusPatching}
                     onValueChange={(v) => void handleSupportTicketStatusChange(v)}
                   >
-                    <SelectTrigger className="h-9 w-full min-w-0 max-w-[220px] sm:w-[200px]">
+                    <SelectTrigger className="h-9 w-full min-w-0 max-w-[220px] border-[#d7c7a8] bg-[#fffdf7] text-[#2f3a2f] sm:w-[200px]">
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
@@ -2259,31 +2261,31 @@ const AdminDashboard = () => {
                       <SelectItem value="closed">Closed</SelectItem>
                     </SelectContent>
                   </Select>
-                  {supportStatusPatching && <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />}
+                  {supportStatusPatching && <Loader2 className="h-4 w-4 animate-spin text-[#6f6552]" />}
                 </div>
 
-                <div className="rounded-lg border bg-muted/30 p-3 space-y-1">
-                  <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">Requester</p>
+                <div className="space-y-1 rounded-lg border border-[#e2d4b7] bg-[#fffdf7] p-3">
+                  <p className="text-xs font-semibold uppercase tracking-wide text-[#6f6552]">Requester</p>
                   {supportSheetTicket.user ? (
                     <>
                       <p className="font-medium">{supportSheetTicket.user.name || 'User'}</p>
-                      <p className="text-xs text-muted-foreground break-all">{supportSheetTicket.user.email}</p>
+                      <p className="break-all text-xs text-[#6f6552]">{supportSheetTicket.user.email}</p>
                       {supportSheetTicket.user.phone ? (
-                        <p className="text-xs text-muted-foreground">{supportSheetTicket.user.phone}</p>
+                        <p className="text-xs text-[#6f6552]">{supportSheetTicket.user.phone}</p>
                       ) : null}
                     </>
                   ) : supportSheetTicket.guestEmail ? (
                     <p className="text-sm break-all">{supportSheetTicket.guestEmail}</p>
                   ) : (
-                    <p className="text-muted-foreground">Guest (no email on file)</p>
+                    <p className="text-[#6f6552]">Guest (no email on file)</p>
                   )}
-                  <p className="text-[11px] text-muted-foreground pt-1">
+                  <p className="pt-1 text-[11px] text-[#6f6552]">
                     Email to inbox: {supportSheetTicket.emailNotified ? 'Notified on create' : 'Not sent (mail off or failed)'}
                   </p>
                 </div>
 
                 <div>
-                  <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-1">
+                  <p className="mb-1 text-xs font-semibold uppercase tracking-wide text-[#6f6552]">
                     Original message
                   </p>
                   <p className="whitespace-pre-wrap text-foreground">{supportSheetTicket.message}</p>
@@ -2292,19 +2294,19 @@ const AdminDashboard = () => {
                 <Separator />
 
                 <div className="space-y-3">
-                  <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">Thread</p>
+                  <p className="text-xs font-semibold uppercase tracking-wide text-[#6f6552]">Thread</p>
                   {supportSheetTicket.replies.length === 0 ? (
-                    <p className="text-muted-foreground text-sm">No replies yet.</p>
+                    <p className="text-sm text-[#6f6552]">No replies yet.</p>
                   ) : (
                     <ul className="space-y-3">
                       {supportSheetTicket.replies.map((r) => (
                         <li
                           key={r.id}
                           className={`rounded-lg border p-3 text-sm ${
-                            r.fromRole === 'admin' ? 'bg-primary/5 border-primary/20' : 'bg-background'
+                            r.fromRole === 'admin' ? 'border-[#d7c7a8] bg-[#f7f2e8]' : 'border-[#e2d4b7] bg-[#fffdf7]'
                           }`}
                         >
-                          <div className="flex justify-between gap-2 text-xs text-muted-foreground mb-1">
+                          <div className="mb-1 flex justify-between gap-2 text-xs text-[#6f6552]">
                             <span className="font-medium text-foreground">
                               {r.authorName || (r.fromRole === 'admin' ? 'Admin' : 'User')}
                             </span>
@@ -2341,9 +2343,9 @@ const AdminDashboard = () => {
                   className="resize-none"
                 />
               </div>
-              <SheetFooter className="border-t bg-muted/30 p-6 sm:flex-col gap-2">
+              <SheetFooter className="gap-2 border-t border-[#e2d4b7] bg-[#f6eddc] p-6 sm:flex-col">
                 <Button
-                  className="w-full"
+                  className="w-full border border-[#b68222] bg-[#d89b2b] text-[#2f2416] hover:bg-[#c88d22]"
                   disabled={supportReplySubmitting || !supportReplyText.trim()}
                   onClick={() => void handleSupportTicketReply()}
                 >

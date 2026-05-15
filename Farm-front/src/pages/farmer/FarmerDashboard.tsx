@@ -422,13 +422,13 @@ const FarmerDashboard = () => {
 
   return (
     <Layout>
-      <div className="min-h-screen min-w-0 overflow-x-hidden bg-gradient-to-b from-green-50/50 to-background dark:from-background">
+      <div className="min-h-screen min-w-0 overflow-x-hidden bg-[linear-gradient(rgba(251,247,235,0.97),rgba(251,247,235,0.97)),linear-gradient(rgba(138,79,42,0.07)_1px,transparent_1px),linear-gradient(90deg,rgba(138,79,42,0.07)_1px,transparent_1px)] bg-[size:auto,24px_24px,24px_24px]">
         <div className="container mx-auto min-w-0 px-3 py-6 sm:px-4 sm:py-8">
           {user ? <FarmerKycAccountBanner user={user} currentLanguage={currentLanguage} /> : null}
 
           {!initialLoading ? (
-            <div className="mb-6 flex flex-col gap-3 rounded-xl border border-primary/20 bg-primary/5 px-4 py-3 md:hidden">
-              <p className={`text-sm text-muted-foreground ${currentLanguage === 'hi' ? 'font-hindi' : ''}`}>
+            <div className="mb-6 flex flex-col gap-3 rounded-xl border border-[#d7c7a8] bg-[#fffaf0] px-4 py-3 shadow-[0_10px_26px_rgba(95,70,40,0.06)] md:hidden">
+              <p className={`text-sm text-[#6f6552] ${currentLanguage === 'hi' ? 'font-hindi' : ''}`}>
                 {currentLanguage === 'en'
                   ? 'Pull down from the top of the page to refresh, or tap Refresh.'
                   : 'पेज के ऊपर से नीचे खींचकर रिफ्रेश करें, या रिफ्रेश दबाएँ।'}
@@ -436,7 +436,7 @@ const FarmerDashboard = () => {
               <Button
                 type="button"
                 variant="secondary"
-                className="w-full gap-2 sm:w-auto"
+                className="w-full gap-2 border border-[#c8d8cb] bg-[#eef5ee] text-[#315f3b] hover:bg-[#e3eee4] sm:w-auto"
                 onClick={() => void loadDashboard()}
                 disabled={isRefreshing}
               >
@@ -454,9 +454,9 @@ const FarmerDashboard = () => {
           <AnimateOnScroll animation="fade-in">
             <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-8">
               <div>
-                <div className="inline-flex items-center gap-2 bg-primary/10 px-4 py-2 rounded-full mb-4">
-                  <Calendar className="w-4 h-4 text-primary" />
-                  <span className="text-sm font-semibold text-primary">
+                <div className="mb-4 inline-flex items-center gap-2 rounded-full border border-[#d7c7a8] bg-[#fffaf0] px-4 py-2">
+                  <Calendar className="w-4 h-4 text-[#315f3b]" />
+                  <span className="text-sm font-semibold text-[#315f3b]">
                     {new Date().toLocaleDateString(currentLanguage === 'en' ? 'en-US' : 'hi-IN', { 
                       weekday: 'long', 
                       year: 'numeric', 
@@ -465,13 +465,13 @@ const FarmerDashboard = () => {
                     })}
                   </span>
                 </div>
-                <h1 className={`text-4xl md:text-5xl font-extrabold text-foreground mb-2 ${currentLanguage === 'hi' ? 'font-hindi' : ''}`}>
+                <h1 className={`mb-2 text-4xl font-extrabold text-[#2f3a2f] md:text-5xl ${currentLanguage === 'hi' ? 'font-hindi' : ''}`}>
                   {currentLanguage === 'en' ? `Welcome back, ${user?.name?.split(' ')[0]}!` : `वापसी पर स्वागत है, ${user?.name?.split(' ')[0]}!`}
                 </h1>
-                <p className={`text-lg text-muted-foreground ${currentLanguage === 'hi' ? 'font-hindi' : ''}`}>
+                <p className={`text-lg text-[#6f6552] ${currentLanguage === 'hi' ? 'font-hindi' : ''}`}>
                   {currentLanguage === 'en' ? "Here's your farm overview and recent activity" : 'यहाँ आपका खेत अवलोकन और हाल की गतिविधि है'}
                 </p>
-                <p className="text-sm text-green-700 dark:text-green-400 font-medium mt-2">
+                <p className="mt-2 text-sm font-medium text-[#8a4f2a]">
                   {currentLanguage === 'en' ? 'Farmer Workspace' : 'किसान कार्यक्षेत्र'}
                 </p>
               </div>
@@ -480,14 +480,14 @@ const FarmerDashboard = () => {
                   type="button"
                   variant="outline"
                   size="icon"
-                  className="h-14 w-14 shrink-0 rounded-xl border-2 shadow-sm md:border"
+                  className="h-14 w-14 shrink-0 rounded-xl border-[#d7c7a8] bg-[#fffaf0] text-[#315f3b] shadow-sm hover:bg-[#f6eddc] hover:text-[#315f3b] md:border"
                   onClick={() => void loadDashboard()}
                   disabled={isRefreshing}
                   title={currentLanguage === 'en' ? 'Refresh dashboard' : 'डैशबोर्ड रिफ्रेश'}
                 >
                   <RefreshCw className={`h-5 w-5 ${isRefreshing ? 'animate-spin' : ''}`} />
                 </Button>
-                <Button variant="outline" className="h-14 gap-2 rounded-xl border-2 shadow-sm px-4" asChild>
+                <Button variant="outline" className="h-14 gap-2 rounded-xl border-[#d7c7a8] bg-[#fffaf0] px-4 text-[#315f3b] shadow-sm hover:bg-[#f3ebdd] hover:text-[#315f3b]" asChild>
                   <Link to="/farmer/news">
                     <Newspaper className="h-5 w-5 shrink-0" />
                     <span className={currentLanguage === 'hi' ? 'font-hindi' : ''}>
@@ -496,7 +496,7 @@ const FarmerDashboard = () => {
                   </Link>
                 </Button>
                 <Link to="/farmer/listings">
-                  <Button className="btn-primary-gradient text-lg px-8 py-7 hover:scale-105 transition-transform shadow-lg">
+                  <Button className="border border-[#b68222] bg-[#d89b2b] px-8 py-7 text-lg text-[#2f2416] shadow-lg transition-transform hover:scale-105 hover:bg-[#c88d22]">
                     <Plus className="w-5 h-5 mr-2" />
                     {currentLanguage === 'en' ? 'Add New Listing' : 'नई लिस्टिंग जोड़ें'}
                     <ArrowRight className="w-5 h-5 ml-2" />
@@ -508,10 +508,10 @@ const FarmerDashboard = () => {
 
           {farmerProducts.length === 0 ? (
             <AnimateOnScroll animation="slide-up" delay={0.05}>
-              <Card className="mb-10 border-2 border-dashed border-primary/35 bg-primary/[0.04] shadow-sm">
+              <Card className="mb-10 border-2 border-dashed border-[#d7c7a8] bg-[#fffaf0] shadow-sm">
                 <CardHeader>
                   <CardTitle className={`flex items-center gap-2 ${currentLanguage === 'hi' ? 'font-hindi' : ''}`}>
-                    <Package className="h-5 w-5 text-primary" />
+                    <Package className="h-5 w-5 text-[#315f3b]" />
                     {currentLanguage === 'en' ? 'No listings yet' : 'अभी कोई लिस्टिंग नहीं'}
                   </CardTitle>
                   <CardDescription className={currentLanguage === 'hi' ? 'font-hindi' : ''}>
@@ -521,13 +521,13 @@ const FarmerDashboard = () => {
                   </CardDescription>
                 </CardHeader>
                 <CardContent className="flex flex-col gap-3 sm:flex-row sm:flex-wrap">
-                  <Button className="btn-primary-gradient gap-2" asChild>
+                  <Button className="gap-2 border border-[#b68222] bg-[#d89b2b] text-[#2f2416] hover:bg-[#c88d22]" asChild>
                     <Link to="/farmer/listings?coach=1">
                       <Plus className="h-4 w-4" />
                       {currentLanguage === 'en' ? 'Add listing' : 'लिस्टिंग जोड़ें'}
                     </Link>
                   </Button>
-                  <Button type="button" variant="outline" className="gap-2" onClick={() => copyShopShareLink()}>
+                  <Button type="button" variant="outline" className="gap-2 border-[#d7c7a8] bg-[#fffdf7] text-[#315f3b] hover:bg-[#f3ebdd] hover:text-[#315f3b]" onClick={() => copyShopShareLink()}>
                     <Share2 className="h-4 w-4" />
                     {currentLanguage === 'en' ? 'Copy shop link' : 'दुकान का लिंक कॉपी करें'}
                   </Button>
@@ -594,41 +594,41 @@ const FarmerDashboard = () => {
             <AnimateOnScroll animation="slide-up" delay={0.12}>
               <Link
                 to="/farmer/earnings"
-                className="mb-6 flex items-center gap-3 rounded-xl border border-border/80 bg-card/90 px-4 py-3 text-sm shadow-sm transition-colors hover:border-primary/35 hover:bg-primary/[0.03] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                className="mb-6 flex items-center gap-3 rounded-xl border border-[#d7c7a8] bg-[#fffaf0] px-4 py-3 text-sm shadow-sm transition-colors hover:border-[#315f3b]/35 hover:bg-[#f5eee0] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#315f3b] focus-visible:ring-offset-2"
               >
-                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-accent/15 text-accent">
+                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-[#fff0cc] text-[#d89b2b]">
                   <Wallet className="h-5 w-5" aria-hidden />
                 </div>
                 <p
-                  className={`min-w-0 flex-1 leading-snug text-muted-foreground ${currentLanguage === 'hi' ? 'font-hindi' : ''}`}
+                  className={`min-w-0 flex-1 leading-snug text-[#6f6552] ${currentLanguage === 'hi' ? 'font-hindi' : ''}`}
                 >
                   {currentLanguage === 'en' ? (
                     <>
-                      <span className="font-medium text-foreground">Available balance</span>{' '}
-                      <span className="tabular-nums text-foreground">{formatPrice(payoutSnapshot.availableBalance)}</span>
-                      <span className="mx-1.5 text-border">·</span>
-                      <span className="font-medium text-foreground">Pending withdrawal</span>{' '}
-                      <span className="tabular-nums text-foreground">{formatPrice(payoutSnapshot.pendingWithdrawal)}</span>
+                      <span className="font-medium text-[#2f3a2f]">Available balance</span>{' '}
+                      <span className="tabular-nums text-[#2f3a2f]">{formatPrice(payoutSnapshot.availableBalance)}</span>
+                      <span className="mx-1.5 text-[#c4b79f]">·</span>
+                      <span className="font-medium text-[#2f3a2f]">Pending withdrawal</span>{' '}
+                      <span className="tabular-nums text-[#2f3a2f]">{formatPrice(payoutSnapshot.pendingWithdrawal)}</span>
                     </>
                   ) : (
                     <>
-                      <span className="font-medium text-foreground">उपलब्ध शेष</span>{' '}
-                      <span className="tabular-nums text-foreground">{formatPrice(payoutSnapshot.availableBalance)}</span>
-                      <span className="mx-1.5 text-border">·</span>
-                      <span className="font-medium text-foreground">लंबित निकासी</span>{' '}
-                      <span className="tabular-nums text-foreground">{formatPrice(payoutSnapshot.pendingWithdrawal)}</span>
+                      <span className="font-medium text-[#2f3a2f]">उपलब्ध शेष</span>{' '}
+                      <span className="tabular-nums text-[#2f3a2f]">{formatPrice(payoutSnapshot.availableBalance)}</span>
+                      <span className="mx-1.5 text-[#c4b79f]">·</span>
+                      <span className="font-medium text-[#2f3a2f]">लंबित निकासी</span>{' '}
+                      <span className="tabular-nums text-[#2f3a2f]">{formatPrice(payoutSnapshot.pendingWithdrawal)}</span>
                     </>
                   )}
                 </p>
-                <ArrowRight className="h-5 w-5 shrink-0 text-muted-foreground" aria-hidden />
+                <ArrowRight className="h-5 w-5 shrink-0 text-[#6f6552]" aria-hidden />
               </Link>
             </AnimateOnScroll>
           ) : null}
 
           {/* Farmer Operations Board */}
           <AnimateOnScroll animation="slide-up" delay={0.15}>
-            <Card className="border-2 border-green-200/70 dark:border-green-900/40 shadow-lg mb-10">
-              <CardHeader className="bg-gradient-to-r from-green-500/10 to-emerald-500/10 border-b">
+            <Card className="mb-10 border-2 border-[#d7c7a8] bg-[#fffaf0] shadow-[0_18px_42px_rgba(95,70,40,0.08)]">
+              <CardHeader className="border-b border-[#e2d4b7] bg-[#f7eedf]">
                 <CardTitle>
                   {currentLanguage === 'en' ? "Today's Farm Operations" : 'आज के कृषि कार्य'}
                 </CardTitle>
@@ -646,19 +646,19 @@ const FarmerDashboard = () => {
                       ? `Need confirmation, ${pendingOrderCount} orders. Open orders filtered by pending.`
                       : `पुष्टि लंबित, ${pendingOrderCount} ऑर्डर। लंबित ऑर्डर सूची खोलें।`
                   }
-                  className="group relative flex flex-col rounded-xl border bg-card p-4 text-left shadow-sm transition-all hover:border-primary/45 hover:bg-primary/[0.04] hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                  className="group relative flex flex-col rounded-xl border border-[#d7c7a8] bg-[#fffdf7] p-4 text-left shadow-sm transition-all hover:border-[#315f3b]/45 hover:bg-[#f5eee0] hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#315f3b] focus-visible:ring-offset-2"
                 >
                   <div className="flex items-start justify-between gap-2">
                     <div className="min-w-0">
-                      <p className="text-sm text-muted-foreground">
+                      <p className="text-sm text-[#6f6552]">
                         {currentLanguage === 'en' ? 'Need confirmation' : 'पुष्टि लंबित'}
                       </p>
-                      <p className="text-2xl font-bold mt-1 tabular-nums">
+                      <p className="mt-1 text-2xl font-bold tabular-nums text-[#2f3a2f]">
                         {pendingOrderCount}
                       </p>
                     </div>
                     <ArrowRight
-                      className="mt-0.5 h-5 w-5 shrink-0 text-muted-foreground transition-transform group-hover:translate-x-0.5 group-hover:text-primary"
+                      className="mt-0.5 h-5 w-5 shrink-0 text-[#6f6552] transition-transform group-hover:translate-x-0.5 group-hover:text-[#315f3b]"
                       aria-hidden
                     />
                   </div>
@@ -670,19 +670,19 @@ const FarmerDashboard = () => {
                       ? `In processing, ${processingOrderCount} orders. Open orders filtered by processing.`
                       : `प्रोसेसिंग में, ${processingOrderCount} ऑर्डर। प्रोसेसिंग ऑर्डर सूची खोलें।`
                   }
-                  className="group relative flex flex-col rounded-xl border bg-card p-4 text-left shadow-sm transition-all hover:border-primary/45 hover:bg-primary/[0.04] hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                  className="group relative flex flex-col rounded-xl border border-[#d7c7a8] bg-[#fffdf7] p-4 text-left shadow-sm transition-all hover:border-[#315f3b]/45 hover:bg-[#f5eee0] hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#315f3b] focus-visible:ring-offset-2"
                 >
                   <div className="flex items-start justify-between gap-2">
                     <div className="min-w-0">
-                      <p className="text-sm text-muted-foreground">
+                      <p className="text-sm text-[#6f6552]">
                         {currentLanguage === 'en' ? 'In processing' : 'प्रोसेसिंग में'}
                       </p>
-                      <p className="text-2xl font-bold mt-1 tabular-nums">
+                      <p className="mt-1 text-2xl font-bold tabular-nums text-[#2f3a2f]">
                         {processingOrderCount}
                       </p>
                     </div>
                     <ArrowRight
-                      className="mt-0.5 h-5 w-5 shrink-0 text-muted-foreground transition-transform group-hover:translate-x-0.5 group-hover:text-primary"
+                      className="mt-0.5 h-5 w-5 shrink-0 text-[#6f6552] transition-transform group-hover:translate-x-0.5 group-hover:text-[#315f3b]"
                       aria-hidden
                     />
                   </div>
@@ -694,19 +694,19 @@ const FarmerDashboard = () => {
                       ? `Low stock listings, ${lowStockListingCount} items. Open listings sorted by quantity, lowest first.`
                       : `कम स्टॉक लिस्टिंग, ${lowStockListingCount}। मात्रा के अनुसार लिस्टिंग खोलें।`
                   }
-                  className="group relative flex flex-col rounded-xl border bg-card p-4 text-left shadow-sm transition-all hover:border-primary/45 hover:bg-primary/[0.04] hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                  className="group relative flex flex-col rounded-xl border border-[#d7c7a8] bg-[#fffdf7] p-4 text-left shadow-sm transition-all hover:border-[#315f3b]/45 hover:bg-[#f5eee0] hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#315f3b] focus-visible:ring-offset-2"
                 >
                   <div className="flex items-start justify-between gap-2">
                     <div className="min-w-0">
-                      <p className="text-sm text-muted-foreground">
+                      <p className="text-sm text-[#6f6552]">
                         {currentLanguage === 'en' ? 'Low stock listings' : 'कम स्टॉक लिस्टिंग'}
                       </p>
-                      <p className="text-2xl font-bold mt-1 tabular-nums">
+                      <p className="mt-1 text-2xl font-bold tabular-nums text-[#2f3a2f]">
                         {lowStockListingCount}
                       </p>
                     </div>
                     <ArrowRight
-                      className="mt-0.5 h-5 w-5 shrink-0 text-muted-foreground transition-transform group-hover:translate-x-0.5 group-hover:text-primary"
+                      className="mt-0.5 h-5 w-5 shrink-0 text-[#6f6552] transition-transform group-hover:translate-x-0.5 group-hover:text-[#315f3b]"
                       aria-hidden
                     />
                   </div>
@@ -717,10 +717,10 @@ const FarmerDashboard = () => {
 
           {/* Quick Actions */}
           <AnimateOnScroll animation="slide-up" delay={0.2}>
-            <Card className="border-2 shadow-lg mb-10">
-              <CardHeader className="bg-gradient-to-r from-primary/10 to-secondary/10 border-b">
+            <Card className="mb-10 border-2 border-[#d7c7a8] bg-[#fffaf0] shadow-[0_18px_42px_rgba(95,70,40,0.08)]">
+              <CardHeader className="border-b border-[#e2d4b7] bg-[#f7eedf]">
                 <CardTitle className="flex items-center gap-2">
-                  <Sparkles className="w-5 h-5 text-primary" />
+                  <Sparkles className="w-5 h-5 text-[#315f3b]" />
                   {currentLanguage === 'en' ? 'Quick Actions' : 'त्वरित कार्य'}
                 </CardTitle>
                 <CardDescription>
@@ -735,29 +735,30 @@ const FarmerDashboard = () => {
                   className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-7 gap-4"
                 >
                   {[
-                    { icon: Package, label: currentLanguage === 'en' ? 'My Listings' : 'मेरी लिस्टिंग', path: '/farmer/listings', color: 'from-primary/20 to-primary/10' },
+                    { icon: Package, label: currentLanguage === 'en' ? 'My Listings' : 'मेरी लिस्टिंग', path: '/farmer/listings', color: 'from-[#dfeadc] to-[#eef5ee]', iconColor: 'text-[#315f3b]' },
                     {
                       icon: Sparkles,
                       label: currentLanguage === 'en' ? 'AI listing help' : 'AI लिस्टिंग मदद',
                       path: '/farmer/listings?coach=1',
-                      color: 'from-violet-500/25 to-violet-500/10',
+                      color: 'from-[#efe5d2] to-[#fbf3e6]',
+                      iconColor: 'text-[#6c5a3d]',
                     },
-                    { icon: ShoppingCart, label: currentLanguage === 'en' ? 'Orders' : 'ऑर्डर', path: '/farmer/orders', color: 'from-success/20 to-success/10' },
-                    { icon: Wallet, label: currentLanguage === 'en' ? 'Earnings' : 'कमाई', path: '/farmer/earnings', color: 'from-accent/20 to-accent/10' },
-                    { icon: BarChart3, label: currentLanguage === 'en' ? 'Analytics' : 'विश्लेषण', path: '/farmer/analytics', color: 'from-secondary/20 to-secondary/10' },
-                    { icon: MessageCircle, label: currentLanguage === 'en' ? 'Messages' : 'संदेश', path: '/farmer/chats', badge: unreadChatCount, color: 'from-purple-500/20 to-purple-500/10' },
-                    { icon: Star, label: currentLanguage === 'en' ? 'Reviews' : 'समीक्षाएं', path: '/farmer/reviews', color: 'from-warning/20 to-warning/10' },
+                    { icon: ShoppingCart, label: currentLanguage === 'en' ? 'Orders' : 'ऑर्डर', path: '/farmer/orders', color: 'from-[#dfeadc] to-[#eef5ee]', iconColor: 'text-[#315f3b]' },
+                    { icon: Wallet, label: currentLanguage === 'en' ? 'Earnings' : 'कमाई', path: '/farmer/earnings', color: 'from-[#fff0cc] to-[#fff7e3]', iconColor: 'text-[#d89b2b]' },
+                    { icon: BarChart3, label: currentLanguage === 'en' ? 'Analytics' : 'विश्लेषण', path: '/farmer/analytics', color: 'from-[#efe5d2] to-[#fbf3e6]', iconColor: 'text-[#6c5a3d]' },
+                    { icon: MessageCircle, label: currentLanguage === 'en' ? 'Messages' : 'संदेश', path: '/farmer/chats', badge: unreadChatCount, color: 'from-[#f8e1d9] to-[#fff3ee]', iconColor: 'text-[#8a4f2a]' },
+                    { icon: Star, label: currentLanguage === 'en' ? 'Reviews' : 'समीक्षाएं', path: '/farmer/reviews', color: 'from-[#fff0cc] to-[#fff7e3]', iconColor: 'text-[#d89b2b]' },
                   ].map((item) => (
                     <Link 
                       key={item.path} 
                       to={item.path} 
-                      className="group relative flex h-full min-h-[124px] flex-col items-center justify-center gap-3 rounded-xl border-2 border-border bg-gradient-to-br from-card to-muted/30 p-5 transition-all duration-300 hover:scale-105 hover:border-primary/50 hover:shadow-xl"
+                      className="group relative flex h-full min-h-[124px] flex-col items-center justify-center gap-3 rounded-xl border-2 border-[#d7c7a8] bg-[#fffdf7] p-5 transition-all duration-300 hover:scale-105 hover:border-[#315f3b]/40 hover:shadow-xl"
                     >
                       <div className={`flex h-14 w-14 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br ${item.color} transition-transform group-hover:scale-110`}>
-                        <item.icon className="h-6 w-6 shrink-0 text-primary" strokeWidth={2} />
+                        <item.icon className={`h-6 w-6 shrink-0 ${item.iconColor}`} strokeWidth={2} />
                       </div>
                       {typeof item.badge === 'number' && item.badge > 0 ? (
-                        <Badge className="absolute -right-2 -top-2 bg-accent px-2 py-0.5 text-xs font-bold text-accent-foreground">
+                        <Badge className="absolute -right-2 -top-2 bg-[#d89b2b] px-2 py-0.5 text-xs font-bold text-[#2f2416]">
                           {item.badge > 99 ? '99+' : item.badge}
                         </Badge>
                       ) : null}
@@ -771,12 +772,12 @@ const FarmerDashboard = () => {
 
           {/* Recent Orders */}
           <AnimateOnScroll animation="slide-up" delay={0.3}>
-            <Card className="border-2 shadow-lg mb-8">
-              <CardHeader className="bg-gradient-to-r from-success/10 to-success/5 border-b">
+            <Card className="mb-8 border-2 border-[#d7c7a8] bg-[#fffaf0] shadow-[0_18px_42px_rgba(95,70,40,0.08)]">
+              <CardHeader className="border-b border-[#e2d4b7] bg-[#f7eedf]">
                 <div className="flex items-center justify-between">
                   <div>
                     <CardTitle className="flex items-center gap-2">
-                      <ShoppingCart className="w-5 h-5 text-success" />
+                      <ShoppingCart className="w-5 h-5 text-[#315f3b]" />
                       {currentLanguage === 'en' ? 'Recent Orders' : 'हाल के ऑर्डर'}
                     </CardTitle>
                     <CardDescription>
@@ -784,7 +785,7 @@ const FarmerDashboard = () => {
                     </CardDescription>
                   </div>
                   <Link to="/farmer/orders">
-                    <Button variant="ghost" size="sm" className="gap-2">
+                    <Button variant="ghost" size="sm" className="gap-2 text-[#315f3b] hover:bg-[#f3ebdd] hover:text-[#315f3b]">
                       {currentLanguage === 'en' ? 'View All' : 'सभी देखें'}
                       <ArrowRight className="w-4 h-4" />
                     </Button>
@@ -800,20 +801,20 @@ const FarmerDashboard = () => {
                   </div>
                 ) : (
                   <div className="flex flex-col items-center py-12 text-center">
-                    <ShoppingCart className="mx-auto mb-4 h-16 w-16 text-muted-foreground" />
-                    <p className={`mb-6 max-w-md text-muted-foreground ${currentLanguage === 'hi' ? 'font-hindi' : ''}`}>
+                    <ShoppingCart className="mx-auto mb-4 h-16 w-16 text-[#b8ad97]" />
+                    <p className={`mb-6 max-w-md text-[#6f6552] ${currentLanguage === 'hi' ? 'font-hindi' : ''}`}>
                       {currentLanguage === 'en'
                         ? 'When buyers place orders, they will show up here. List products and share your shop link.'
                         : 'जब खरीदार ऑर्डर करेंगे, वे यहाँ दिखेंगे। उत्पाद लिस्ट करें और दुकान का लिंक साझा करें।'}
                     </p>
                     <div className="flex w-full max-w-md flex-col gap-3 sm:flex-row sm:justify-center">
-                      <Button className="btn-primary-gradient gap-2" asChild>
+                      <Button className="gap-2 border border-[#b68222] bg-[#d89b2b] text-[#2f2416] hover:bg-[#c88d22]" asChild>
                         <Link to="/farmer/listings?coach=1">
                           <Plus className="h-4 w-4" />
                           {currentLanguage === 'en' ? 'Add listing' : 'लिस्टिंग जोड़ें'}
                         </Link>
                       </Button>
-                      <Button type="button" variant="outline" className="gap-2" onClick={() => copyShopShareLink()}>
+                      <Button type="button" variant="outline" className="gap-2 border-[#d7c7a8] bg-[#fffdf7] text-[#315f3b] hover:bg-[#f3ebdd] hover:text-[#315f3b]" onClick={() => copyShopShareLink()}>
                         <Share2 className="h-4 w-4" />
                         {currentLanguage === 'en' ? 'Copy shop link' : 'दुकान का लिंक कॉपी करें'}
                       </Button>
@@ -826,12 +827,12 @@ const FarmerDashboard = () => {
 
           {/* Notifications */}
           <AnimateOnScroll animation="slide-up" delay={0.4}>
-            <Card className="border-2 shadow-lg">
-              <CardHeader className="bg-gradient-to-r from-secondary/10 to-secondary/5 border-b">
+            <Card className="border-2 border-[#d7c7a8] bg-[#fffaf0] shadow-[0_18px_42px_rgba(95,70,40,0.08)]">
+              <CardHeader className="border-b border-[#e2d4b7] bg-[#f7eedf]">
                 <div className="flex items-center justify-between">
                   <div>
                     <CardTitle className="flex items-center gap-2">
-                      <Bell className="w-5 h-5 text-secondary" />
+                      <Bell className="w-5 h-5 text-[#315f3b]" />
                       {currentLanguage === 'en' ? 'Notifications' : 'सूचनाएं'}
                     </CardTitle>
                     <CardDescription>
@@ -839,7 +840,7 @@ const FarmerDashboard = () => {
                     </CardDescription>
                   </div>
                   <Link to="/notifications">
-                    <Button variant="ghost" size="sm" className="gap-2">
+                    <Button variant="ghost" size="sm" className="gap-2 text-[#315f3b] hover:bg-[#f3ebdd] hover:text-[#315f3b]">
                       {currentLanguage === 'en' ? 'View All' : 'सभी देखें'}
                       <ArrowRight className="w-4 h-4" />
                     </Button>
@@ -852,29 +853,29 @@ const FarmerDashboard = () => {
                     {notifications.slice(0, 3).map((notif) => {
                       const row = (
                         <div
-                          className={`p-5 hover:bg-muted/50 transition-colors ${!notif.isRead ? 'bg-primary/5 border-l-4 border-l-primary' : ''}`}
+                          className={`p-5 transition-colors hover:bg-[#f6eddc] ${!notif.isRead ? 'border-l-4 border-l-[#315f3b] bg-[#eef5ee]' : ''}`}
                         >
                           <div className="flex items-start gap-3">
                             <div
-                              className={`w-10 h-10 rounded-full flex items-center justify-center ${
-                                !notif.isRead ? 'bg-primary/20' : 'bg-muted'
+                              className={`flex h-10 w-10 items-center justify-center rounded-full ${
+                                !notif.isRead ? 'bg-[#dfeadc]' : 'bg-[#f3ebdd]'
                               }`}
                             >
                               <Bell
-                                className={`w-5 h-5 ${!notif.isRead ? 'text-primary' : 'text-muted-foreground'}`}
+                                className={`w-5 h-5 ${!notif.isRead ? 'text-[#315f3b]' : 'text-[#8b816f]'}`}
                               />
                             </div>
                             <div className="flex-1 min-w-0">
-                              <h4 className="font-semibold text-base mb-1">{notif.title}</h4>
-                              <p className="text-sm text-muted-foreground leading-relaxed">{notif.message}</p>
-                              <p className="text-xs text-muted-foreground mt-2">
+                              <h4 className="mb-1 text-base font-semibold text-[#2f3a2f]">{notif.title}</h4>
+                              <p className="text-sm leading-relaxed text-[#6f6552]">{notif.message}</p>
+                              <p className="mt-2 text-xs text-[#6f6552]">
                                 {new Date(notif.createdAt).toLocaleString(
                                   currentLanguage === 'en' ? 'en-IN' : 'hi-IN'
                                 )}
                               </p>
                             </div>
                             {!notif.isRead && (
-                              <Badge variant="secondary" className="bg-primary text-primary-foreground shrink-0">
+                              <Badge variant="secondary" className="shrink-0 bg-[#315f3b] text-white">
                                 {currentLanguage === 'en' ? 'New' : 'नया'}
                               </Badge>
                             )}
@@ -893,8 +894,8 @@ const FarmerDashboard = () => {
                   </div>
                 ) : (
                   <div className="text-center py-12">
-                    <Bell className="w-16 h-16 text-muted-foreground mx-auto mb-4" />
-                    <p className={`text-muted-foreground ${currentLanguage === 'hi' ? 'font-hindi' : ''}`}>
+                    <Bell className="mx-auto mb-4 h-16 w-16 text-[#b8ad97]" />
+                    <p className={`text-[#6f6552] ${currentLanguage === 'hi' ? 'font-hindi' : ''}`}>
                       {currentLanguage === 'en' ? 'No notifications' : 'कोई सूचना नहीं'}
                     </p>
                   </div>

@@ -201,7 +201,7 @@ const Reviews = () => {
             className={`${interactive ? 'cursor-pointer hover:scale-110 transition-transform' : ''}`}
           >
             <Star
-              className={`w-5 h-5 ${star <= rating ? 'text-warning fill-warning' : 'text-muted-foreground'}`}
+              className={`h-5 w-5 ${star <= rating ? 'fill-[#d89b2b] text-[#d89b2b]' : 'text-[#b8ad97]'}`}
             />
           </button>
         ))}
@@ -211,17 +211,21 @@ const Reviews = () => {
 
   return (
     <Layout>
-      <div className="container mx-auto min-w-0 px-3 py-5 sm:px-4 sm:py-6">
+      <div className="min-h-screen bg-[linear-gradient(rgba(251,247,235,0.97),rgba(251,247,235,0.97)),linear-gradient(rgba(138,79,42,0.07)_1px,transparent_1px),linear-gradient(90deg,rgba(138,79,42,0.07)_1px,transparent_1px)] bg-[size:auto,24px_24px,24px_24px]">
+        <div className="container mx-auto min-w-0 px-3 py-5 sm:px-4 sm:py-6">
         {/* Header */}
         <div className="flex items-center gap-4 mb-6">
-          <button onClick={() => navigate(-1)} className="p-2 hover:bg-muted rounded-lg">
+          <button
+            onClick={() => navigate(-1)}
+            className="rounded-lg border border-[#d7c7a8] bg-[#fffaf0] p-2 text-[#315f3b] transition hover:bg-[#f6eddc]"
+          >
             <ArrowLeft className="w-5 h-5" />
           </button>
           <div>
-            <h1 className="text-2xl font-bold">
+            <h1 className="text-2xl font-bold text-[#2f3a2f]">
               {currentLanguage === 'en' ? 'Reviews & Ratings' : 'समीक्षाएं और रेटिंग'}
             </h1>
-            <p className="text-muted-foreground">
+            <p className="text-[#6f6552]">
               {isFarmer 
                 ? (currentLanguage === 'en' ? 'See what buyers say about you' : 'देखें खरीदार आपके बारे में क्या कहते हैं')
                 : (currentLanguage === 'en' ? 'Your reviews for farmers' : 'किसानों के लिए आपकी समीक्षाएं')}
@@ -231,37 +235,37 @@ const Reviews = () => {
 
         {/* Stats */}
         <div className="grid grid-cols-3 gap-4 mb-6">
-          <div className="card-elevated p-4 text-center">
-            <p className="text-3xl font-bold text-primary">{userReviews.length}</p>
-            <p className="text-sm text-muted-foreground">
+          <div className="rounded-2xl border border-[#d7c7a8] bg-[#fffaf0] p-4 text-center shadow-[0_16px_40px_rgba(95,70,40,0.08)]">
+            <p className="text-3xl font-bold text-[#315f3b]">{userReviews.length}</p>
+            <p className="text-sm text-[#6f6552]">
               {currentLanguage === 'en' ? 'Total Reviews' : 'कुल समीक्षाएं'}
             </p>
           </div>
-          <div className="card-elevated p-4 text-center">
+          <div className="rounded-2xl border border-[#d7c7a8] bg-[#fffaf0] p-4 text-center shadow-[0_16px_40px_rgba(95,70,40,0.08)]">
             <div className="flex items-center justify-center gap-1">
-              <p className="text-3xl font-bold text-warning">
+              <p className="text-3xl font-bold text-[#d89b2b]">
                 {userReviews.length > 0 
                   ? (userReviews.reduce((sum, r) => sum + r.rating, 0) / userReviews.length).toFixed(1)
                   : '0'}
               </p>
-              <Star className="w-6 h-6 text-warning fill-warning" />
+              <Star className="h-6 w-6 fill-[#d89b2b] text-[#d89b2b]" />
             </div>
-            <p className="text-sm text-muted-foreground">
+            <p className="text-sm text-[#6f6552]">
               {currentLanguage === 'en' ? 'Avg Rating' : 'औसत रेटिंग'}
             </p>
           </div>
-          <div className="card-elevated p-4 text-center">
-            <p className="text-3xl font-bold text-success">
+          <div className="rounded-2xl border border-[#d7c7a8] bg-[#fffaf0] p-4 text-center shadow-[0_16px_40px_rgba(95,70,40,0.08)]">
+            <p className="text-3xl font-bold text-[#315f3b]">
               {userReviews.filter(r => r.rating >= 4).length}
             </p>
-            <p className="text-sm text-muted-foreground">
+            <p className="text-sm text-[#6f6552]">
               {currentLanguage === 'en' ? 'Positive' : 'सकारात्मक'}
             </p>
           </div>
         </div>
 
         <Tabs defaultValue="reviews" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-2">
+          <TabsList className="grid w-full grid-cols-2 border border-[#d7c7a8] bg-[#f4ead7] p-1">
             <TabsTrigger value="reviews">
               {currentLanguage === 'en' ? 'All Reviews' : 'सभी समीक्षाएं'}
             </TabsTrigger>
@@ -280,28 +284,31 @@ const Reviews = () => {
           <TabsContent value="reviews" className="space-y-4">
             {isLoading ? (
               <div className="text-center py-12">
-                <Star className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
-                <p className="text-muted-foreground">
+                <Star className="mx-auto mb-4 h-12 w-12 text-[#b8ad97]" />
+                <p className="text-[#6f6552]">
                   {currentLanguage === 'en'
                     ? 'Loading reviews...'
                     : 'समीक्षाएं लोड हो रही हैं...'}
                 </p>
               </div>
             ) : userReviews.map((review: any) => (
-              <div key={reviewRowId(review)} className="card-elevated p-4">
+              <div
+                key={reviewRowId(review)}
+                className="rounded-2xl border border-[#d7c7a8] bg-[#fffaf0] p-4 shadow-[0_16px_40px_rgba(95,70,40,0.08)]"
+              >
                 <div className="flex items-start gap-4">
-                  <div className="w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center">
-                    <span className="text-lg font-bold text-primary">
+                  <div className="flex h-12 w-12 items-center justify-center rounded-full border border-[#d7c7a8] bg-[#eef5ee]">
+                    <span className="text-lg font-bold text-[#315f3b]">
                       {(review.reviewer?.name || review.reviewerName || '?').charAt(0)}
                     </span>
                   </div>
                   <div className="flex-1">
                     <div className="flex items-center justify-between mb-2">
                       <div>
-                        <p className="font-semibold">
+                        <p className="font-semibold text-[#2f3a2f]">
                           {review.reviewer?.name || review.reviewerName}
                         </p>
-                        <p className="text-sm text-muted-foreground">
+                        <p className="text-sm text-[#6f6552]">
                           {review.product?.name || review.productName}
                         </p>
                       </div>
@@ -309,26 +316,26 @@ const Reviews = () => {
                         <div className="flex flex-col items-end gap-1">
                           {renderStars(review.rating)}
                           {!isFarmer && review.isApproved === false && (
-                            <Badge variant="outline" className="text-warning border-warning/50">
+                            <Badge variant="outline" className="border-[#ead5a6] text-[#9a6b12]">
                               {currentLanguage === 'en' ? 'Pending moderation' : 'मॉडरेशन लंबित'}
                             </Badge>
                           )}
                         </div>
-                        <p className="text-xs text-muted-foreground mt-1">
+                        <p className="mt-1 text-xs text-[#6f6552]">
                           {new Date(review.createdAt).toLocaleDateString()}
                         </p>
                       </div>
                     </div>
-                    <p className="text-foreground">{review.comment}</p>
+                    <p className="text-[#2f3a2f]">{review.comment}</p>
 
                     {/* Reply Section */}
                     {review.reply && (
-                      <div className="mt-4 pl-4 border-l-2 border-primary/30">
-                        <p className="text-sm font-medium text-primary mb-1">
+                      <div className="mt-4 border-l-2 border-[#c8d8cb] pl-4">
+                        <p className="mb-1 text-sm font-medium text-[#315f3b]">
                           {currentLanguage === 'en' ? 'Farmer Reply:' : 'किसान का जवाब:'}
                         </p>
-                        <p className="text-sm text-muted-foreground">{review.reply}</p>
-                        <p className="text-xs text-muted-foreground mt-1">
+                        <p className="text-sm text-[#6f6552]">{review.reply}</p>
+                        <p className="mt-1 text-xs text-[#6f6552]">
                           {review.replyDate
                             ? new Date(review.replyDate).toLocaleDateString()
                             : null}
@@ -342,19 +349,25 @@ const Reviews = () => {
                         {showReplyInput[reviewRowId(review)] ? (
                           <div className="space-y-2">
                             <Textarea
+                              className="border-[#d7c7a8] bg-[#fffdf7] text-[#2f3a2f] placeholder:text-[#8b816f] focus-visible:ring-[#315f3b]"
                               placeholder={currentLanguage === 'en' ? 'Write your reply...' : 'अपना जवाब लिखें...'}
                               value={replyText[reviewRowId(review)] || ''}
                               onChange={(e) => setReplyText(prev => ({ ...prev, [reviewRowId(review)]: e.target.value }))}
                               rows={2}
                             />
                             <div className="flex gap-2">
-                              <Button size="sm" onClick={() => handleReply(reviewRowId(review))}>
+                              <Button
+                                size="sm"
+                                className="border border-[#b68222] bg-[#d89b2b] text-[#2f2416] hover:bg-[#c88d22]"
+                                onClick={() => handleReply(reviewRowId(review))}
+                              >
                                 <Send className="w-4 h-4 mr-1" />
                                 {currentLanguage === 'en' ? 'Send' : 'भेजें'}
                               </Button>
                               <Button 
                                 size="sm" 
                                 variant="outline"
+                                className="border-[#d7c7a8] bg-[#fffdf7] text-[#315f3b] hover:bg-[#f3ebdd] hover:text-[#315f3b]"
                                 onClick={() => setShowReplyInput(prev => ({ ...prev, [reviewRowId(review)]: false }))}
                               >
                                 {currentLanguage === 'en' ? 'Cancel' : 'रद्द'}
@@ -365,6 +378,7 @@ const Reviews = () => {
                           <Button
                             size="sm"
                             variant="outline"
+                            className="border-[#d7c7a8] bg-[#fffdf7] text-[#315f3b] hover:bg-[#f3ebdd] hover:text-[#315f3b]"
                             onClick={() => setShowReplyInput(prev => ({ ...prev, [reviewRowId(review)]: true }))}
                           >
                             <MessageCircle className="w-4 h-4 mr-1" />
@@ -380,8 +394,8 @@ const Reviews = () => {
 
             {userReviews.length === 0 && (
               <div className="text-center py-12">
-                <Star className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
-                <h3 className="text-lg font-medium mb-2">
+                <Star className="mx-auto mb-4 h-12 w-12 text-[#b8ad97]" />
+                <h3 className="mb-2 text-lg font-medium text-[#2f3a2f]">
                   {currentLanguage === 'en' ? 'No reviews yet' : 'अभी तक कोई समीक्षा नहीं'}
                 </h3>
               </div>
@@ -390,15 +404,15 @@ const Reviews = () => {
 
           {!isFarmer && (
             <TabsContent value="write" className="space-y-6">
-              <div className="card-elevated p-6">
-                <h3 className="font-semibold mb-4">
+              <div className="rounded-2xl border border-[#d7c7a8] bg-[#fffaf0] p-6 shadow-[0_16px_40px_rgba(95,70,40,0.08)]">
+                <h3 className="mb-4 font-semibold text-[#2f3a2f]">
                   {currentLanguage === 'en' ? 'Write a Review' : 'समीक्षा लिखें'}
                 </h3>
 
                 {pendingReviewOrders.length > 0 ? (
                   <div className="space-y-4">
                     <div>
-                      <p className="text-sm text-muted-foreground mb-2">
+                      <p className="mb-2 text-sm text-[#6f6552]">
                         {currentLanguage === 'en' ? 'Select an order to review:' : 'समीक्षा के लिए ऑर्डर चुनें:'}
                       </p>
                       <div className="space-y-2">
@@ -407,16 +421,20 @@ const Reviews = () => {
                             key={order.id}
                             type="button"
                             onClick={() => setSelectedOrder(order.id)}
-                            className={`w-full flex items-center gap-3 p-3 rounded-xl border-2 transition-all ${selectedOrder === order.id ? 'border-primary bg-primary/5' : 'border-border hover:border-primary/50'}`}
+                            className={`flex w-full items-center gap-3 rounded-xl border-2 p-3 text-left transition-all ${
+                              selectedOrder === order.id
+                                ? 'border-[#315f3b] bg-[#eef5ee]'
+                                : 'border-[#d7c7a8] bg-[#fffdf7] hover:border-[#315f3b]/55'
+                            }`}
                           >
                             <img
                               src={order.productImage}
                               alt={order.productName}
-                              className="w-12 h-12 rounded-lg object-cover"
+                              className="h-12 w-12 rounded-lg border border-[#e2d4b7] object-cover"
                             />
                             <div className="text-left">
-                              <p className="font-medium">{order.productName}</p>
-                              <p className="text-sm text-muted-foreground">
+                              <p className="font-medium text-[#2f3a2f]">{order.productName}</p>
+                              <p className="text-sm text-[#6f6552]">
                                 {currentLanguage === 'en' ? 'from' : 'से'} {order.farmerName}
                               </p>
                             </div>
@@ -426,17 +444,18 @@ const Reviews = () => {
                     </div>
 
                     <div>
-                      <p className="text-sm text-muted-foreground mb-2">
+                      <p className="mb-2 text-sm text-[#6f6552]">
                         {currentLanguage === 'en' ? 'Your Rating:' : 'आपकी रेटिंग:'}
                       </p>
                       {renderStars(newReviewRating, true, setNewReviewRating)}
                     </div>
 
                     <div>
-                      <p className="text-sm text-muted-foreground mb-2">
+                      <p className="mb-2 text-sm text-[#6f6552]">
                         {currentLanguage === 'en' ? 'Your Review:' : 'आपकी समीक्षा:'}
                       </p>
                       <Textarea
+                        className="border-[#d7c7a8] bg-[#fffdf7] text-[#2f3a2f] placeholder:text-[#8b816f] focus-visible:ring-[#315f3b]"
                         placeholder={currentLanguage === 'en' ? 'Share your experience...' : 'अपना अनुभव साझा करें...'}
                         value={newReviewComment}
                         onChange={(e) => setNewReviewComment(e.target.value)}
@@ -444,15 +463,15 @@ const Reviews = () => {
                       />
                     </div>
 
-                    <Button onClick={handleSubmitReview} className="btn-primary-gradient">
+                    <Button onClick={handleSubmitReview} className="border border-[#b68222] bg-[#d89b2b] text-[#2f2416] hover:bg-[#c88d22]">
                       <ThumbsUp className="w-4 h-4 mr-2" />
                       {currentLanguage === 'en' ? 'Submit Review' : 'समीक्षा सबमिट करें'}
                     </Button>
                   </div>
                 ) : (
                   <div className="text-center py-8">
-                    <Star className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
-                    <p className="text-muted-foreground">
+                    <Star className="mx-auto mb-4 h-12 w-12 text-[#b8ad97]" />
+                    <p className="text-[#6f6552]">
                       {currentLanguage === 'en' 
                         ? 'No delivered orders pending review.' 
                         : 'समीक्षा के लिए कोई डिलीवर ऑर्डर नहीं है।'}
@@ -466,23 +485,31 @@ const Reviews = () => {
           {isFarmer && (
             <TabsContent value="pending" className="space-y-4">
               {userReviews.filter(r => !r.reply).map((review) => (
-                <div key={reviewRowId(review)} className="card-elevated p-4 border-l-4 border-warning">
+                <div
+                  key={reviewRowId(review)}
+                  className="rounded-2xl border border-[#ead5a6] border-l-4 bg-[#fff7e8] p-4 shadow-[0_14px_34px_rgba(95,70,40,0.07)]"
+                >
                   <div className="flex items-start gap-4">
                     <div className="flex-1">
                       <div className="flex items-center justify-between mb-2">
-                        <p className="font-semibold">{review.reviewerName}</p>
+                        <p className="font-semibold text-[#2f3a2f]">{review.reviewerName}</p>
                         {renderStars(review.rating)}
                       </div>
-                      <p className="text-sm text-muted-foreground mb-2">{review.productName}</p>
-                      <p className="text-foreground">{review.comment}</p>
+                      <p className="mb-2 text-sm text-[#6f6552]">{review.productName}</p>
+                      <p className="text-[#2f3a2f]">{review.comment}</p>
                       <div className="mt-3">
                         <Textarea
+                          className="border-[#d7c7a8] bg-[#fffdf7] text-[#2f3a2f] placeholder:text-[#8b816f] focus-visible:ring-[#315f3b]"
                           placeholder={currentLanguage === 'en' ? 'Write your reply...' : 'अपना जवाब लिखें...'}
                           value={replyText[reviewRowId(review)] || ''}
                           onChange={(e) => setReplyText(prev => ({ ...prev, [reviewRowId(review)]: e.target.value }))}
                           rows={2}
                         />
-                        <Button size="sm" className="mt-2" onClick={() => handleReply(reviewRowId(review))}>
+                        <Button
+                          size="sm"
+                          className="mt-2 border border-[#b68222] bg-[#d89b2b] text-[#2f2416] hover:bg-[#c88d22]"
+                          onClick={() => handleReply(reviewRowId(review))}
+                        >
                           <Send className="w-4 h-4 mr-1" />
                           {currentLanguage === 'en' ? 'Reply' : 'जवाब दें'}
                         </Button>
@@ -494,11 +521,11 @@ const Reviews = () => {
 
               {userReviews.filter(r => !r.reply).length === 0 && (
                 <div className="text-center py-12">
-                  <ThumbsUp className="w-12 h-12 text-success mx-auto mb-4" />
-                  <h3 className="text-lg font-medium mb-2">
+                  <ThumbsUp className="mx-auto mb-4 h-12 w-12 text-[#315f3b]" />
+                  <h3 className="mb-2 text-lg font-medium text-[#2f3a2f]">
                     {currentLanguage === 'en' ? 'All caught up!' : 'सब हो गया!'}
                   </h3>
-                  <p className="text-muted-foreground">
+                  <p className="text-[#6f6552]">
                     {currentLanguage === 'en' ? 'You have replied to all reviews.' : 'आपने सभी समीक्षाओं का जवाब दे दिया है।'}
                   </p>
                 </div>
@@ -506,6 +533,7 @@ const Reviews = () => {
             </TabsContent>
           )}
         </Tabs>
+      </div>
       </div>
     </Layout>
   );

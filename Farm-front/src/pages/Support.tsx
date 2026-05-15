@@ -213,21 +213,21 @@ const Support = () => {
 
   return (
     <Layout>
-      <div className="min-h-screen min-w-0 overflow-x-hidden bg-gradient-to-b from-background to-muted/20">
+      <div className="min-h-screen min-w-0 overflow-x-hidden bg-[#f6f1e7] bg-[linear-gradient(rgba(138,79,42,0.05)_1px,transparent_1px),linear-gradient(90deg,rgba(138,79,42,0.05)_1px,transparent_1px)] bg-[size:24px_24px]">
         <div className="container mx-auto min-w-0 px-3 py-10 sm:px-4 sm:py-12">
           {/* Header Section */}
           <AnimateOnScroll animation="fade-in">
             <div className="text-center mb-12">
-              <div className="inline-flex items-center gap-2 bg-primary/10 px-4 py-2 rounded-full mb-6">
-                <Shield className="w-5 h-5 text-primary" />
-                <span className="text-sm font-semibold text-primary">
+              <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-[#d7c7a8] bg-[#fffaf0] px-4 py-2">
+                <Shield className="w-5 h-5 text-[#315f3b]" />
+                <span className="text-sm font-semibold text-[#315f3b]">
                   {currentLanguage === 'en' ? 'Submit tickets anytime' : 'कभी भी टिकट भेजें'}
                 </span>
               </div>
-              <h1 className={`text-4xl md:text-5xl lg:text-6xl font-extrabold mb-4 ${currentLanguage === 'hi' ? 'font-hindi' : ''}`}>
+              <h1 className={`mb-4 text-4xl font-extrabold text-[#2f3a2f] md:text-5xl lg:text-6xl ${currentLanguage === 'hi' ? 'font-hindi' : ''}`}>
                 {currentLanguage === 'en' ? 'Help & Support' : 'मदद और सहायता'}
               </h1>
-              <p className={`text-xl text-muted-foreground max-w-2xl mx-auto ${currentLanguage === 'hi' ? 'font-hindi' : ''}`}>
+              <p className={`mx-auto max-w-2xl text-xl text-[#6f6552] ${currentLanguage === 'hi' ? 'font-hindi' : ''}`}>
                 {currentLanguage === 'en' ? 'Find answers to your questions or get in touch with our support team' : 'अपने प्रश्नों के उत्तर खोजें या हमारी सहायता टीम से संपर्क करें'}
               </p>
             </div>
@@ -236,23 +236,23 @@ const Support = () => {
           {/* Quick facts — policy + real data (no vanity metrics) */}
           <AnimateOnScroll animation="slide-up" delay={0.1}>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
-              <Card className="bg-gradient-to-br from-primary/10 to-primary/5 border-primary/20">
+              <Card className="border-[#d7c7a8] bg-[#fffaf0] shadow-[0_16px_40px_rgba(95,70,40,0.08)]">
                 <CardContent className="p-6">
                   <div className="flex items-center gap-4">
                     <div
-                      className="w-16 h-16 bg-primary/20 rounded-xl flex items-center justify-center shrink-0"
+                      className="flex h-16 w-16 shrink-0 items-center justify-center rounded-xl bg-[#f3ebdd]"
                       aria-hidden
                     >
-                      <Clock className="w-8 h-8 text-primary" />
+                      <Clock className="w-8 h-8 text-[#315f3b]" />
                     </div>
                     <div className="min-w-0">
-                      <p className="text-sm text-muted-foreground mb-1">
+                      <p className="mb-1 text-sm text-[#6f6552]">
                         {currentLanguage === 'en' ? 'First response goal' : 'पहली प्रतिक्रिया लक्ष्य'}
                       </p>
-                      <p className="text-2xl font-bold text-foreground">
+                      <p className="text-2xl font-bold text-[#2f3a2f]">
                         {currentLanguage === 'en' ? 'Within 24 hours' : '24 घंटों के भीतर'}
                       </p>
-                      <p className={`text-xs text-muted-foreground mt-1 ${currentLanguage === 'hi' ? 'font-hindi' : ''}`}>
+                      <p className={`mt-1 text-xs text-[#6f6552] ${currentLanguage === 'hi' ? 'font-hindi' : ''}`}>
                         {currentLanguage === 'en'
                           ? 'Business days; complex cases may take longer.'
                           : 'कार्य दिवस; जटिल मामले में अधिक समय लग सकता है।'}
@@ -261,17 +261,17 @@ const Support = () => {
                   </div>
                 </CardContent>
               </Card>
-              <Card className="bg-gradient-to-br from-success/10 to-success/5 border-success/20">
+              <Card className="border-[#d7c7a8] bg-[#fffaf0] shadow-[0_16px_40px_rgba(95,70,40,0.08)]">
                 <CardContent className="p-6">
                   <div className="flex items-center gap-4">
                     <div
-                      className="w-16 h-16 bg-success/20 rounded-xl flex items-center justify-center shrink-0"
+                      className="flex h-16 w-16 shrink-0 items-center justify-center rounded-xl bg-[#eaf5ec]"
                       aria-hidden
                     >
-                      <CheckCircle className="w-8 h-8 text-success" />
+                      <CheckCircle className="w-8 h-8 text-[#315f3b]" />
                     </div>
                     <div className="min-w-0">
-                      <p className="text-sm text-muted-foreground mb-1">
+                      <p className="mb-1 text-sm text-[#6f6552]">
                         {isAuthenticated
                           ? currentLanguage === 'en'
                             ? 'Your tickets'
@@ -282,12 +282,12 @@ const Support = () => {
                       </p>
                       {isAuthenticated ? (
                         <>
-                          <p className="text-2xl font-bold text-foreground tabular-nums">
+                          <p className="text-2xl font-bold tabular-nums text-[#2f3a2f]">
                             {myTicketsLoading
                               ? '—'
                               : `${ticketOpenCount} ${currentLanguage === 'en' ? 'open' : 'खुले'} · ${ticketResolvedCount} ${currentLanguage === 'en' ? 'closed' : 'बंद'}`}
                           </p>
-                          <p className={`text-xs text-muted-foreground mt-1 ${currentLanguage === 'hi' ? 'font-hindi' : ''}`}>
+                          <p className={`mt-1 text-xs text-[#6f6552] ${currentLanguage === 'hi' ? 'font-hindi' : ''}`}>
                             {currentLanguage === 'en'
                               ? 'Counts are from tickets on this account.'
                               : 'गिनती इस खाते के टिकटों से है।'}
@@ -295,10 +295,10 @@ const Support = () => {
                         </>
                       ) : (
                         <>
-                          <p className={`text-2xl font-bold text-foreground ${currentLanguage === 'hi' ? 'font-hindi' : ''}`}>
+                          <p className={`text-2xl font-bold text-[#2f3a2f] ${currentLanguage === 'hi' ? 'font-hindi' : ''}`}>
                             {currentLanguage === 'en' ? 'Sign in' : 'साइन इन करें'}
                           </p>
-                          <p className={`text-xs text-muted-foreground mt-1 ${currentLanguage === 'hi' ? 'font-hindi' : ''}`}>
+                          <p className={`mt-1 text-xs text-[#6f6552] ${currentLanguage === 'hi' ? 'font-hindi' : ''}`}>
                             {currentLanguage === 'en'
                               ? 'Sign in to see your ticket history and replies on this page.'
                               : 'इस पृष्ठ पर अपना टिकट इतिहास और जवाब देखने के लिए साइन इन करें।'}
@@ -309,21 +309,21 @@ const Support = () => {
                   </div>
                 </CardContent>
               </Card>
-              <Card className="bg-gradient-to-br from-secondary/10 to-secondary/5 border-secondary/20">
+              <Card className="border-[#d7c7a8] bg-[#fffaf0] shadow-[0_16px_40px_rgba(95,70,40,0.08)]">
                 <CardContent className="p-6">
                   <div className="flex items-center gap-4">
                     <div
-                      className="w-16 h-16 bg-secondary/20 rounded-xl flex items-center justify-center shrink-0"
+                      className="flex h-16 w-16 shrink-0 items-center justify-center rounded-xl bg-[#fff4dd]"
                       aria-hidden
                     >
-                      <MessageCircle className="w-8 h-8 text-secondary" />
+                      <MessageCircle className="w-8 h-8 text-[#d89b2b]" />
                     </div>
                     <div className="min-w-0">
-                      <p className="text-sm text-muted-foreground mb-1">
+                      <p className="mb-1 text-sm text-[#6f6552]">
                         {currentLanguage === 'en' ? 'Self-service articles' : 'स्व-सेवा लेख'}
                       </p>
-                      <p className="text-2xl font-bold text-foreground tabular-nums">{faqArticleCount}</p>
-                      <p className={`text-xs text-muted-foreground mt-1 ${currentLanguage === 'hi' ? 'font-hindi' : ''}`}>
+                      <p className="text-2xl font-bold tabular-nums text-[#2f3a2f]">{faqArticleCount}</p>
+                      <p className={`mt-1 text-xs text-[#6f6552] ${currentLanguage === 'hi' ? 'font-hindi' : ''}`}>
                         {currentLanguage === 'en'
                           ? 'FAQs below — try search before opening a ticket.'
                           : 'नीचे अक्सर पूछे जाने वाले प्रश्न — टिकट से पहले खोज आज़माएँ।'}
@@ -339,16 +339,16 @@ const Support = () => {
           <AnimateOnScroll animation="slide-up" delay={0.2}>
             <div className="max-w-2xl mx-auto mb-12">
               <div className="relative">
-                <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground z-10" />
+                <Search className="absolute left-4 top-1/2 z-10 h-5 w-5 -translate-y-1/2 text-[#8b816f]" />
                 <Input 
                   placeholder={currentLanguage === 'en' ? 'Search for help...' : 'मदद खोजें...'} 
-                  className="pl-12 py-6 text-lg border-2 focus:border-primary"
+                  className="border-[#d7c7a8] bg-[#fffaf0] py-6 pl-12 text-lg text-[#2f3a2f] placeholder:text-[#8b816f] focus-visible:ring-[#315f3b]"
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                 />
               </div>
               {searchQuery && (
-                <p className="text-sm text-muted-foreground mt-2 text-center">
+                <p className="mt-2 text-center text-sm text-[#6f6552]">
                   {currentLanguage === 'en' 
                     ? `Found ${filteredFAQs.length} result${filteredFAQs.length !== 1 ? 's' : ''}`
                     : `${filteredFAQs.length} परिणाम मिले`}
@@ -363,14 +363,14 @@ const Support = () => {
               <div>
                 <div className="flex items-center justify-between mb-6">
                   <h2 className="text-2xl font-bold flex items-center gap-3">
-                    <div className="w-12 h-12 bg-primary/10 rounded-xl flex items-center justify-center">
-                      <HelpCircle className="w-6 h-6 text-primary" />
+                    <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-[#f3ebdd]">
+                      <HelpCircle className="w-6 h-6 text-[#315f3b]" />
                     </div>
                     <span className={currentLanguage === 'hi' ? 'font-hindi' : ''}>
                       {currentLanguage === 'en' ? 'Frequently Asked Questions' : 'अक्सर पूछे जाने वाले प्रश्न'}
                     </span>
                   </h2>
-                  <Badge variant="secondary" className="text-sm">
+                  <Badge className="bg-[#f3ebdd] text-[#6c5a3d] hover:bg-[#f3ebdd] text-sm">
                     {filteredFAQs.length} {currentLanguage === 'en' ? 'Questions' : 'प्रश्न'}
                   </Badge>
                 </div>
@@ -380,23 +380,23 @@ const Support = () => {
                       {filteredFAQs.map((faq, index) => (
                         <Card 
                           key={index} 
-                          className="border-2 hover:border-primary/50 transition-all duration-300 hover:shadow-lg overflow-hidden"
+                          className="overflow-hidden border-[#d7c7a8] bg-[#fffaf0] transition-all duration-300 hover:border-[#c8b38b] hover:shadow-[0_16px_40px_rgba(95,70,40,0.12)]"
                         >
                           <button
                             onClick={() => setOpenFaq(openFaq === index ? null : index)}
-                            className="w-full p-5 flex items-center justify-between text-left hover:bg-muted/50 transition-colors"
+                            className="flex w-full items-center justify-between p-5 text-left transition-colors hover:bg-[#f6eddc]"
                           >
                             <span className={`font-semibold text-base flex-1 pr-4 ${currentLanguage === 'hi' ? 'font-hindi' : ''}`}>
                               {currentLanguage === 'hi' ? faq.questionHindi : faq.question}
                             </span>
                             <ChevronDown 
-                              className={`w-5 h-5 text-muted-foreground transition-transform duration-300 shrink-0 ${
+                              className={`h-5 w-5 shrink-0 text-[#8b816f] transition-transform duration-300 ${
                                 openFaq === index ? 'rotate-180' : ''
                               }`} 
                             />
                           </button>
                           {openFaq === index && (
-                            <div className="px-5 pb-5 text-muted-foreground animate-fade-in border-t border-border pt-4">
+                            <div className="animate-fade-in border-t border-[#e2d4b7] px-5 pb-5 pt-4 text-[#6f6552]">
                               <p className={`leading-relaxed ${currentLanguage === 'hi' ? 'font-hindi' : ''}`}>
                                 {faq.answer}
                               </p>
@@ -406,10 +406,10 @@ const Support = () => {
                       ))}
                     </StaggerContainer>
                   ) : (
-                    <Card className="border-2 border-dashed">
+                    <Card className="border-dashed border-[#d7c7a8] bg-[#fffaf0]">
                       <CardContent className="p-12 text-center">
-                        <AlertCircle className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
-                        <p className={`text-muted-foreground ${currentLanguage === 'hi' ? 'font-hindi' : ''}`}>
+                        <AlertCircle className="mx-auto mb-4 h-12 w-12 text-[#8b816f]" />
+                        <p className={`text-[#6f6552] ${currentLanguage === 'hi' ? 'font-hindi' : ''}`}>
                           {currentLanguage === 'en' 
                             ? 'No FAQs found. Try a different search term.' 
                             : 'कोई प्रश्न नहीं मिला। एक अलग खोज शब्द आज़माएं।'}
@@ -426,15 +426,15 @@ const Support = () => {
               <div className="space-y-6">
                 <div>
                   <h2 className="text-2xl font-bold mb-6 flex items-center gap-3">
-                    <div className="w-12 h-12 bg-primary/10 rounded-xl flex items-center justify-center">
-                      <MessageCircle className="w-6 h-6 text-primary" />
+                    <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-[#f3ebdd]">
+                      <MessageCircle className="w-6 h-6 text-[#315f3b]" />
                     </div>
                     <span className={currentLanguage === 'hi' ? 'font-hindi' : ''}>
                       {currentLanguage === 'en' ? 'Submit a Ticket' : 'टिकट जमा करें'}
                     </span>
                   </h2>
-                  <Card className="border-2 shadow-lg">
-                    <CardHeader className="bg-gradient-to-r from-primary/10 to-secondary/10 border-b">
+                  <Card className="border-[#d7c7a8] bg-[#fffaf0] shadow-[0_16px_40px_rgba(95,70,40,0.08)]">
+                    <CardHeader className="border-b border-[#e2d4b7] bg-[#f6eddc]">
                       <CardDescription className="space-y-2">
                         <span className="block">
                           {currentLanguage === 'en'
@@ -455,7 +455,7 @@ const Support = () => {
                               value={guestEmail}
                               onChange={(e) => setGuestEmail(e.target.value)}
                               placeholder={currentLanguage === 'en' ? 'So we can reach you' : 'ताकि हम आपसे संपर्क कर सकें'}
-                              className="border-2 focus:border-primary py-6"
+                              className="border-[#d7c7a8] bg-[#fffdf7] py-6 text-[#2f3a2f] placeholder:text-[#8b816f] focus-visible:ring-[#315f3b]"
                             />
                           </div>
                         )}
@@ -467,7 +467,7 @@ const Support = () => {
                             value={ticketSubject} 
                             onChange={(e) => setTicketSubject(e.target.value)} 
                             placeholder={currentLanguage === 'en' ? 'What do you need help with?' : 'आपको किस मदद की ज़रूरत है?'}
-                            className="border-2 focus:border-primary py-6"
+                            className="border-[#d7c7a8] bg-[#fffdf7] py-6 text-[#2f3a2f] placeholder:text-[#8b816f] focus-visible:ring-[#315f3b]"
                           />
                         </div>
                         <div>
@@ -478,11 +478,11 @@ const Support = () => {
                             value={ticketMessage}
                             onChange={(e) => setTicketMessage(e.target.value)}
                             placeholder={currentLanguage === 'en' ? 'Describe your issue in detail...' : 'अपनी समस्या का विस्तार से वर्णन करें...'}
-                            className="min-h-[180px] border-2 focus:border-primary resize-none"
+                            className="min-h-[180px] resize-none border-[#d7c7a8] bg-[#fffdf7] text-[#2f3a2f] placeholder:text-[#8b816f] focus-visible:ring-[#315f3b]"
                           />
                         </div>
                         <Button 
-                          className="w-full btn-primary-gradient py-6 text-lg hover:scale-105 transition-transform"
+                          className="w-full border border-[#b68222] bg-[#d89b2b] py-6 text-lg text-[#2f2416] transition-transform hover:scale-105 hover:bg-[#c88d22]"
                           onClick={handleSubmitTicket}
                           disabled={isSubmitting}
                         >
@@ -503,7 +503,7 @@ const Support = () => {
                   </Card>
 
                   {isAuthenticated && (
-                    <Card className="border-2 shadow-md">
+                    <Card className="border-[#d7c7a8] bg-[#fffaf0] shadow-[0_16px_40px_rgba(95,70,40,0.08)]">
                       <CardHeader>
                         <CardTitle className="text-lg">
                           {currentLanguage === 'en' ? 'Your tickets' : 'आपके टिकट'}
@@ -516,12 +516,12 @@ const Support = () => {
                       </CardHeader>
                       <CardContent className="space-y-3">
                         {myTicketsLoading ? (
-                          <div className="flex items-center gap-2 text-sm text-muted-foreground py-4">
+                          <div className="flex items-center gap-2 py-4 text-sm text-[#6f6552]">
                             <Loader2 className="h-4 w-4 animate-spin" />
                             {currentLanguage === 'en' ? 'Loading…' : 'लोड हो रहा है…'}
                           </div>
                         ) : myTickets.length === 0 ? (
-                          <p className="text-sm text-muted-foreground py-2">
+                          <p className="py-2 text-sm text-[#6f6552]">
                             {currentLanguage === 'en' ? 'No tickets yet.' : 'अभी कोई टिकट नहीं।'}
                           </p>
                         ) : (
@@ -529,11 +529,11 @@ const Support = () => {
                             {myTickets.map((t) => (
                               <li
                                 key={t.id}
-                                className="flex flex-wrap items-center justify-between gap-2 rounded-lg border p-3 text-sm"
+                                className="flex flex-wrap items-center justify-between gap-2 rounded-lg border border-[#e2d4b7] bg-[#fffdf7] p-3 text-sm"
                               >
                                 <div className="min-w-0 flex-1">
-                                  <p className="font-medium truncate">{t.subject}</p>
-                                  <p className="text-xs text-muted-foreground">
+                                  <p className="truncate font-medium text-[#2f3a2f]">{t.subject}</p>
+                                  <p className="text-xs text-[#6f6552]">
                                     {t.createdAt
                                       ? new Date(t.createdAt).toLocaleDateString('en-IN', {
                                           dateStyle: 'medium',
@@ -543,13 +543,13 @@ const Support = () => {
                                     {currentLanguage === 'en' ? 'replies' : 'जवाब'}
                                   </p>
                                 </div>
-                                <Badge variant="outline" className="capitalize shrink-0">
+                                <Badge variant="outline" className="shrink-0 border-[#d7c7a8] bg-[#fffaf0] capitalize text-[#6c5a3d]">
                                   {t.status.replace('_', ' ')}
                                 </Badge>
                                 <Button
                                   size="sm"
                                   variant="secondary"
-                                  className="shrink-0"
+                                  className="shrink-0 bg-[#f3ebdd] text-[#315f3b] hover:bg-[#eadfc9]"
                                   onClick={() => void openMyTicket(t.id)}
                                 >
                                   {currentLanguage === 'en' ? 'Open' : 'खोलें'}
@@ -564,10 +564,10 @@ const Support = () => {
                 </div>
 
                 {/* Contact Info */}
-                <Card className="border-2 border-primary/20 bg-gradient-to-br from-primary/10 to-primary/5">
+                <Card className="border-[#d7c7a8] bg-[#fffaf0] shadow-[0_16px_40px_rgba(95,70,40,0.08)]">
                   <CardHeader>
                     <CardTitle className="flex items-center gap-2">
-                      <Sparkles className="w-5 h-5 text-primary" />
+                      <Sparkles className="w-5 h-5 text-[#d89b2b]" />
                       {currentLanguage === 'en' ? 'Need Immediate Help?' : 'तुरंत मदद चाहिए?'}
                     </CardTitle>
                     <CardDescription>
@@ -577,30 +577,30 @@ const Support = () => {
                     </CardDescription>
                   </CardHeader>
                   <CardContent className="space-y-4">
-                    <div className="flex items-center gap-4 p-4 bg-card rounded-xl border border-border hover:border-primary/50 transition-colors">
-                      <div className="w-12 h-12 bg-primary/10 rounded-xl flex items-center justify-center">
-                        <Phone className="w-6 h-6 text-primary" />
+                    <div className="flex items-center gap-4 rounded-xl border border-[#e2d4b7] bg-[#fffdf7] p-4 transition-colors hover:border-[#c8b38b]">
+                      <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-[#f3ebdd]">
+                        <Phone className="w-6 h-6 text-[#315f3b]" />
                       </div>
                       <div>
-                        <p className="text-sm text-muted-foreground mb-1">
+                        <p className="mb-1 text-sm text-[#6f6552]">
                           {currentLanguage === 'en' ? 'Toll Free' : 'टोल फ्री'}
                         </p>
                         <p className="font-bold text-lg">+91 6203135782</p>
-                        <p className="text-xs text-muted-foreground mt-1">
+                        <p className="mt-1 text-xs text-[#6f6552]">
                           {currentLanguage === 'en' ? 'Mon-Sat, 9 AM - 9 PM' : 'सोम-शनि, सुबह 9 - रात 9'}
                         </p>
                       </div>
                     </div>
-                    <div className="flex items-center gap-4 p-4 bg-card rounded-xl border border-border hover:border-primary/50 transition-colors">
-                      <div className="w-12 h-12 bg-secondary/10 rounded-xl flex items-center justify-center">
-                        <Mail className="w-6 h-6 text-secondary" />
+                    <div className="flex items-center gap-4 rounded-xl border border-[#e2d4b7] bg-[#fffdf7] p-4 transition-colors hover:border-[#c8b38b]">
+                      <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-[#f6e5dc]">
+                        <Mail className="w-6 h-6 text-[#8a4f2a]" />
                       </div>
                       <div>
-                        <p className="text-sm text-muted-foreground mb-1">
+                        <p className="mb-1 text-sm text-[#6f6552]">
                           {currentLanguage === 'en' ? 'Email Support' : 'ईमेल सहायता'}
                         </p>
                         <p className="font-bold text-lg">praj01012003@gmail.com</p>
-                        <p className="text-xs text-muted-foreground mt-1">
+                        <p className="mt-1 text-xs text-[#6f6552]">
                           {currentLanguage === 'en' ? 'We respond within 24 hours' : 'हम 24 घंटों के भीतर जवाब देते हैं'}
                         </p>
                       </div>
@@ -623,14 +623,14 @@ const Support = () => {
           }
         }}
       >
-        <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-lg">
+        <DialogContent className="max-h-[90vh] overflow-y-auto border-[#d7c7a8] bg-[#fffaf0] sm:max-w-lg">
           <DialogHeader>
             <DialogTitle className="pr-8 leading-tight">
               {ticketDialogDetail?.subject || (currentLanguage === 'en' ? 'Ticket' : 'टिकट')}
             </DialogTitle>
           </DialogHeader>
           {ticketDialogLoading && (
-            <div className="flex items-center gap-2 text-sm text-muted-foreground py-6">
+            <div className="flex items-center gap-2 py-6 text-sm text-[#6f6552]">
               <Loader2 className="h-4 w-4 animate-spin" />
               {currentLanguage === 'en' ? 'Loading…' : 'लोड हो रहा है…'}
             </div>
@@ -638,25 +638,25 @@ const Support = () => {
           {!ticketDialogLoading && ticketDialogDetail && (
             <div className="space-y-4 text-sm">
               <div className="flex items-center gap-2">
-                <span className="text-muted-foreground">
+                <span className="text-[#6f6552]">
                   {currentLanguage === 'en' ? 'Status' : 'स्थिति'}:
                 </span>
-                <Badge variant="outline" className="capitalize">
+                <Badge variant="outline" className="border-[#d7c7a8] bg-[#fffdf7] capitalize text-[#6c5a3d]">
                   {ticketDialogDetail.status.replace('_', ' ')}
                 </Badge>
               </div>
               <div>
-                <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-1">
+                <p className="mb-1 text-xs font-semibold uppercase tracking-wide text-[#6f6552]">
                   {currentLanguage === 'en' ? 'Your message' : 'आपका संदेश'}
                 </p>
                 <p className="whitespace-pre-wrap">{ticketDialogDetail.message}</p>
               </div>
               <div className="space-y-2">
-                <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">
+                <p className="text-xs font-semibold uppercase tracking-wide text-[#6f6552]">
                   {currentLanguage === 'en' ? 'Thread' : 'बातचीत'}
                 </p>
                 {ticketDialogDetail.replies.length === 0 ? (
-                  <p className="text-muted-foreground">
+                  <p className="text-[#6f6552]">
                     {currentLanguage === 'en' ? 'No replies yet.' : 'अभी कोई जवाब नहीं।'}
                   </p>
                 ) : (
@@ -665,10 +665,10 @@ const Support = () => {
                       <li
                         key={r.id}
                         className={`rounded-md border p-3 ${
-                          r.fromRole === 'admin' ? 'bg-primary/5' : ''
+                          r.fromRole === 'admin' ? 'bg-[#f7f2e8]' : 'bg-[#fffdf7]'
                         }`}
                       >
-                        <p className="text-xs text-muted-foreground mb-1">
+                        <p className="mb-1 text-xs text-[#6f6552]">
                           {r.authorName || r.fromRole} ·{' '}
                           {r.createdAt
                             ? new Date(r.createdAt).toLocaleString('en-IN', {
@@ -693,7 +693,7 @@ const Support = () => {
                     value={userReplyText}
                     onChange={(e) => setUserReplyText(e.target.value)}
                     rows={3}
-                    className="resize-none"
+                    className="resize-none border-[#d7c7a8] bg-[#fffdf7] text-[#2f3a2f] placeholder:text-[#8b816f] focus-visible:ring-[#315f3b]"
                     placeholder={
                       currentLanguage === 'en' ? 'Add a follow-up message…' : 'फॉलो-अप संदेश…'
                     }
@@ -707,6 +707,7 @@ const Support = () => {
               <Button
                 onClick={() => void handleUserReply()}
                 disabled={userReplyBusy || !userReplyText.trim()}
+                className="border border-[#b68222] bg-[#d89b2b] text-[#2f2416] hover:bg-[#c88d22]"
               >
                 {userReplyBusy ? (
                   <>

@@ -125,6 +125,35 @@
     --sidebar-border: 156 20% 18%;
     --sidebar-ring: 142 60% 45%;
   }
+
+  body.landing-market-theme {
+    --background: 43 53% 95%;
+    --foreground: 132 23% 17%;
+    --card: 44 64% 97%;
+    --card-foreground: 132 23% 17%;
+    --popover: 44 64% 97%;
+    --popover-foreground: 132 23% 17%;
+    --primary: 133 32% 28%;
+    --primary-foreground: 43 77% 95%;
+    --primary-light: 132 28% 39%;
+    --primary-dark: 132 36% 18%;
+    --secondary: 38 68% 51%;
+    --secondary-foreground: 29 43% 11%;
+    --secondary-light: 41 80% 63%;
+    --accent: 24 53% 35%;
+    --accent-foreground: 43 77% 95%;
+    --muted: 42 34% 88%;
+    --muted-foreground: 92 10% 35%;
+    --border: 40 27% 78%;
+    --input: 40 27% 82%;
+    --ring: 133 32% 28%;
+    --cream: 43 53% 95%;
+    --earth: 24 53% 35%;
+    --success: 133 38% 34%;
+    --warning: 38 68% 51%;
+    --shadow-card: 0 8px 18px rgba(49, 44, 31, 0.08);
+    --shadow-glow: 0 0 0 rgba(0, 0, 0, 0);
+  }
 }
 
 @layer base {
