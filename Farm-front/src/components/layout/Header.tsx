@@ -120,7 +120,7 @@ const Header = () => {
   }, [isAuthenticated, user?.id]);
 
   const barLink = (active: boolean) =>
-    `rounded-full border px-3 py-1.5 text-sm font-medium transition-colors ${
+    `whitespace-nowrap rounded-full border px-3 py-1.5 text-sm font-medium transition-colors ${
       active
         ? 'border-[#d89b2b] bg-[#f1dfae] text-[#274631]'
         : 'border-transparent text-[#fff3d7] hover:border-[#ceb98c] hover:bg-white/10 hover:text-white'
@@ -152,7 +152,7 @@ const Header = () => {
                   style={{ filter: 'brightness(0) invert(1)', backgroundColor: 'transparent' }}
                 />
               </Link>
-            <nav className="hidden md:flex items-center gap-5 lg:gap-7 flex-wrap min-w-0">
+            <nav className="hidden min-w-0 items-center gap-4 lg:gap-5 xl:gap-6 md:flex">
             {isAuthenticated && user?.role === 'farmer' && (
               <>
                 <Link
